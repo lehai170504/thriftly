@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { ShoppingBag, Gavel, Upload, X, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { useCategories, useCreateProduct } from '../hooks/useProducts';
@@ -200,22 +200,49 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                   name="categoryId"
                   control={control}
                   rules={{ required: true }}
-                  render={({ field }) => (
+                  render={({ field }) => {
+                    const renderCategoryName = (id: string) => {
+                      if (!id) return isLoadingCategories ? "Đang tải..." : "Chọn danh mục phù hợp";
+                      for (const cat of categories || []) {
+                        if (cat.id === id) return cat.name;
+                        if (cat.subCategories) {
+                          const sub = cat.subCategories.find((s: any) => s.id === id);
+                          if (sub) return sub.name;
+                        }
+                      }
+                      return "Chọn danh mục phù hợp";
+                    };
+
+                    return (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger className="h-12 focus:ring-primary">
                         <span className="flex flex-1 text-left">
-                          {field.value
-                            ? categories?.find((c) => c.id === field.value)?.name
-                            : (isLoadingCategories ? "Đang tải..." : "Chọn danh mục phù hợp")}
+                          {renderCategoryName(field.value)}
                         </span>
                       </SelectTrigger>
                       <SelectContent>
-                        {categories?.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                        ))}
+                        {categories?.map((cat) => {
+                          if (cat.subCategories && cat.subCategories.length > 0) {
+                            return (
+                              <SelectGroup key={cat.id}>
+                                <SelectLabel className="font-bold text-foreground bg-muted/30">{cat.name}</SelectLabel>
+                                {cat.subCategories.map((sub: any) => (
+                                  <SelectItem key={sub.id} value={sub.id} className="ml-4">
+                                    {sub.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            );
+                          }
+                          return (
+                            <SelectItem key={cat.id} value={cat.id} className="font-bold">
+                              {cat.name}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
-                  )}
+                  )}}
                 />
                 {errors.categoryId && <p className="text-red-500 text-xs mt-1">{errors.categoryId.message}</p>}
               </div>

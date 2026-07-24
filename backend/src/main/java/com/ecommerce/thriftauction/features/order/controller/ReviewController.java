@@ -28,9 +28,31 @@ public class ReviewController {
     }
 
     @GetMapping("/user/{username}")
-    public ResponseEntity<?> getReviewsByUser(@PathVariable String username) {
+    public ResponseEntity<?> getReviewsByUser(@PathVariable String username, Authentication authentication) {
         try {
-            return ResponseEntity.ok(reviewService.getReviewsByUsername(username));
+            String currentUsername = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : null;
+            return ResponseEntity.ok(reviewService.getReviewsByUsername(username, currentUsername));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<?> likeReview(@PathVariable String id, Authentication authentication) {
+        try {
+            return ResponseEntity.ok(reviewService.likeReview(id, authentication.getName()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/reply")
+    public ResponseEntity<?> replyReview(
+            @PathVariable String id, 
+            @RequestBody com.ecommerce.thriftauction.features.order.dto.ReviewReplyRequest request, 
+            Authentication authentication) {
+        try {
+            return ResponseEntity.ok(reviewService.replyReview(id, authentication.getName(), request.getReply()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

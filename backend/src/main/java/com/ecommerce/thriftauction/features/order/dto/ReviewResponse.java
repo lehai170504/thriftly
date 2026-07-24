@@ -20,5 +20,8 @@ public class ReviewResponse {
     private int rating;
     private String comment;
     private String reviewerTier;
+    private String sellerReply;
+    private int likesCount;
+    private boolean isLikedByCurrentUser;
     private LocalDateTime createdAt;
 }

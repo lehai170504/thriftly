@@ -54,20 +54,62 @@ public class ReviewService {
                 .build();
 
         Review savedReview = reviewRepository.save(review);
-        return mapToResponse(savedReview);
+        return mapToResponse(savedReview, username);
+    }
+
+    @Transactional
+    public ReviewResponse likeReview(String reviewId, String username) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Đánh giá không tồn tại"));
+        User user = userRepository.findByEmail(username)
+                .or(() -> userRepository.findByUsername(username))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean alreadyLiked = review.getLikedByUsers().stream()
+                .anyMatch(u -> u.getId().equals(user.getId()));
+
+        if (alreadyLiked) {
+            review.getLikedByUsers().removeIf(u -> u.getId().equals(user.getId()));
+        } else {
+            review.getLikedByUsers().add(user);
+        }
+
+        return mapToResponse(reviewRepository.save(review), username);
+    }
+
+    @Transactional
+    public ReviewResponse replyReview(String reviewId, String username, String reply) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Đánh giá không tồn tại"));
+        User user = userRepository.findByEmail(username)
+                .or(() -> userRepository.findByUsername(username))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!review.getReviewee().getId().equals(user.getId())) {
+            throw new RuntimeException("Chỉ người bán mới có quyền phản hồi đánh giá này.");
+        }
+
+        review.setSellerReply(reply);
+        return mapToResponse(reviewRepository.save(review), username);
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewsByUsername(String username) {
+    public List<ReviewResponse> getReviewsByUsername(String username, String currentUsername) {
         User user = userRepository.findByEmail(username)
                 .or(() -> userRepository.findByUsername(username))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return reviewRepository.findByRevieweeIdOrderByCreatedAtDesc(user.getId())
-                .stream().map(this::mapToResponse).collect(Collectors.toList());
+                .stream().map(r -> mapToResponse(r, currentUsername)).collect(Collectors.toList());
     }
 
-    private ReviewResponse mapToResponse(Review review) {
+    private ReviewResponse mapToResponse(Review review, String currentUsername) {
+        boolean isLiked = false;
+        if (currentUsername != null) {
+            isLiked = review.getLikedByUsers().stream()
+                    .anyMatch(u -> u.getEmail().equals(currentUsername) || u.getUsername().equals(currentUsername));
+        }
+
         return ReviewResponse.builder()
                 .id(review.getId())
                 .reviewerName(review.getReviewer().getUsername())
@@ -77,6 +119,9 @@ public class ReviewService {
                 .productTitle(review.getOrder().getProduct().getTitle())
                 .rating(review.getRating())
                 .comment(review.getComment())
+                .sellerReply(review.getSellerReply())
+                .likesCount(review.getLikedByUsers() != null ? review.getLikedByUsers().size() : 0)
+                .isLikedByCurrentUser(isLiked)
                 .reviewerTier(review.getReviewer().getTier() != null ? review.getReviewer().getTier().name() : "BRONZE")
                 .createdAt(review.getCreatedAt())
                 .build();

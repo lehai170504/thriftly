@@ -35,6 +35,18 @@ public class Review {
     @Column(length = 1000)
     private String comment;
 
+    @Column(length = 1000)
+    private String sellerReply;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "review_likes",
+        joinColumns = @JoinColumn(name = "review_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    @Builder.Default
+    private java.util.Set<User> likedByUsers = new java.util.HashSet<>();
+
     private LocalDateTime createdAt;
 
     @PrePersist

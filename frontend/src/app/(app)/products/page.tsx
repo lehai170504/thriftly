@@ -140,12 +140,26 @@ function ProductsContent() {
                       Tất cả danh mục
                     </button>
                     {categories?.map((c) => (
-                      <button key={c.id} onClick={() => {
-                        if (!categoryIds.includes(c.id)) { setCategoryIds(prev => [...prev, c.id]); } else { setCategoryIds(prev => prev.filter(id => id !== c.id)); }
-                        setPage(0);
-                      }} className={`text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors ${categoryIds.includes(c.id) ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-muted text-foreground'}`}>
-                        {c.name}
-                      </button>
+                      <div key={c.id} className="flex flex-col mb-1">
+                        <button onClick={() => {
+                          if (categoryIds.includes(c.id)) { setCategoryIds([]); } else { setCategoryIds([c.id]); }
+                          setPage(0);
+                        }} className={`text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors ${categoryIds.includes(c.id) ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-muted text-foreground'}`}>
+                          {c.name}
+                        </button>
+                        {c.subCategories && c.subCategories.length > 0 && (
+                          <div className="flex flex-col ml-3 border-l-2 border-border/40 pl-2 mt-1 mb-1 gap-0.5">
+                            {c.subCategories.map((sub: any) => (
+                              <button key={sub.id} onClick={() => {
+                                if (categoryIds.includes(sub.id)) { setCategoryIds([]); } else { setCategoryIds([sub.id]); }
+                                setPage(0);
+                              }} className={`text-left px-3 py-1.5 rounded-xl text-xs transition-colors ${categoryIds.includes(sub.id) ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}>
+                                {sub.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -224,11 +238,18 @@ function ProductsContent() {
 
                     {/* Category Chips */}
                     {categoryIds.map(id => {
-                      const cat = categories?.find(c => c.id === id);
+                      let catName = 'Danh mục';
+                      for (const c of categories || []) {
+                        if (c.id === id) { catName = c.name; break; }
+                        if (c.subCategories) {
+                          const sub = c.subCategories.find((s: any) => s.id === id);
+                          if (sub) { catName = sub.name; break; }
+                        }
+                      }
                       return (
-                        <Badge key={id} variant="secondary" className="pl-3 pr-1 py-1 rounded-full gap-1 border-border glass text-foreground">
-                          {cat?.name || 'Danh mục'}
-                          <button onClick={() => { setCategoryIds(prev => prev.filter(c => c !== id)); setPage(0); }} className="hover:bg-secondary rounded-full p-0.5 transition-colors">
+                        <Badge key={id} variant="secondary" className="pl-3 pr-1 py-1 rounded-full gap-1 border-border glass text-foreground font-medium">
+                          {catName}
+                          <button onClick={() => { setCategoryIds(prev => prev.filter(c => c !== id)); setPage(0); }} className="hover:bg-secondary rounded-full p-0.5 transition-colors ml-1">
                             <X className="w-3.5 h-3.5" />
                           </button>
                         </Badge>

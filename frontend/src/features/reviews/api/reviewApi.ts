@@ -11,4 +11,14 @@ export const reviewApi = {
     const response = await api.get(`/reviews/user/${username}`);
     return response.data;
   },
+
+  likeReview: async (reviewId: string): Promise<ReviewResponse> => {
+    const response = await api.post(`/reviews/${reviewId}/like`);
+    return response.data;
+  },
+
+  replyReview: async (reviewId: string, reply: string): Promise<ReviewResponse> => {
+    const response = await api.post(`/reviews/${reviewId}/reply`, { reply });
+    return response.data;
+  },
 };

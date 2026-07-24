@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ShoppingBag, LogOut, User as UserIcon, Wallet, Search, ShieldAlert, MessageCircle, Package, Store, Menu, LineChart, Heart, Tag } from 'lucide-react';
+import { ShoppingBag, LogOut, User as UserIcon, Wallet, Search, ShieldAlert, MessageCircle, Package, Store, Menu, LineChart, Heart, Tag, ChevronRight, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -18,6 +18,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useSearchProducts, useCategories } from '@/features/products/hooks/useProducts';
 import { formatCurrency } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
+import { CategoryIcon } from '../ui/category-icon';
 
 export default function AppHeader() {
   const queryClient = useQueryClient();
@@ -27,6 +28,7 @@ export default function AppHeader() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '');
   const [showDropdown, setShowDropdown] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<any>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +43,12 @@ export default function AppHeader() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (categories && categories.length > 0 && !activeCategory) {
+      setActiveCategory(categories[0]);
+    }
+  }, [categories, activeCategory]);
 
   useEffect(() => {
     setSearchQuery(searchParams.get('query') || '');
@@ -143,31 +151,87 @@ export default function AppHeader() {
 
           <nav className="hidden xl:flex items-center gap-1 xl:gap-2 ml-4">
             <div
+              className="relative group/mega"
               onMouseEnter={() => setIsCategoryOpen(true)}
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
-              <DropdownMenu open={isCategoryOpen} onOpenChange={setIsCategoryOpen}>
-                <DropdownMenuTrigger className="inline-flex items-center font-bold uppercase tracking-widest text-[10px] text-muted-foreground hover:text-primary hover:bg-primary/10 px-3 h-9 rounded-md outline-none cursor-pointer transition-colors">
-                  <Menu className="w-4 h-4 mr-2" />
-                  Danh mục
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 rounded-xl">
-                  {categories?.map((c) => (
-                    <DropdownMenuItem key={c.id} className="cursor-pointer" onClick={() => router.push(`/products?category=${c.id}`)}>
-                      {c.name}
-                    </DropdownMenuItem>
-                  ))}
-                  {(!categories || categories.length === 0) && (
-                    <DropdownMenuItem disabled>
-                      Chưa có danh mục nào
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer font-medium text-primary" onClick={() => router.push('/products')}>
-                    Xem tất cả
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className={`inline-flex items-center font-bold uppercase tracking-widest text-[10px] px-3 h-9 rounded-md outline-none cursor-pointer transition-colors ${isCategoryOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}>
+                <Menu className="w-4 h-4 mr-2" />
+                Danh mục
+              </div>
+
+              {/* Mega Menu Dropdown */}
+              {isCategoryOpen && (
+                <div className="absolute top-full left-0 pt-4 z-50">
+                  <div className="w-[750px] bg-background rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-border overflow-hidden flex min-h-[350px] animate-in fade-in zoom-in-95 duration-200">
+                    {/* Left Sidebar - Main Categories */}
+                    <div className="w-1/3 bg-muted/30 border-r border-border py-4">
+                      {categories?.map((c) => (
+                        <div
+                          key={c.id}
+                          onMouseEnter={() => setActiveCategory(c)}
+                          onClick={() => router.push(`/products?category=${c.id}`)}
+                          className={`px-6 py-3 cursor-pointer flex items-center justify-between transition-colors ${activeCategory?.id === c.id ? 'bg-background border-l-4 border-primary text-primary font-semibold shadow-sm' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                        >
+                          <span className="text-sm">{c.name}</span>
+                          <ChevronRight className={`w-4 h-4 transition-opacity ${activeCategory?.id === c.id ? 'opacity-100' : 'opacity-30'}`} />
+                        </div>
+                      ))}
+                      {(!categories || categories.length === 0) && (
+                        <div className="px-6 py-4 text-sm text-muted-foreground">
+                          Chưa có danh mục nào
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right Content - Subcategories */}
+                    <div className="w-2/3 p-6 bg-background">
+                      {activeCategory && (
+                        <div className="h-full flex flex-col">
+                          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/50">
+                            <h3 className="text-lg font-bold text-foreground">{activeCategory.name}</h3>
+                            <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 h-8 text-xs font-semibold" onClick={() => router.push(`/products?category=${activeCategory.id}`)}>
+                              Xem tất cả <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                            </Button>
+                          </div>
+
+                          <div className="flex-1 overflow-y-auto pr-2">
+                            {activeCategory.subCategories && activeCategory.subCategories.length > 0 ? (
+                              <div className="grid grid-cols-3 gap-4">
+                                {activeCategory.subCategories.map((sub: any) => (
+                                  <div
+                                    key={sub.id}
+                                    onClick={() => router.push(`/products?category=${sub.id}`)}
+                                    className="group cursor-pointer flex flex-col items-center text-center"
+                                  >
+                                    <div className="w-16 h-16 bg-muted/50 rounded-2xl mb-2 overflow-hidden border border-border group-hover:border-primary/50 group-hover:shadow-md transition-all flex items-center justify-center p-2">
+                                      {sub.icon ? (
+                                        sub.icon.startsWith('http') || sub.icon.startsWith('/') ? (
+                                          <img src={sub.icon} alt={sub.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+                                        ) : (
+                                          <CategoryIcon name={sub.icon} className="w-8 h-8 text-muted-foreground/70 group-hover:text-primary transition-colors" />
+                                        )
+                                      ) : (
+                                        <Package className="w-6 h-6 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
+                                      )}
+                                    </div>
+                                    <p className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors line-clamp-2">{sub.name}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-60 mt-4">
+                                <Store className="w-10 h-10 mb-3" />
+                                <p className="text-sm">Không có danh mục con</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <Link href="/products?sort=createdAt_desc">

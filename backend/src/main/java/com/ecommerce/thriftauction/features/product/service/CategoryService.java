@@ -25,6 +25,7 @@ public class CategoryService {
         Category category = Category.builder()
                 .name(request.getName())
                 .description(request.getDescription())
+                .icon(request.getIcon())
                 .parent(parent)
                 .build();
 
@@ -40,9 +41,17 @@ public class CategoryService {
     public CategoryDto updateCategory(String id, CategoryDto request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        Category parent = null;
+        if (request.getParentId() != null) {
+            parent = categoryRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new RuntimeException("Parent category not found"));
+        }
+
         category.setName(request.getName());
         category.setDescription(request.getDescription());
         category.setIcon(request.getIcon());
+        category.setParent(parent);
         return mapToDto(categoryRepository.save(category));
     }
 

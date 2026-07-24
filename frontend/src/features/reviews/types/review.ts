@@ -15,5 +15,9 @@ export interface ReviewResponse {
   productTitle?: string;
   rating: number;
   comment: string;
+  reviewerTier?: string;
+  sellerReply?: string;
+  likesCount?: number;
+  isLikedByCurrentUser?: boolean;
   createdAt: string;
 }

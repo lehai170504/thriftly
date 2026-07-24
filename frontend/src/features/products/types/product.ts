@@ -4,6 +4,7 @@ export interface Category {
   description?: string;
   icon?: string;
   parentId?: string;
+  subCategories?: Category[];
 }
 
 export type ProductCondition = 'NEW' | 'LIKE_NEW' | 'GOOD' | 'FAIR';

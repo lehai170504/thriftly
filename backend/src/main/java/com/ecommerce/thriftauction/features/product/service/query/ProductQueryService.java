@@ -9,6 +9,8 @@ import com.ecommerce.thriftauction.features.product.entity.ProductStatus;
 import com.ecommerce.thriftauction.features.product.entity.SellType;
 import com.ecommerce.thriftauction.features.product.repository.ProductRepository;
 import com.ecommerce.thriftauction.features.product.repository.ProductViewHistoryRepository;
+import com.ecommerce.thriftauction.features.product.entity.Category;
+import com.ecommerce.thriftauction.features.product.repository.CategoryRepository;
 import com.ecommerce.thriftauction.features.product.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +34,7 @@ public class ProductQueryService {
         private final UserRepository userRepository;
         private final ProductViewHistoryRepository productViewHistoryRepository;
         private final ProductMapper productMapper;
+        private final CategoryRepository categoryRepository;
 
         public Page<ProductResponse> getAllActiveProducts(Pageable pageable) {
                 return productRepository.findByStatus(ProductStatus.ACTIVE, pageable)
@@ -83,9 +89,23 @@ public class ProductQueryService {
                 BigDecimal min = minPrice != null ? BigDecimal.valueOf(minPrice) : null;
                 BigDecimal max = maxPrice != null ? BigDecimal.valueOf(maxPrice) : null;
 
+                List<String> expandedCategoryIds = null;
+                if (categoryIds != null && !categoryIds.isEmpty()) {
+                        Set<String> expandedIds = new HashSet<>(categoryIds);
+                        List<Category> categories = categoryRepository.findAllById(categoryIds);
+                        for (Category cat : categories) {
+                                if (cat.getSubCategories() != null) {
+                                        for (Category sub : cat.getSubCategories()) {
+                                                expandedIds.add(sub.getId());
+                                        }
+                                }
+                        }
+                        expandedCategoryIds = new ArrayList<>(expandedIds);
+                }
+
                 return productRepository.searchProducts(
                                 query == null || query.trim().isEmpty() ? null : query.trim(),
-                                categoryIds,
+                                expandedCategoryIds,
                                 min, max, condition, sellType, location, pageable).map(productMapper::mapToResponse);
         }
 
