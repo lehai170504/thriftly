@@ -20,6 +20,7 @@ public class ChatController {
         private final SimpMessagingTemplate messagingTemplate;
         private final ChatMessageRepository chatMessageRepository;
         private final UserRepository userRepository;
+        private final com.ecommerce.thriftauction.features.social.repository.BlockedUserRepository blockedUserRepository;
 
         @MessageMapping("/chat.sendMessage")
         public void sendMessage(@Payload ChatMessageDto chatMessageDto, SimpMessageHeaderAccessor headerAccessor) {
@@ -32,10 +33,17 @@ public class ChatController {
                 User receiver = userRepository.findByUsername(chatMessageDto.getReceiverUsername())
                                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
+                // Check block status
+                if (blockedUserRepository.existsByBlockerIdAndBlockedId(sender.getId(), receiver.getId()) ||
+                                blockedUserRepository.existsByBlockerIdAndBlockedId(receiver.getId(), sender.getId())) {
+                        throw new RuntimeException("Cannot send message. One of the users is blocked.");
+                }
+
                 ChatMessage message = ChatMessage.builder()
                                 .sender(sender)
                                 .receiver(receiver)
-                                .content(chatMessageDto.getContent())
+                                .content(chatMessageDto.getContent() != null ? chatMessageDto.getContent() : "")
+                                .imageUrl(chatMessageDto.getImageUrl())
                                 .build();
 
                 chatMessageRepository.save(message);
@@ -54,5 +62,21 @@ public class ChatController {
                                 "/queue/messages",
                                 chatMessageDto);
         }
-}
 
+        @MessageMapping("/chat.typing")
+        public void typing(@Payload ChatMessageDto chatMessageDto, SimpMessageHeaderAccessor headerAccessor) {
+                if (headerAccessor.getUser() == null)
+                        return;
+                String senderEmail = headerAccessor.getUser().getName();
+                User sender = userRepository.findByEmail(senderEmail).orElseThrow();
+                User receiver = userRepository.findByUsername(chatMessageDto.getReceiverUsername()).orElseThrow();
+
+                chatMessageDto.setSenderUsername(sender.getUsername());
+                chatMessageDto.setType("TYPING");
+
+                messagingTemplate.convertAndSendToUser(
+                                receiver.getEmail(),
+                                "/queue/messages",
+                                chatMessageDto);
+        }
+}

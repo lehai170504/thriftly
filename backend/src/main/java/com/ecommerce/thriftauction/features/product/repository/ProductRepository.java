@@ -30,7 +30,11 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
        List<Product> findBySellerId(String sellerId);
 
-       @Query("SELECT p FROM Product p WHERE p.status = com.ecommerce.thriftauction.features.product.entity.ProductStatus.ACTIVE "
+       @Query("SELECT p FROM Product p " +
+                     "LEFT JOIN AuctionSession a ON a.product.id = p.id " +
+                     "WHERE p.status = com.ecommerce.thriftauction.features.product.entity.ProductStatus.ACTIVE " +
+                     "AND (p.sellType = com.ecommerce.thriftauction.features.product.entity.SellType.BUY_NOW " +
+                     "     OR (p.sellType = com.ecommerce.thriftauction.features.product.entity.SellType.AUCTION AND a.endTime > CURRENT_TIMESTAMP)) "
                      +
                      "AND (:query IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', CAST(:query AS text), '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', CAST(:query AS text), '%'))) "
                      +

@@ -1,26 +1,27 @@
 'use client';
 
-import { useWallet, usePayOSPayment, useWithdraw } from '@/features/wallet/hooks/useWallet';
+import { useWallet, usePayOSPayment, useWithdraw, useBankAccounts } from '@/features/wallet/hooks/useWallet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { formatCurrency, preventInvalidNumberInput } from '@/lib/utils';
-import { Wallet, ArrowDownToLine, ArrowUpRight, History, ShieldCheck, Clock, ArrowLeft, Banknote } from 'lucide-react';
+import { Wallet, ArrowDownToLine, ArrowUpRight, History, ShieldCheck, Clock, ArrowLeft, Banknote, Building2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { TransactionResponse } from '@/features/wallet/types/wallet';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Link from 'next/link';
 
 export default function WalletPage() {
   const router = useRouter();
   const { data: wallet, isLoading } = useWallet();
   const { mutate: createPayment, isPending: isDepositing } = usePayOSPayment();
   const { mutate: withdraw, isPending: isWithdrawing } = useWithdraw();
+  const { data: bankAccounts = [] } = useBankAccounts();
 
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [bankName, setBankName] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [accountName, setAccountName] = useState('');
+  const [selectedBankId, setSelectedBankId] = useState('');
 
   const [isDepositOpen, setIsDepositOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
@@ -50,13 +51,20 @@ export default function WalletPage() {
 
   const handleWithdraw = () => {
     const amount = Number(withdrawAmount);
-    if (amount > 0 && bankName && accountNumber && accountName) {
-      withdraw({ amount, bankName, accountNumber, accountName }, {
+    if (amount > 0 && selectedBankId) {
+      const selectedBank = bankAccounts.find((b: any) => b.id === selectedBankId);
+      if (!selectedBank) return;
+
+      withdraw({
+        amount,
+        bankName: selectedBank.bankName,
+        accountNumber: selectedBank.accountNumber,
+        accountName: selectedBank.accountName,
+        bankAccountId: selectedBank.id
+      }, {
         onSuccess: () => {
           setWithdrawAmount('');
-          setBankName('');
-          setAccountNumber('');
-          setAccountName('');
+          setSelectedBankId('');
           setIsWithdrawOpen(false);
         }
       });
@@ -221,7 +229,7 @@ export default function WalletPage() {
                   </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                  <p className="text-sm text-muted-foreground">Tiền sẽ được admin duyệt và chuyển khoản thủ công</p>
+                  <p className="text-sm text-muted-foreground">Yêu cầu rút tiền sẽ được Admin xem xét và chuyển về tài khoản liên kết.</p>
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">VNĐ</span>
                     <Input
@@ -236,34 +244,51 @@ export default function WalletPage() {
                   {Number(withdrawAmount) > 0 && (
                     <p className="text-xs text-orange-500 font-medium flex items-center gap-1.5 px-1 -mt-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse inline-block"></span>
-                      Sẽ rút: <strong className="font-bold">{formatCurrency(withdrawAmount)}</strong>
+                      Sẽ rút: <strong className="font-bold">{formatCurrency(withdrawAmount)}</strong> (Chưa bao gồm phí)
                     </p>
                   )}
-                  <Input
-                    placeholder="Tên ngân hàng (Vd: Vietcombank)"
-                    className="rounded-[16px] bg-muted border-border text-foreground h-12"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Số tài khoản"
-                    className="rounded-[16px] bg-muted border-border text-foreground h-12"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Tên chủ tài khoản"
-                    value={accountName}
-                    onChange={(e) => setAccountName(e.target.value)}
-                    className="uppercase rounded-[16px] bg-muted border-border text-foreground h-12"
-                  />
+
+                  {bankAccounts.length === 0 ? (
+                    <div className="p-4 bg-orange-500/10 text-orange-600 rounded-[16px] text-sm font-medium flex flex-col gap-3">
+                      Bạn chưa liên kết tài khoản ngân hàng nào.
+                      <Link href="/profile">
+                        <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl">
+                          <Building2 className="w-4 h-4 mr-2" />
+                          Liên kết ngân hàng
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <Select value={selectedBankId} onValueChange={(val) => setSelectedBankId(val || '')}>
+                      <SelectTrigger className="h-12 rounded-[16px] bg-muted border-border text-foreground">
+                        {selectedBankId ? (
+                          <span className="flex-1 text-left line-clamp-1">
+                            {(() => {
+                              const b = bankAccounts.find((bank: any) => bank.id === selectedBankId);
+                              return b ? `${b.bankName} - ${b.accountNumber} (${b.accountName})` : '';
+                            })()}
+                          </span>
+                        ) : (
+                          <span className="flex-1 text-left text-muted-foreground line-clamp-1">Chọn tài khoản nhận tiền...</span>
+                        )}
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        {bankAccounts.map((bank: any) => (
+                          <SelectItem key={bank.id} value={bank.id} className="cursor-pointer">
+                            {bank.bankName} - {bank.accountNumber} ({bank.accountName})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+
                   <Button
                     variant="default"
                     className="w-full h-12 rounded-[20px] bg-orange-600 hover:bg-orange-700 text-white font-bold"
                     onClick={handleWithdraw}
-                    disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || !bankName || !accountNumber || !accountName || isWithdrawing}
+                    disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || !selectedBankId || isWithdrawing}
                   >
-                    {isWithdrawing ? 'Đang gửi yêu cầu...' : 'Tạo yêu cầu rút tiền'}
+                    {isWithdrawing ? 'Đang gửi yêu cầu...' : 'Rút tiền ngay'}
                   </Button>
                 </div>
               </DialogContent>

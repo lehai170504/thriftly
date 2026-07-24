@@ -30,6 +30,7 @@ public class ProductResponse {
     private Integer quantity;
     private ProductStatus status;
     private String imageUrl;
+    private java.util.List<String> images;
     private String videoUrl;
     private String location;
     private LocalDateTime createdAt;

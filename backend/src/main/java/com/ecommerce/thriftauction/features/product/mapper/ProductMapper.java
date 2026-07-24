@@ -43,6 +43,7 @@ public class ProductMapper {
                 .price(product.getPrice())
                 .quantity(product.getQuantity() != null ? product.getQuantity() : 1)
                 .imageUrl(product.getImageUrl())
+                .images(product.getImages())
                 .videoUrl(product.getVideoUrl())
                 .location(product.getLocation())
                 .status(product.getStatus())

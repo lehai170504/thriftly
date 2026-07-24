@@ -30,6 +30,8 @@ public class ProductRequest {
     private Integer quantity = 1;
 
     private String imageUrl;
+    
+    private java.util.List<String> images;
 
     private String videoUrl;
 

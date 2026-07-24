@@ -10,4 +10,5 @@ public class WithdrawRequest {
     private String bankName;
     private String accountNumber;
     private String accountName;
+    private String bankAccountId;
 }

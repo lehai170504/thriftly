@@ -163,6 +163,11 @@ Hệ thống chat 1-1 theo thời gian thực hoạt động hoàn toàn qua STO
   - **[PHIÊN 2026-07-24 (Performance & Bugfix)]**
     - Sửa lỗi Login form bị "treo" (pending) khi gửi Email OTP: JavaMailSender gửi mail đồng bộ (Synchronous) gây block main thread khi kết nối SMTP bị chậm. Giải quyết triệt để bằng cách áp dụng cơ chế Asynchronous (`@EnableAsync`, `@Async` trong `EmailService`), giúp UI chuyển màn hình tức thời trong khi mail được gửi ngầm.
     - Cập nhật lại UI màn hình đăng nhập Admin: fix lỗi màu chữ tiêu đề bị trùng màu nền (hiển thị màu đen trên nền đen) ở chế độ Light Mode.
+  - **[PHIÊN 2026-07-24 (Chat UI, Block User & Seller Layout)]**
+    - **Nâng cấp Chat UI:** Tinh chỉnh bong bóng chat (message bubbles) bo góc tròn mềm mại có 'đuôi' (tails) theo chuẩn iMessage/Messenger, tối ưu khoảng cách tin nhắn, sửa thanh Header chat thực tế hơn. Tích hợp tính năng Upload Ảnh vào Chat (Upload qua Cloudinary) và hiển thị modal xem ảnh.
+    - **Tính năng Chặn Người Dùng (Block User):** Backend xây dựng luồng chặn (Entity `BlockedUser`, check blocked list để drop tin nhắn gửi đi). Frontend tích hợp Component `ConfirmDialog` và Dropdown Header Chat để Chặn/Bỏ chặn, tự động ẩn khung gõ khi bị chặn.
+    - **Typing Indicator (WebSockets):** Bắt sự kiện gõ phím (`handleTyping`), debounce và gửi STOMP message qua kênh `/topic/typing`, xử lý UI dấu 3 chấm nhấp nháy 3D bằng Framer Motion mượt mà. Đã fix lỗi Infinite Re-render vòng lặp vô tận bằng `useCallback` do hàm `handleTyping` tạo mới liên tục.
+    - **Hạ tầng Kênh Người Bán (Seller Dashboard):** Xây dựng Layout chung (`seller/layout.tsx`) và `SellerSidebar.tsx` gom tất cả các tính năng của người bán (Thống kê, Đơn bán, Sản phẩm, Mã giảm giá) vào một Dashboard thống nhất chuyên nghiệp thay vì để dropdown lộn xộn trên Header.
 
 ### 🏆 Đã hoàn thành 100% mục tiêu Đồ Án! 
 Hệ thống hiện tại đã sở hữu đủ các chức năng phức tạp của một sàn TMĐT đấu giá chuyên nghiệp, đồng thời được gia cố bảo mật kỹ càng.

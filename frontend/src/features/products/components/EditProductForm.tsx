@@ -43,8 +43,9 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
     }
   });
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(initialData.imageUrl || null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>(initialData.images?.length ? initialData.images : (initialData.imageUrl ? [initialData.imageUrl] : []));
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(initialData.videoUrl || null);
   const [suggestedPriceText, setSuggestedPriceText] = useState<string | null>(null);
@@ -92,10 +93,14 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
 
   const onSubmit = async (data: CreateProductRequest) => {
     try {
-      if (imageFile) {
-        const url = await uploadImageMutation.mutateAsync(imageFile);
-        data.imageUrl = url;
+      let finalImages = [...imagePreviews.filter(p => !p.startsWith('blob:'))];
+      if (newImageFiles.length > 0) {
+        const uploadedUrls = await Promise.all(newImageFiles.map(file => uploadImageMutation.mutateAsync(file)));
+        finalImages = [...finalImages, ...uploadedUrls];
       }
+      data.images = finalImages;
+      data.imageUrl = finalImages.length > 0 ? finalImages[0] : '';
+
       if (videoFile) {
         const url = await uploadVideoMutation.mutateAsync(videoFile);
         data.videoUrl = url;
@@ -112,15 +117,25 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Ảnh phải nhỏ hơn 5MB');
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
+      if (validFiles.length < files.length) {
+        toast.error('Một số ảnh bị bỏ qua do vượt quá 5MB');
+      }
+
+      const totalAllowed = 5 - imagePreviews.length;
+      if (totalAllowed <= 0) {
+        toast.error('Đã đạt giới hạn tối đa 5 ảnh');
         return;
       }
-      setImageFile(file);
-      const url = URL.createObjectURL(file);
-      setImagePreview(url);
+
+      const filesToAdd = validFiles.slice(0, totalAllowed);
+      if (filesToAdd.length > 0) {
+        setNewImageFiles(prev => [...prev, ...filesToAdd]);
+        const newPreviews = filesToAdd.map(f => URL.createObjectURL(f));
+        setImagePreviews(prev => [...prev, ...newPreviews]);
+      }
     }
   };
 
@@ -242,37 +257,54 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
 
         {/* Image Upload */}
         <div className="space-y-2">
-          <Label>Hình ảnh sản phẩm <span className="text-red-500">*</span></Label>
-          <div className="flex items-center gap-4">
-            {imagePreview ? (
-              <div className="relative w-32 h-32 rounded-[24px] overflow-hidden border border-border">
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+          <Label>Hình ảnh sản phẩm (Tối đa 5 ảnh) <span className="text-red-500">*</span></Label>
+          <div className="flex flex-wrap items-start gap-4">
+            {imagePreviews.map((preview, index) => (
+              <div key={index} className="relative w-32 h-32 rounded-[16px] overflow-hidden border border-border group shadow-sm flex-shrink-0">
+                <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                {index === 0 && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-foreground text-[10px] font-bold text-center py-0.5 z-10">
+                    Ảnh bìa
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => {
-                    setImageFile(null);
-                    setImagePreview(null);
+                    const urlToRemove = preview;
+                    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+
+                    if (urlToRemove.startsWith('blob:')) {
+                      // Need to figure out index in newImageFiles. A simple way: find the blob index in the previews that are blobs
+                      const blobPreviews = imagePreviews.filter(p => p.startsWith('blob:'));
+                      const blobIndex = blobPreviews.indexOf(urlToRemove);
+                      if (blobIndex !== -1) {
+                        setNewImageFiles(prev => prev.filter((_, i) => i !== blobIndex));
+                      }
+                    }
                   }}
-                  className="absolute top-1 right-1 bg-background/50 text-foreground rounded-full p-1 hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  className="absolute top-1 right-1 bg-background/80 text-foreground rounded-full p-1 hover:bg-destructive hover:text-destructive-foreground transition-colors z-20 opacity-0 group-hover:opacity-100"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
-            ) : (
-              <label className="w-32 h-32 border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 rounded-[24px] flex flex-col items-center justify-center cursor-pointer transition-colors bg-background/50">
-                <Upload className="w-6 h-6 text-muted-foreground mb-2" />
-                <span className="text-xs text-muted-foreground font-medium">Tải ảnh lên</span>
+            ))}
+
+            {imagePreviews.length < 5 && (
+              <label className="w-32 h-32 flex-shrink-0 border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 rounded-[16px] flex flex-col items-center justify-center cursor-pointer transition-colors bg-background/50 group">
+                <Upload className="w-6 h-6 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
+                <span className="text-xs text-muted-foreground font-medium group-hover:text-primary text-center px-2">Thêm ảnh<br />({imagePreviews.length}/5)</span>
                 <input
                   type="file"
+                  multiple
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
                   onChange={handleImageChange}
                 />
               </label>
             )}
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm text-muted-foreground flex flex-col justify-center gap-1.5 ml-2">
               <p>• Hỗ trợ JPG, PNG, WEBP</p>
-              <p>• Kích thước tối đa 5MB</p>
+              <p>• Kích thước tối đa 5MB/ảnh</p>
               <p>• Hình ảnh chân thực giúp bán nhanh hơn</p>
             </div>
           </div>

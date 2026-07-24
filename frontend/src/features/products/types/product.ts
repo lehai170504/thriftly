@@ -24,6 +24,7 @@ export interface Product {
   price: number;
   quantity: number;
   imageUrl?: string;
+  images?: string[];
   videoUrl?: string;
   status: ProductStatus;
   location?: string;
@@ -45,6 +46,7 @@ export interface CreateProductRequest {
   condition: ProductCondition;
   sellType: SellType;
   imageUrl?: string;
+  images?: string[];
   videoUrl?: string;
   location?: string;
   auctionDurationDays?: number;

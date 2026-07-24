@@ -6,7 +6,12 @@ import Cookies from 'js-cookie';
 import { toast } from 'sonner';
 import { MessageCircle } from 'lucide-react';
 
-export const useChatSocket = (isAuthenticated: boolean, currentUsername?: string, disabled: boolean = false) => {
+export const useChatSocket = (
+  isAuthenticated: boolean, 
+  currentUsername?: string, 
+  disabled: boolean = false,
+  onTyping?: (username: string) => void
+) => {
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const queryClient = useQueryClient();
 
@@ -46,6 +51,13 @@ export const useChatSocket = (isAuthenticated: boolean, currentUsername?: string
           return;
         }
 
+        if (payload.type === 'TYPING') {
+          if (onTyping && payload.senderUsername !== currentUsername) {
+            onTyping(payload.senderUsername);
+          }
+          return;
+        }
+
         const chatMsg: ChatMessageDto = payload;
 
         // Determine the other user in the conversation
@@ -69,7 +81,7 @@ export const useChatSocket = (isAuthenticated: boolean, currentUsername?: string
           toast.info(`Tin nhắn mới từ ${chatMsg.senderUsername}`, {
             description: (
               <span className="text-neutral-900 text-[15px] font-medium block mt-1">
-                {chatMsg.content.length > 50 ? chatMsg.content.substring(0, 50) + '...' : chatMsg.content}
+                {chatMsg.imageUrl ? '[Hình ảnh]' : (chatMsg.content.length > 50 ? chatMsg.content.substring(0, 50) + '...' : chatMsg.content)}
               </span>
             ),
             icon: <MessageCircle className="w-5 h-5 text-primary" />,
@@ -100,19 +112,31 @@ export const useChatSocket = (isAuthenticated: boolean, currentUsername?: string
         client.deactivate();
       }
     };
-  }, [isAuthenticated, currentUsername, queryClient, disabled]);
+  }, [isAuthenticated, currentUsername, queryClient, disabled, onTyping]);
 
-  const sendMessage = (receiverUsername: string, content: string) => {
+  const sendMessage = (receiverUsername: string, content: string, imageUrl?: string) => {
     if (stompClient && stompClient.connected) {
       stompClient.publish({
         destination: '/app/chat.sendMessage',
         body: JSON.stringify({
           receiverUsername,
-          content
+          content,
+          imageUrl
         }),
       });
     }
   };
 
-  return { sendMessage };
+  const sendTyping = (receiverUsername: string) => {
+    if (stompClient && stompClient.connected) {
+      stompClient.publish({
+        destination: '/app/chat.typing',
+        body: JSON.stringify({
+          receiverUsername,
+        }),
+      });
+    }
+  };
+
+  return { sendMessage, sendTyping };
 };

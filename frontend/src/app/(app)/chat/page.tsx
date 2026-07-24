@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConversationResponse } from '@/features/chat/api/chatApi';
 import { useChatSocket } from '@/features/chat/hooks/useChatSocket';
@@ -16,11 +16,24 @@ export default function ChatPage() {
   const [message, setMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<ConversationResponse | null>(null);
+  const [typingUsers, setTypingUsers] = useState<{ [username: string]: NodeJS.Timeout }>({});
+  const [isTyping, setIsTyping] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const { sendMessage } = useChatSocket(isAuthenticated, user?.username);
+  const handleTyping = useCallback((username: string) => {
+    setIsTyping(true);
+    setTypingUsers(prev => {
+      if (prev[username]) clearTimeout(prev[username]);
+      const timeout = setTimeout(() => {
+        setIsTyping(false);
+      }, 3000);
+      return { ...prev, [username]: timeout };
+    });
+  }, []);
+
+  const { sendMessage, sendTyping } = useChatSocket(isAuthenticated, user?.username, false, handleTyping);
 
   const { data: conversations = [], isLoading: isConversationsLoading } = useChatConversations(isAuthenticated);
   const { data: history, isLoading: isHistoryLoading } = useChatHistory(activeUser?.username);
@@ -42,11 +55,18 @@ export default function ChatPage() {
 
   if (!isAuthenticated) return null;
 
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() || !activeUser) return;
-    sendMessage(activeUser.username, message);
+  const handleSend = (e?: React.FormEvent, imageUrl?: string) => {
+    if (e) e.preventDefault();
+    if ((!message.trim() && !imageUrl) || !activeUser) return;
+    sendMessage(activeUser.username, message, imageUrl);
     setMessage('');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessage(e.target.value);
+    if (activeUser) {
+      sendTyping(activeUser.username);
+    }
   };
 
   const handleDeleteConversation = async () => {
@@ -96,6 +116,8 @@ export default function ChatPage() {
             scrollContainerRef={scrollContainerRef}
             messagesEndRef={messagesEndRef}
             currentUsername={user?.username}
+            isTyping={isTyping && activeUser?.username ? typingUsers[activeUser.username] !== undefined : false}
+            onInputChange={handleInputChange}
           />
         </div>
       </div>

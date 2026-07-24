@@ -43,6 +43,7 @@ public class RestChatController {
                         dto.setSenderUsername(msg.getSender().getUsername());
                         dto.setReceiverUsername(msg.getReceiver().getUsername());
                         dto.setContent(msg.getContent());
+                        dto.setImageUrl(msg.getImageUrl());
                         dto.setTimestamp(msg.getTimestamp());
                         dto.setRead(msg.isRead());
                         return dto;

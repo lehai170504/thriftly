@@ -18,6 +18,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ecommerce.thriftauction.features.payment.dto.BankAccountRequest;
+import com.ecommerce.thriftauction.features.payment.dto.BankAccountResponse;
+import com.ecommerce.thriftauction.features.payment.entity.LinkedBankAccount;
+import com.ecommerce.thriftauction.features.payment.repository.BankAccountRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +34,7 @@ public class WalletService {
         private final TransactionRepository transactionRepository;
         private final UserRepository userRepository;
         private final SystemConfigService systemConfigService;
+        private final BankAccountRepository bankAccountRepository;
 
         @Transactional(readOnly = true)
         public WalletResponse getMyWallet(String username) {
@@ -146,8 +151,18 @@ public class WalletService {
                 wallet.setBalance(wallet.getBalance().subtract(totalDeduction));
                 walletRepository.save(wallet);
 
-                String description = String.format("Ngân hàng: %s | STK: %s | Tên: %s",
-                                request.getBankName(), request.getAccountNumber(), request.getAccountName());
+                String description = "";
+                if (request.getBankAccountId() != null) {
+                        LinkedBankAccount bankAccount = bankAccountRepository
+                                        .findByIdAndUserId(request.getBankAccountId(), user.getId())
+                                        .orElseThrow(() -> new RuntimeException("Bank account not found"));
+                        description = String.format("Ngân hàng: %s | STK: %s | Tên: %s",
+                                        bankAccount.getBankName(), bankAccount.getAccountNumber(),
+                                        bankAccount.getAccountName());
+                } else {
+                        description = String.format("Ngân hàng: %s | STK: %s | Tên: %s",
+                                        request.getBankName(), request.getAccountNumber(), request.getAccountName());
+                }
 
                 // Record transaction
                 Transaction tx = Transaction.builder()
@@ -181,5 +196,63 @@ public class WalletService {
                                 });
 
                 return getMyWallet(username);
+        }
+
+        @Transactional(readOnly = true)
+        public List<BankAccountResponse> getLinkedBankAccounts(String username) {
+                User user = userRepository.findByEmail(username)
+                                .or(() -> userRepository.findByUsername(username))
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+                return bankAccountRepository.findByUserIdOrderByCreatedAtDesc(user.getId())
+                                .stream()
+                                .map(b -> BankAccountResponse.builder()
+                                                .id(b.getId())
+                                                .bankName(b.getBankName())
+                                                .accountNumber(b.getAccountNumber())
+                                                .accountName(b.getAccountName())
+                                                .isDefault(b.getIsDefault())
+                                                .createdAt(b.getCreatedAt())
+                                                .build())
+                                .collect(Collectors.toList());
+        }
+
+        @Transactional
+        public BankAccountResponse addLinkedBankAccount(String username, BankAccountRequest request) {
+                User user = userRepository.findByEmail(username)
+                                .or(() -> userRepository.findByUsername(username))
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                boolean isFirst = bankAccountRepository.findByUserIdOrderByCreatedAtDesc(user.getId()).isEmpty();
+
+                LinkedBankAccount bankAccount = LinkedBankAccount.builder()
+                                .user(user)
+                                .bankName(request.getBankName())
+                                .accountNumber(request.getAccountNumber())
+                                .accountName(request.getAccountName())
+                                .isDefault(isFirst)
+                                .build();
+
+                bankAccountRepository.save(bankAccount);
+
+                return BankAccountResponse.builder()
+                                .id(bankAccount.getId())
+                                .bankName(bankAccount.getBankName())
+                                .accountNumber(bankAccount.getAccountNumber())
+                                .accountName(bankAccount.getAccountName())
+                                .isDefault(bankAccount.getIsDefault())
+                                .createdAt(bankAccount.getCreatedAt())
+                                .build();
+        }
+
+        @Transactional
+        public void deleteLinkedBankAccount(String username, String bankAccountId) {
+                User user = userRepository.findByEmail(username)
+                                .or(() -> userRepository.findByUsername(username))
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                LinkedBankAccount bankAccount = bankAccountRepository.findByIdAndUserId(bankAccountId, user.getId())
+                                .orElseThrow(() -> new RuntimeException("Bank account not found or access denied"));
+
+                bankAccountRepository.delete(bankAccount);
         }
 }

@@ -49,6 +49,7 @@ function AuctionCountdown({ endTime }: { endTime: string }) {
 
 export function ProductCard({ product }: { product: any }) {
   const imageUrl = product.imageUrl || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600&h=600&seed=${product.id}`;
+  const secondaryImage = (product.images && product.images.length > 1) ? product.images[1] : imageUrl;
   const isBoosted = product.boostedUntil && new Date(product.boostedUntil) > new Date();
 
   const { data: favorites = [] } = useFavorites();
@@ -75,7 +76,15 @@ export function ProductCard({ product }: { product: any }) {
           <img
             src={imageUrl}
             alt={product.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-out group-hover:opacity-0"
+            onError={(e) => {
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=600&h=600&q=80';
+            }}
+          />
+          <img
+            src={secondaryImage}
+            alt={product.title}
+            className="absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out opacity-0 group-hover:opacity-100 group-hover:scale-105"
             onError={(e) => {
               e.currentTarget.src = 'https://images.unsplash.com/photo-1555421689-491a97ff2040?auto=format&fit=crop&w=600&h=600&q=80';
             }}

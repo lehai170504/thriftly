@@ -21,4 +21,20 @@ export interface WithdrawRequest {
   bankName: string;
   accountNumber: string;
   accountName: string;
+  bankAccountId?: string;
+}
+
+export interface BankAccountResponse {
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+export interface BankAccountRequest {
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
 }

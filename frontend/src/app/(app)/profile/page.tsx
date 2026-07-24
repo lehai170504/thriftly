@@ -13,6 +13,7 @@ import { ShippingInfoForm } from '@/components/ui/ShippingInfoForm';
 import { useFollow } from '@/features/users/hooks/useFollow';
 import { ProfileSidebar } from '@/features/users/components/ProfileSidebar';
 import { ChangePasswordForm } from '@/features/users/components/ChangePasswordForm';
+import { BankAccountManager } from '@/features/wallet/components/BankAccountManager';
 
 export default function ProfilePage() {
   const { data: profile, isLoading } = useProfile();
@@ -126,6 +127,9 @@ export default function ProfilePage() {
                 <TabsTrigger value="password" className="rounded-lg px-6 py-2 text-sm font-semibold transition-all">
                   Đổi mật khẩu
                 </TabsTrigger>
+                <TabsTrigger value="bank" className="rounded-lg px-6 py-2 text-sm font-semibold transition-all">
+                  Ngân hàng
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="info" className="focus-visible:outline-none data-[state=active]:animate-in data-[state=active]:fade-in duration-300">
@@ -164,6 +168,10 @@ export default function ProfilePage() {
 
               <TabsContent value="password" className="focus-visible:outline-none data-[state=active]:animate-in data-[state=active]:fade-in duration-300">
                 <ChangePasswordForm />
+              </TabsContent>
+
+              <TabsContent value="bank" className="focus-visible:outline-none data-[state=active]:animate-in data-[state=active]:fade-in duration-300">
+                <BankAccountManager />
               </TabsContent>
             </Tabs>
           </div>

@@ -7,6 +7,8 @@ export interface ChatMessageDto {
   senderAvatar?: string;
   receiverId?: string;
   content: string;
+  imageUrl?: string;
+  type?: string;
   timestamp?: string;
   createdAt?: string;
   isRead?: boolean;

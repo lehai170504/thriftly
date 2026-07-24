@@ -48,8 +48,8 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
     { id: 3, title: 'Định giá' }
   ];
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [suggestedPriceText, setSuggestedPriceText] = useState<string | null>(null);
@@ -97,9 +97,10 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
 
   const onSubmit = async (data: CreateProductRequest) => {
     try {
-      if (imageFile) {
-        const url = await uploadImageMutation.mutateAsync(imageFile);
-        data.imageUrl = url;
+      if (imageFiles.length > 0) {
+        const urls = await Promise.all(imageFiles.map(file => uploadImageMutation.mutateAsync(file)));
+        data.images = urls;
+        data.imageUrl = urls[0];
       }
       if (videoFile) {
         const url = await uploadVideoMutation.mutateAsync(videoFile);
@@ -117,15 +118,17 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Ảnh phải nhỏ hơn 5MB');
-        return;
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const validFiles = files.filter(f => f.size <= 5 * 1024 * 1024);
+      if (validFiles.length < files.length) {
+        toast.error('Một số ảnh bị bỏ qua do vượt quá 5MB');
       }
-      setImageFile(file);
-      const url = URL.createObjectURL(file);
-      setImagePreview(url);
+      if (validFiles.length > 0) {
+        setImageFiles(prev => [...prev, ...validFiles].slice(0, 5));
+        const newPreviews = validFiles.map(f => URL.createObjectURL(f));
+        setImagePreviews(prev => [...prev, ...newPreviews].slice(0, 5));
+      }
     }
   };
 
@@ -134,7 +137,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
     if (currentStep === 1) {
       isValid = await trigger(['title', 'categoryId', 'condition', 'description', 'location']);
     } else if (currentStep === 2) {
-      if (!imageFile) {
+      if (imageFiles.length === 0) {
         toast.error('Vui lòng tải lên ít nhất 1 hình ảnh sản phẩm');
         isValid = false;
       } else {
@@ -291,38 +294,47 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
             </div>
 
             <div className="space-y-4">
-              <Label>Hình ảnh sản phẩm (Bắt buộc) <span className="text-red-500">*</span></Label>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                {imagePreview ? (
-                  <div className="relative w-40 h-40 rounded-[24px] overflow-hidden border border-border group flex-shrink-0">
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              <Label>Hình ảnh sản phẩm (Tối đa 5 ảnh) <span className="text-red-500">*</span></Label>
+              <div className="flex flex-wrap items-start gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative w-32 h-32 rounded-[16px] overflow-hidden border border-border group flex-shrink-0 shadow-sm">
+                    <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    {index === 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-foreground text-[10px] font-bold text-center py-0.5 z-10">
+                        Ảnh bìa
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
-                        setImageFile(null);
-                        setImagePreview(null);
+                        setImageFiles(prev => prev.filter((_, i) => i !== index));
+                        setImagePreviews(prev => prev.filter((_, i) => i !== index));
                       }}
-                      className="absolute top-2 right-2 bg-background/50 text-foreground rounded-full p-1.5 hover:bg-destructive hover:text-destructive-foreground transition-colors z-10 opacity-0 group-hover:opacity-100"
+                      className="absolute top-1 right-1 bg-background/80 text-foreground rounded-full p-1 hover:bg-destructive hover:text-destructive-foreground transition-colors z-20 opacity-0 group-hover:opacity-100"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                ) : (
-                  <label className="w-40 h-40 flex-shrink-0 border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 rounded-[24px] flex flex-col items-center justify-center cursor-pointer transition-colors bg-background/50 group">
-                    <Upload className="w-8 h-8 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
-                    <span className="text-sm text-muted-foreground font-medium group-hover:text-primary">Tải ảnh lên</span>
+                ))}
+                
+                {imagePreviews.length < 5 && (
+                  <label className="w-32 h-32 flex-shrink-0 border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 rounded-[16px] flex flex-col items-center justify-center cursor-pointer transition-colors bg-background/50 group">
+                    <Upload className="w-6 h-6 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
+                    <span className="text-xs text-muted-foreground font-medium group-hover:text-primary text-center px-2">Thêm ảnh<br/>({imagePreviews.length}/5)</span>
                     <input
                       type="file"
+                      multiple
                       accept="image/jpeg,image/png,image/webp"
                       className="hidden"
                       onChange={handleImageChange}
                     />
                   </label>
                 )}
-                <div className="text-sm text-muted-foreground flex flex-col gap-1.5">
+                
+                <div className="text-sm text-muted-foreground flex flex-col justify-center gap-1.5 ml-2">
                   <p>• Hỗ trợ JPG, PNG, WEBP</p>
-                  <p>• Kích thước tối đa 5MB</p>
-                  <p>• Yêu cầu ảnh chụp thực tế rõ ràng</p>
+                  <p>• Kích thước tối đa 5MB/ảnh</p>
+                  <p>• Chọn nhiều ảnh cùng lúc</p>
                 </div>
               </div>
             </div>

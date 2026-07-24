@@ -48,7 +48,9 @@ public class ProductCommandService {
                 .sellType(request.getSellType())
                 .price(request.getPrice())
                 .quantity(request.getQuantity() != null ? request.getQuantity() : 1)
-                .imageUrl(request.getImageUrl())
+                .imageUrl(request.getImages() != null && !request.getImages().isEmpty() ? request.getImages().get(0)
+                        : request.getImageUrl())
+                .images(request.getImages())
                 .videoUrl(request.getVideoUrl())
                 .location(request.getLocation())
                 .status(ProductStatus.ACTIVE)
@@ -123,7 +125,10 @@ public class ProductCommandService {
         product.setCategory(category);
         product.setLocation(request.getLocation());
 
-        if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            product.setImages(request.getImages());
+            product.setImageUrl(request.getImages().get(0));
+        } else if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
             product.setImageUrl(request.getImageUrl());
         }
         if (request.getVideoUrl() != null && !request.getVideoUrl().isEmpty()) {

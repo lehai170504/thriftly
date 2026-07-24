@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { walletApi } from '../api/walletApi';
 import { toast } from 'sonner';
+import { extractError } from '@/lib/utils';
 
 export const useWallet = () => {
   return useQuery({
@@ -26,15 +27,49 @@ export const useDeposit = () => {
 
 export const useWithdraw = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: walletApi.withdraw,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
-      toast.success('Đã gửi yêu cầu rút tiền thành công!');
+      toast.success('Rút tiền thành công!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi rút tiền');
+      toast.error(extractError(error, 'Không thể gửi yêu cầu rút tiền'));
+    },
+  });
+};
+
+export const useBankAccounts = () => {
+  return useQuery({
+    queryKey: ['bank-accounts'],
+    queryFn: walletApi.getBankAccounts,
+  });
+};
+
+export const useAddBankAccount = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: walletApi.addBankAccount,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Thêm tài khoản ngân hàng thành công!');
+    },
+    onError: (error: any) => {
+      toast.error(extractError(error, 'Không thể thêm tài khoản ngân hàng'));
+    },
+  });
+};
+
+export const useDeleteBankAccount = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: walletApi.deleteBankAccount,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+      toast.success('Xóa tài khoản ngân hàng thành công!');
+    },
+    onError: (error: any) => {
+      toast.error(extractError(error, 'Không thể xóa tài khoản ngân hàng'));
     },
   });
 };

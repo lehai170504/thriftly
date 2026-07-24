@@ -3,7 +3,11 @@ package com.ecommerce.thriftauction.features.payment.controller;
 import com.ecommerce.thriftauction.features.payment.dto.WithdrawRequest;
 import com.ecommerce.thriftauction.features.payment.dto.DepositRequest;
 import com.ecommerce.thriftauction.features.payment.dto.WalletResponse;
+import com.ecommerce.thriftauction.features.payment.dto.BankAccountRequest;
+import com.ecommerce.thriftauction.features.payment.dto.BankAccountResponse;
 import com.ecommerce.thriftauction.features.payment.service.WalletService;
+import java.util.List;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -41,5 +45,29 @@ public class WalletController {
     public ResponseEntity<WalletResponse> requestWithdraw(
             @RequestBody WithdrawRequest request, Authentication authentication) {
         return ResponseEntity.ok(walletService.requestWithdraw(authentication.getName(), request));
+    }
+
+    @Operation(summary = "Lấy danh sách ngân hàng liên kết")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @GetMapping("/bank-accounts")
+    public ResponseEntity<List<BankAccountResponse>> getBankAccounts(Authentication authentication) {
+        return ResponseEntity.ok(walletService.getLinkedBankAccounts(authentication.getName()));
+    }
+
+    @Operation(summary = "Thêm ngân hàng liên kết mới")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PostMapping("/bank-accounts")
+    public ResponseEntity<BankAccountResponse> addBankAccount(
+            @Valid @RequestBody BankAccountRequest request, Authentication authentication) {
+        return ResponseEntity.ok(walletService.addLinkedBankAccount(authentication.getName(), request));
+    }
+
+    @Operation(summary = "Xóa ngân hàng liên kết")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @DeleteMapping("/bank-accounts/{id}")
+    public ResponseEntity<Void> deleteBankAccount(
+            @PathVariable String id, Authentication authentication) {
+        walletService.deleteLinkedBankAccount(authentication.getName(), id);
+        return ResponseEntity.ok().build();
     }
 }

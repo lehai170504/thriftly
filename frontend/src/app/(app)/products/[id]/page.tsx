@@ -2,12 +2,13 @@ import { Metadata } from 'next';
 import ProductDetailsClient from './ProductDetailsClient';
 
 type Props = {
-  params: { id: string }
+  params: Promise<{ id: string }>
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const id = params.id;
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
     // We fetch data directly from our Spring Boot backend
     // Since this runs on the server, we use the internal Docker URL if available, or just the public API URL
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';

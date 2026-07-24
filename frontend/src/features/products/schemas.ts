@@ -14,6 +14,7 @@ export const createProductSchema = z.object({
   quantity: z.number().min(1, 'Số lượng ít nhất là 1'),
   auctionDurationDays: z.number().optional(),
   imageUrl: z.string().optional(),
+  images: z.array(z.string()).optional(),
   videoUrl: z.string().optional(),
   location: z.string().min(1, 'Vui lòng chọn khu vực'),
 });
