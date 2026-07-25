@@ -1,47 +1,91 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useSearchProducts, useCategories } from '@/features/products/hooks/useProducts';
 import { useActiveLiveAuctions } from '@/features/live/hooks/useLive';
 import { ProductCard } from '@/features/products/components/ProductCard';
 import { ProductGridSkeleton } from '@/components/ui/loading-skeletons';
-import { Gavel, Activity, Flame, Filter, Tag } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Gavel, Activity, Flame } from 'lucide-react';
+import { useProfile } from '@/features/users/hooks/useUsers';
+import { useAuth } from '@/contexts/AuthContext';
+import { motion } from 'framer-motion';
 
-export default function AuctionsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('createdAt');
-  const [direction, setDirection] = useState<'asc' | 'desc'>('desc');
+import { ProductSidebar } from '@/features/products/components/ProductSidebar';
+import { ActiveFilters } from '@/features/products/components/ActiveFilters';
+import { ProductSortAndPrice } from '@/features/products/components/ProductSortAndPrice';
+import { ProductPagination } from '@/features/products/components/ProductPagination';
+import { ProductEmptyState } from '@/features/products/components/ProductEmptyState';
 
+function AuctionsContent() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query') || '';
+  const initialCategory = searchParams.get('category');
+  const initialSort = searchParams.get('sort') || 'createdAt_desc';
+
+  const [categoryIds, setCategoryIds] = useState<string[]>(initialCategory ? [initialCategory] : []);
+  const [condition, setCondition] = useState<string>('all');
+  const [sellType, setSellType] = useState<string>('AUCTION');
+  const [location, setLocation] = useState<string>('');
+  const [sort, setSort] = useState<string>(initialSort);
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
+  const [page, setPage] = useState<number>(0);
+
+  const resetPage = () => setPage(0);
+
+  useEffect(() => {
+    const newCategory = searchParams.get('category');
+    const newSort = searchParams.get('sort');
+
+    if (newCategory !== null) {
+      setCategoryIds([newCategory]);
+      setPage(0);
+    }
+    if (newSort !== null) {
+      setSort(newSort);
+      setPage(0);
+    }
+  }, [searchParams]);
+
+  const { isAuthenticated } = useAuth();
+  const { data: profile } = useProfile(isAuthenticated);
   const { data: categories } = useCategories();
 
-  const { data: productsPage, isLoading } = useSearchProducts({
+  const { data: productsPage, isLoading, error } = useSearchProducts({
+    query: query || undefined,
+    categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
+    condition: condition !== 'all' ? condition : undefined,
     sellType: 'AUCTION',
-    categoryIds: selectedCategory !== 'all' ? [selectedCategory] : undefined,
-    sortBy: sortBy,
-    direction: direction,
-    size: 20,
+    location: location || undefined,
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    sortBy: sort.split('_')[0],
+    direction: sort.split('_')[1] as 'asc' | 'desc',
+    page: page,
+    size: 12
   });
 
   const { data: activeLiveSessions } = useActiveLiveAuctions();
 
   const productsWithLiveStatus = useMemo(() => {
     if (!productsPage?.content) return [];
-    return productsPage.content.map(product => ({
+    return productsPage.content.map((product: any) => ({
       ...product,
-      isLive: activeLiveSessions?.some(session => session.productId === product.id) || false
+      isLive: activeLiveSessions?.some((session: any) => session.productId === product.id) || false
     }));
   }, [productsPage?.content, activeLiveSessions]);
 
-  // Sắp xếp ưu tiên các phòng đang LIVE lên đầu nếu đang sort theo mặc định (createdAt)
   const sortedProducts = useMemo(() => {
-    if (sortBy !== 'createdAt') return productsWithLiveStatus;
+    if (sort !== 'createdAt_desc') return productsWithLiveStatus;
     return [...productsWithLiveStatus].sort((a, b) => {
       if (a.isLive && !b.isLive) return -1;
       if (!a.isLive && b.isLive) return 1;
       return 0;
     });
-  }, [productsWithLiveStatus, sortBy]);
+  }, [productsWithLiveStatus, sort]);
+
+  const totalPages = productsPage?.totalPages || 1;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -95,99 +139,108 @@ export default function AuctionsPage() {
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          <ProductSidebar
+            profile={profile}
+            categories={categories || []}
+            categoryIds={categoryIds}
+            setCategoryIds={setCategoryIds}
+            location={location}
+            setLocation={setLocation}
+            sellType={sellType}
+            setSellType={setSellType}
+            condition={condition}
+            setCondition={setCondition}
+            resetPage={resetPage}
+            hideSellTypeFilter={true}
+          />
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-card border border-border rounded-[24px] p-6 shadow-sm sticky top-24">
-              <div className="flex items-center gap-2 font-heading font-bold text-lg text-foreground mb-4">
-                <Filter className="w-5 h-5 text-primary" /> Danh Mục
+          {/* Main Content Area */}
+          <main className="flex-1 min-w-0">
+            {/* Top Bar of Main Content: Active Filters & Sort */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-border/50 pb-4">
+              <div className="flex-1 min-w-0">
+                <ActiveFilters
+                  categories={categories || []}
+                  categoryIds={categoryIds}
+                  setCategoryIds={setCategoryIds}
+                  location={location}
+                  setLocation={setLocation}
+                  sellType={sellType}
+                  setSellType={setSellType}
+                  condition={condition}
+                  setCondition={setCondition}
+                  minPrice={minPrice}
+                  setMinPrice={setMinPrice}
+                  maxPrice={maxPrice}
+                  setMaxPrice={setMaxPrice}
+                  resetPage={resetPage}
+                />
               </div>
-              <div className="space-y-1">
-                <button
-                  onClick={() => setSelectedCategory('all')}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${selectedCategory === 'all' ? 'bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/20' : 'text-muted-foreground hover:bg-muted font-medium'}`}
-                >
-                  <Tag className="w-4 h-4" />
-                  Tất cả sản phẩm
-                </button>
-                {categories?.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${selectedCategory === cat.id ? 'bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/20' : 'text-muted-foreground hover:bg-muted font-medium'}`}
-                  >
-                    {/* Placeholder cho icon danh mục nếu có */}
-                    <span className="w-4 h-4 rounded-full bg-border" />
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* Product Grid Area */}
-          <div className="lg:col-span-3 flex flex-col">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4 bg-card border border-border p-4 rounded-[20px] shadow-sm">
-              <h2 className="text-lg font-bold text-foreground font-heading flex items-center gap-2">
-                Kết quả tìm kiếm
-                {!isLoading && (
-                  <span className="text-muted-foreground font-medium text-sm bg-muted px-2.5 py-1 rounded-full">
-                    {productsPage?.totalElements || sortedProducts.length} sản phẩm
-                  </span>
-                )}
-              </h2>
-
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <span className="text-sm text-muted-foreground font-medium whitespace-nowrap hidden sm:inline-block">Sắp xếp:</span>
-                <Select value={`${sortBy}-${direction}`} onValueChange={(val) => {
-                  if (!val) return;
-                  const [s, d] = val.split('-');
-                  setSortBy(s);
-                  setDirection(d as 'asc' | 'desc');
-                }}>
-                  <SelectTrigger className="w-full sm:w-[200px] bg-background border-border rounded-xl">
-                    <SelectValue placeholder="Sắp xếp theo">
-                      {(val: string) => {
-                        if (val === 'createdAt-desc') return 'Mới nhất';
-                        if (val === 'price-asc') return 'Giá: Thấp đến cao';
-                        if (val === 'price-desc') return 'Giá: Cao xuống thấp';
-                        return 'Sắp xếp theo';
-                      }}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="createdAt-desc">Mới nhất</SelectItem>
-                    <SelectItem value="price-asc">Giá: Thấp đến cao</SelectItem>
-                    <SelectItem value="price-desc">Giá: Cao xuống thấp</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <ProductSortAndPrice
+                minPrice={minPrice}
+                setMinPrice={setMinPrice}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
+                sort={sort}
+                setSort={setSort}
+                resetPage={resetPage}
+              />
             </div>
 
-            {/* Grid */}
             {isLoading ? (
               <ProductGridSkeleton />
+            ) : error ? (
+              <div className="text-center py-20 bg-background/50 glass rounded-2xl shadow-sm border border-border">
+                <p className="text-red-500 font-medium text-lg">Không thể tải danh sách phiên đấu giá lúc này. Vui lòng thử lại sau.</p>
+              </div>
             ) : sortedProducts.length === 0 ? (
-              <div className="text-center py-24 bg-card rounded-[24px] border border-border shadow-sm flex flex-col items-center justify-center">
-                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
-                  <Gavel className="w-10 h-10 text-muted-foreground/50" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">Không tìm thấy sản phẩm</h3>
-                <p className="text-muted-foreground max-w-sm mx-auto">
-                  Hiện tại không có phiên đấu giá nào phù hợp với bộ lọc của bạn. Hãy thử chọn danh mục khác nhé!
-                </p>
-              </div>
+              <ProductEmptyState />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {sortedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+              <motion.div
+                initial="hidden"
+                animate="show"
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.1 }
+                  }
+                }}
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8"
+              >
+                {sortedProducts.map((product: any) => (
+                  <motion.div
+                    key={product.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+                    }}
+                    whileHover={{ y: -8 }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
-          </div>
+
+            <ProductPagination
+              page={page}
+              setPage={setPage}
+              totalPages={totalPages}
+            />
+          </main>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuctionsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-foreground">Đang tải...</div>}>
+      <AuctionsContent />
+    </Suspense>
   );
 }

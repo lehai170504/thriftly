@@ -67,12 +67,35 @@ export default function LiveFeedClient() {
 
   if (!clientRef.current) return null;
 
+  const activeSession = activeLiveSessions[activeIndex];
+
   return (
     <AgoraRTCProvider client={clientRef.current}>
       <div className="h-[calc(100vh-4rem)] w-full bg-zinc-950 flex justify-center items-center relative overflow-hidden">
+        {/* Blurred Background */}
+        {activeSession && (
+          <>
+            <div
+              className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-70 transition-all duration-1000 scale-110 blur-2xl"
+              style={{ backgroundImage: `url(${activeSession.productThumbnail || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?seed=${activeSession.productId}`})` }}
+            />
+            <div className="absolute inset-0 z-0 bg-black/60" />
+          </>
+        )}
+
+        {/* Close Button */}
+        <Button
+          onClick={() => router.push('/')}
+          variant="ghost"
+          size="icon"
+          className="absolute top-6 left-6 z-50 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md shadow-lg border border-white/10"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+        </Button>
+
         <div
           ref={containerRef}
-          className="h-full w-full max-w-[420px] bg-black overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar relative shadow-2xl border-x border-white/5"
+          className="h-full w-full max-w-[420px] bg-black overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar relative shadow-2xl border-x border-white/10 z-10"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <style dangerouslySetInnerHTML={{
@@ -82,7 +105,7 @@ export default function LiveFeedClient() {
             }
           `}} />
 
-          {activeLiveSessions.map((session, index) => (
+          {activeLiveSessions.map((session: any, index: number) => (
             <div
               key={session.id}
               data-index={index}

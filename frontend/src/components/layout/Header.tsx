@@ -1,19 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { LogOut, User as UserIcon, Wallet, Plus, LayoutDashboard, Heart } from 'lucide-react';
+import { LogOut, User as UserIcon, Wallet, Plus, LayoutDashboard, Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CreateProductModal } from '@/features/products/components/CreateProductModal';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { GlobalSearchModal } from './GlobalSearchModal';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, logout, openLoginModal, openRegisterModal } = useAuth();
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchModalOpen((open) => !open);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleHowItWorksClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === '/' || pathname === '') {
@@ -66,7 +80,31 @@ export default function Header() {
             </Link>
           </nav>
 
+          <div className="hidden lg:flex items-center mx-2">
+            <button
+              onClick={() => setIsSearchModalOpen(true)}
+              className="group flex items-center justify-between w-full min-w-[200px] xl:min-w-[260px] h-10 px-4 bg-background/50 border border-border hover:border-primary/50 hover:bg-accent/50 rounded-full transition-all text-sm text-muted-foreground shadow-sm"
+            >
+              <div className="flex items-center gap-2 overflow-hidden">
+                <Search className="h-4 w-4 shrink-0 group-hover:text-primary transition-colors" />
+                <span className="truncate">Tìm kiếm...</span>
+              </div>
+              <kbd className="pointer-events-none inline-flex h-5 shrink-0 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground ml-2">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </button>
+          </div>
+
           <div className="flex items-center gap-3">
+            {/* Mobile Search Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden text-muted-foreground hover:text-primary rounded-full"
+              onClick={() => setIsSearchModalOpen(true)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
             <ThemeToggle />
             {!isAuthenticated ? (
               <>
@@ -141,6 +179,11 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      <GlobalSearchModal
+        open={isSearchModalOpen}
+        onOpenChange={setIsSearchModalOpen}
+      />
     </header>
   );
 }

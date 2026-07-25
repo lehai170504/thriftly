@@ -25,7 +25,7 @@ export function CommandPalette({ onSelect }: CommandPaletteProps) {
   }
 
   return (
-    <div className="py-2 max-h-[400px] overflow-y-auto bg-background/50 backdrop-blur-md">
+    <div className="py-2 w-full">
       <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
         Gợi ý nhanh
       </div>

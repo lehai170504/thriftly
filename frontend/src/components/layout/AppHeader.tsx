@@ -1,40 +1,30 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ShoppingBag, LogOut, User as UserIcon, Wallet, Search, ShieldAlert, MessageCircle, Package, Store, Menu, LineChart, Heart, Tag, ChevronRight, ArrowRight } from 'lucide-react';
+import { ShoppingBag, LogOut, User as UserIcon, Wallet, Search, ShieldAlert, MessageCircle, Package, Store, Menu, Heart, ChevronRight, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
 import { CreateProductModal } from '@/features/products/components/CreateProductModal';
 import { NotificationDropdown } from './NotificationDropdown';
-import { CommandPalette } from './CommandPalette';
 import { ThemeToggle } from './ThemeToggle';
-import { useDebounce } from '@/hooks/useDebounce';
-import { useSearchProducts, useCategories } from '@/features/products/hooks/useProducts';
-import { formatCurrency } from '@/lib/utils';
+import { useCategories } from '@/features/products/hooks/useProducts';
 import { useQueryClient } from '@tanstack/react-query';
 import { CategoryIcon } from '../ui/category-icon';
+import { GlobalSearchModal } from './GlobalSearchModal';
 
 export default function AppHeader() {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || '');
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<any>(null);
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const debouncedQuery = useDebounce(searchQuery, 500);
-  const { data: searchResults, isLoading: isSearching } = useSearchProducts({ query: debouncedQuery });
   const { user, isAuthenticated, logout, openLoginModal } = useAuth();
   const { data: categories } = useCategories();
 
@@ -51,34 +41,15 @@ export default function AppHeader() {
   }, [categories, activeCategory]);
 
   useEffect(() => {
-    setSearchQuery(searchParams.get('query') || '');
-  }, [searchParams]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchModalOpen((open) => !open);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      setShowDropdown(false);
-      if (searchQuery.trim()) {
-        router.push(`/products?query=${encodeURIComponent(searchQuery.trim())}`);
-      } else {
-        router.push(`/products`);
-      }
-    }
-  };
-
-  const handleSelectProduct = (productId: string) => {
-    setShowDropdown(false);
-    router.push(`/products/${productId}`);
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border glass">
@@ -163,66 +134,66 @@ export default function AppHeader() {
               {/* Mega Menu Dropdown */}
               {isCategoryOpen && (
                 <div className="absolute top-full left-0 pt-4 z-50">
-                  <div className="w-[750px] bg-background rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-border overflow-hidden flex min-h-[350px] animate-in fade-in zoom-in-95 duration-200">
+                  <div className="w-[750px] bg-background rounded-[32px] shadow-2xl shadow-primary/10 border border-border/50 overflow-hidden flex min-h-[380px] animate-in fade-in slide-in-from-top-4 zoom-in-95 duration-300 ease-out">
                     {/* Left Sidebar - Main Categories */}
-                    <div className="w-1/3 bg-muted/30 border-r border-border py-4">
+                    <div className="w-1/3 bg-muted/20 border-r border-border/50 py-4 flex flex-col gap-1 px-2">
                       {categories?.map((c) => (
                         <div
                           key={c.id}
                           onMouseEnter={() => setActiveCategory(c)}
                           onClick={() => router.push(`/products?category=${c.id}`)}
-                          className={`px-6 py-3 cursor-pointer flex items-center justify-between transition-colors ${activeCategory?.id === c.id ? 'bg-background border-l-4 border-primary text-primary font-semibold shadow-sm' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                          className={`px-4 py-2.5 mx-1 cursor-pointer rounded-2xl flex items-center justify-between transition-all duration-300 ${activeCategory?.id === c.id ? 'bg-primary/10 text-primary font-semibold shadow-sm scale-[1.02]' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'}`}
                         >
                           <span className="text-sm">{c.name}</span>
-                          <ChevronRight className={`w-4 h-4 transition-opacity ${activeCategory?.id === c.id ? 'opacity-100' : 'opacity-30'}`} />
+                          <ChevronRight className={`w-4 h-4 transition-all duration-300 ${activeCategory?.id === c.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`} />
                         </div>
                       ))}
                       {(!categories || categories.length === 0) && (
-                        <div className="px-6 py-4 text-sm text-muted-foreground">
+                        <div className="px-4 py-4 text-sm text-muted-foreground text-center mt-4">
                           Chưa có danh mục nào
                         </div>
                       )}
                     </div>
 
                     {/* Right Content - Subcategories */}
-                    <div className="w-2/3 p-6 bg-background">
+                    <div className="w-2/3 p-6 bg-background/50">
                       {activeCategory && (
-                        <div className="h-full flex flex-col">
-                          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/50">
-                            <h3 className="text-lg font-bold text-foreground">{activeCategory.name}</h3>
-                            <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 h-8 text-xs font-semibold" onClick={() => router.push(`/products?category=${activeCategory.id}`)}>
-                              Xem tất cả <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                        <div className="h-full flex flex-col animate-in fade-in duration-500">
+                          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/30">
+                            <h3 className="text-xl font-bold text-foreground tracking-tight">{activeCategory.name}</h3>
+                            <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 h-8 text-xs font-semibold rounded-full px-4 bg-primary/5 hover:bg-primary/10 transition-colors" onClick={() => router.push(`/products?category=${activeCategory.id}`)}>
+                              Xem tất cả <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                             </Button>
                           </div>
 
-                          <div className="flex-1 overflow-y-auto pr-2">
+                          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                             {activeCategory.subCategories && activeCategory.subCategories.length > 0 ? (
-                              <div className="grid grid-cols-3 gap-4">
+                              <div className="grid grid-cols-3 gap-y-6 gap-x-4">
                                 {activeCategory.subCategories.map((sub: any) => (
                                   <div
                                     key={sub.id}
                                     onClick={() => router.push(`/products?category=${sub.id}`)}
-                                    className="group cursor-pointer flex flex-col items-center text-center"
+                                    className="group cursor-pointer flex flex-col items-center text-center gap-3"
                                   >
-                                    <div className="w-16 h-16 bg-muted/50 rounded-2xl mb-2 overflow-hidden border border-border group-hover:border-primary/50 group-hover:shadow-md transition-all flex items-center justify-center p-2">
+                                    <div className="w-[72px] h-[72px] bg-muted/40 rounded-[24px] overflow-hidden border border-border/40 group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:shadow-lg group-hover:shadow-primary/10 group-hover:-translate-y-1 transition-all duration-300 flex items-center justify-center p-3">
                                       {sub.icon ? (
                                         sub.icon.startsWith('http') || sub.icon.startsWith('/') ? (
-                                          <img src={sub.icon} alt={sub.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+                                          <img src={sub.icon} alt={sub.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300" />
                                         ) : (
-                                          <CategoryIcon name={sub.icon} className="w-8 h-8 text-muted-foreground/70 group-hover:text-primary transition-colors" />
+                                          <CategoryIcon name={sub.icon} className="w-8 h-8 text-muted-foreground/70 group-hover:text-primary transition-colors duration-300" />
                                         )
                                       ) : (
-                                        <Package className="w-6 h-6 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
+                                        <Package className="w-6 h-6 text-muted-foreground/40 group-hover:text-primary/60 transition-colors duration-300" />
                                       )}
                                     </div>
-                                    <p className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors line-clamp-2">{sub.name}</p>
+                                    <p className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors duration-300 line-clamp-2 px-1">{sub.name}</p>
                                   </div>
                                 ))}
                               </div>
                             ) : (
                               <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-60 mt-4">
-                                <Store className="w-10 h-10 mb-3" />
-                                <p className="text-sm">Không có danh mục con</p>
+                                <Store className="w-12 h-12 mb-4 opacity-50" />
+                                <p className="text-sm font-medium">Không có danh mục con</p>
                               </div>
                             )}
                           </div>
@@ -261,83 +232,20 @@ export default function AppHeader() {
           </nav>
         </div>
 
-        {/* Global Search Bar */}
-        <div className="flex-1 max-w-2xl min-w-[200px] hidden md:flex items-center" ref={dropdownRef}>
-          <div className="relative w-full group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
-              ref={inputRef}
-              type="text"
-              placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowDropdown(true);
-              }}
-              onFocus={() => setShowDropdown(true)}
-              onKeyDown={handleSearch}
-              className="w-full h-12 pl-12 pr-20 bg-background/50 border-border hover:bg-background focus:bg-background focus:ring-2 focus:ring-primary focus:border-transparent rounded-full text-base transition-all"
-            />
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
-              <kbd className="pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                <span className="text-xs">⌘</span>K
-              </kbd>
+        {/* Global Search Bar (Trigger for Modal) */}
+        <div className="flex-1 max-w-2xl min-w-[150px] hidden md:flex items-center justify-end xl:justify-center">
+          <button
+            onClick={() => setIsSearchModalOpen(true)}
+            className="group flex items-center justify-between w-full max-w-[400px] h-11 px-4 bg-background/50 border border-border hover:border-primary/50 hover:bg-accent/50 rounded-full transition-all text-sm text-muted-foreground shadow-sm"
+          >
+            <div className="flex items-center gap-2 overflow-hidden">
+              <Search className="h-4 w-4 shrink-0 group-hover:text-primary transition-colors" />
+              <span className="truncate">Tìm kiếm sản phẩm, thương hiệu...</span>
             </div>
-
-            {/* Live Search Dropdown */}
-            {showDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-2 glass rounded-[24px] shadow-2xl border-border overflow-hidden z-50">
-                {searchQuery.trim() === '' ? (
-                  <CommandPalette onSelect={() => setShowDropdown(false)} />
-                ) : isSearching ? (
-                  <div className="p-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                    Đang tìm kiếm...
-                  </div>
-                ) : searchResults?.content && searchResults.content.length > 0 ? (
-                  <div className="max-h-96 overflow-y-auto py-2">
-                    {searchResults.content.slice(0, 5).map((product: any) => (
-                      <div
-                        key={product.id}
-                        className="flex items-center gap-3 p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
-                        onClick={() => handleSelectProduct(product.id)}
-                      >
-                        <div className="w-12 h-12 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
-                          <img
-                            src={product.imageUrl || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=100&h=100&seed=${product.id}`}
-                            alt={product.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-sm text-foreground truncate">{product.title}</h4>
-                          <div className="flex items-center gap-2 text-xs mt-1">
-                            <span className="font-semibold text-primary">{formatCurrency(product.price)}</span>
-                            <span className="text-muted-foreground">•</span>
-                            <span className="text-muted-foreground truncate">{product.categoryName}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <div
-                      className="p-3 text-center text-sm text-primary font-medium hover:bg-primary/5 cursor-pointer border-t border-border"
-                      onClick={() => {
-                        setShowDropdown(false);
-                        router.push(`/products?query=${encodeURIComponent(searchQuery.trim())}`);
-                      }}
-                    >
-                      Xem tất cả kết quả
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-6 text-center">
-                    <Package className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-                    <div className="text-sm text-muted-foreground">Không tìm thấy sản phẩm nào</div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+            <kbd className="pointer-events-none inline-flex h-6 shrink-0 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground ml-2">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </button>
         </div>
 
         {/* User Actions */}
@@ -456,17 +364,21 @@ export default function AppHeader() {
 
       {/* Mobile Search Bar - Visible only on small screens */}
       <div className="md:hidden px-4 pb-3">
-        <div className="relative w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Tìm kiếm..."
-            readOnly
-            onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-            className="w-full h-10 pl-10 pr-4 bg-background/50 border-border rounded-full text-sm cursor-text focus:ring-primary"
-          />
-        </div>
+        <button
+          onClick={() => setIsSearchModalOpen(true)}
+          className="flex items-center justify-between w-full h-10 px-4 bg-background/50 border border-border rounded-full text-sm text-muted-foreground shadow-sm"
+        >
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 shrink-0" />
+            <span>Tìm kiếm...</span>
+          </div>
+        </button>
       </div>
+
+      <GlobalSearchModal
+        open={isSearchModalOpen}
+        onOpenChange={setIsSearchModalOpen}
+      />
     </header>
   );
 }

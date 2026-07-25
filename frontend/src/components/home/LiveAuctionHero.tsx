@@ -23,8 +23,23 @@ interface LiveAuctionHeroProps {
 
 export function LiveAuctionHero({ product: initialProduct }: LiveAuctionHeroProps) {
   const { data } = useProducts(0, 10);
-  const auctionProducts = data?.content?.filter((p: any) => p.sellType === 'AUCTION') || [];
-  const product = initialProduct || auctionProducts[0] || data?.content?.[0];
+  const now = new Date().getTime();
+  const auctionProducts = data?.content?.filter((p: any) => {
+    if (p.sellType !== 'AUCTION') return false;
+    if (!p.auctionEndTime) return false;
+    return new Date(p.auctionEndTime).getTime() > now;
+  }) || [];
+  const defaultFallbackProduct = {
+    id: 'demo',
+    title: 'Bộ sưu tập đồ cổ (Sản phẩm mẫu)',
+    price: 5000000,
+    currentHighestBid: 6500000,
+    auctionEndTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
+    imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?seed=thriftswap',
+    sellerName: 'Thriftly System'
+  };
+
+  const product = initialProduct || auctionProducts[0] || defaultFallbackProduct;
 
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [isExpired, setIsExpired] = useState(false);

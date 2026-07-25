@@ -48,7 +48,7 @@ export default function SystemSettingsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Cấu Hình Hệ Thống</h1>
-            <p className="text-muted-foreground text-sm">Điều chỉnh các thông số vận hành và phí của nền tảng</p>
+            <p className="text-muted-foreground text-s  m">Điều chỉnh các thông số vận hành và phí của nền tảng</p>
           </div>
         </div>
       </div>

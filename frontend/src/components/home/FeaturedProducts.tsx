@@ -35,9 +35,55 @@ export function FeaturedProducts() {
     );
   }
 
-  if (isError || !data || data.content.length === 0) return null;
+  if (isError || !data) return null;
 
-  const auctionProducts = data.content.filter((p: any) => p.sellType === 'AUCTION' && !p.isExpired);
+  const now = new Date().getTime();
+  let auctionProducts: any[] = (data.content || []).filter((p: any) => {
+    if (p.sellType !== 'AUCTION') return false;
+    if (!p.auctionEndTime) return false;
+    return new Date(p.auctionEndTime).getTime() > now;
+  });
+
+  if (auctionProducts.length === 0) {
+    auctionProducts = [
+      {
+        id: 'demo-1',
+        title: 'MacBook Pro M3 Max 2023 (Demo)',
+        price: 50000000,
+        currentHighestBid: 55000000,
+        auctionEndTime: new Date(new Date().getTime() + 12 * 60 * 60 * 1000).toISOString(),
+        imageUrl: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80',
+        sellerName: 'Thriftly System'
+      },
+      {
+        id: 'demo-2',
+        title: 'Đồng hồ Rolex Submariner (Demo)',
+        price: 120000000,
+        currentHighestBid: 150000000,
+        auctionEndTime: new Date(new Date().getTime() + 5 * 60 * 60 * 1000).toISOString(),
+        imageUrl: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=500&q=80',
+        sellerName: 'Thriftly System'
+      },
+      {
+        id: 'demo-3',
+        title: 'Máy ảnh Sony A7IV (Demo)',
+        price: 45000000,
+        currentHighestBid: 48000000,
+        auctionEndTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
+        imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=500&q=80',
+        sellerName: 'Thriftly System'
+      },
+      {
+        id: 'demo-4',
+        title: 'Giày Nike Air Jordan 1 (Demo)',
+        price: 4000000,
+        currentHighestBid: 5500000,
+        auctionEndTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80',
+        sellerName: 'Thriftly System'
+      }
+    ];
+  }
 
   if (auctionProducts.length === 0) return null;
 
