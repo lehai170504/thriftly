@@ -4,6 +4,7 @@ import { useProducts } from '@/features/products/hooks/useProducts';
 import { AuctionProductCard } from '@/components/home/AuctionProductCard';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { FadeIn } from '@/components/ui/fade-in';
 import { Button } from '@/components/ui/button';
 import { ProductGridSkeleton } from '@/components/ui/loading-skeletons';
 import { useRef } from 'react';
@@ -90,36 +91,38 @@ export function FeaturedProducts() {
   return (
     <div className="w-full relative overflow-hidden py-2">
       <div className="w-full px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-          <div className="max-w-2xl">
-            <p className="text-xs font-bold tracking-[0.2em] text-blue-600 uppercase mb-3 flex items-center gap-3">
-              <span className="w-8 h-px bg-blue-600/50"></span>
-              Phiên đấu giá
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-2 font-sans">
-              Khám Phá Phiên Đấu Giá Nổi Bật
-            </h2>
-            <p className="text-base text-muted-foreground font-medium">
-              Cơ hội sở hữu những món đồ độc đáo với giá tốt nhất hôm nay.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 mr-2">
-              <Button variant="outline" size="icon" onClick={() => scroll('left')} className="rounded-full border-slate-200 hover:bg-slate-100">
-                <ChevronLeft className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => scroll('right')} className="rounded-full border-slate-200 hover:bg-slate-100">
-                <ChevronRight className="w-5 h-5" />
-              </Button>
+        <FadeIn direction="up">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold tracking-[0.2em] text-blue-600 uppercase mb-3 flex items-center gap-3">
+                <span className="w-8 h-px bg-blue-600/50"></span>
+                Phiên đấu giá
+              </p>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-2 font-sans">
+                Khám Phá Phiên Đấu Giá Nổi Bật
+              </h2>
+              <p className="text-base text-muted-foreground font-medium">
+                Cơ hội sở hữu những món đồ độc đáo với giá tốt nhất hôm nay.
+              </p>
             </div>
-            <Link href="/products">
-              <Button variant="ghost" className="rounded-full px-5 hover:bg-slate-100 font-semibold text-slate-700">
-                Xem tất cả <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 mr-2">
+                <Button variant="outline" size="icon" onClick={() => scroll('left')} className="rounded-full border-slate-200 hover:bg-slate-100 transition-transform hover:scale-105 active:scale-95">
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                <Button variant="outline" size="icon" onClick={() => scroll('right')} className="rounded-full border-slate-200 hover:bg-slate-100 transition-transform hover:scale-105 active:scale-95">
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+              </div>
+              <Link href="/products">
+                <Button variant="ghost" className="rounded-full px-5 hover:bg-slate-100 font-semibold text-slate-700 transition-transform hover:translate-x-1">
+                  Xem tất cả <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
-        </div>
+        </FadeIn>
 
         <div className="relative w-full">
           <div
@@ -127,20 +130,29 @@ export function FeaturedProducts() {
             className="flex overflow-x-auto gap-6 snap-x snap-mandatory pb-6 pt-2 scrollbar-hide"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {auctionProducts.map((product: any) => (
-              <div key={product.id} className="w-[280px] sm:w-[320px] lg:w-[340px] snap-start shrink-0 transform transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl rounded-2xl">
+            {auctionProducts.map((product: any, index: number) => (
+              <FadeIn 
+                key={product.id} 
+                direction="left" 
+                delay={index * 0.1}
+                className="w-[280px] sm:w-[320px] lg:w-[340px] snap-start shrink-0 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl rounded-2xl"
+              >
                 <AuctionProductCard product={product} />
-              </div>
+              </FadeIn>
             ))}
 
-            <div className="w-[280px] sm:w-[320px] lg:w-[340px] snap-start shrink-0 flex items-center justify-center p-4">
-              <Link href="/products" className="group flex flex-col items-center justify-center gap-5 w-full h-full min-h-[360px] rounded-[2rem] bg-white border border-slate-200 hover:border-blue-400 transition-all duration-500 hover:shadow-lg hover:-translate-y-1.5 cursor-pointer">
-                <div className="w-14 h-14 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all duration-500">
-                  <ArrowRight className="w-6 h-6 text-slate-700 group-hover:text-white transition-colors duration-500" />
+            <FadeIn 
+              direction="left" 
+              delay={auctionProducts.length * 0.1} 
+              className="w-[280px] sm:w-[320px] lg:w-[340px] snap-start shrink-0 flex items-center justify-center p-4"
+            >
+              <Link href="/products" className="group flex flex-col items-center justify-center gap-5 w-full h-full min-h-[360px] rounded-[2rem] bg-card border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-xl hover:-translate-y-2 cursor-pointer">
+                <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 group-hover:scale-110">
+                  <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary-foreground transition-colors duration-500" />
                 </div>
-                <span className="font-bold text-base text-slate-900 group-hover:text-blue-600 transition-colors duration-300">Xem toàn bộ</span>
+                <span className="font-bold text-base text-foreground group-hover:text-primary transition-colors duration-300">Xem toàn bộ</span>
               </Link>
-            </div>
+            </FadeIn>
           </div>
         </div>
       </div>

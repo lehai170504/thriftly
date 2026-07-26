@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-plus-jakarta), var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-be-vietnam), var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-heading: var(--font-plus-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-be-vietnam), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -50,72 +50,100 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  /* Nền hơi ngả màu ngọc/kem cực nhẹ, tạo cảm giác sang trọng, bớt chói hơn trắng tinh */
+  --background: oklch(0.99 0.005 160);
   --foreground: oklch(0.145 0 0);
+
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.145 0 0);
+
+  /* Brand Color: Premium Emerald (Xanh ngọc lục bảo) */
+  --primary: oklch(0.55 0.15 160);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+
+  /* Secondary: Xanh nhạt làm nền cho các nút phụ */
+  --secondary: oklch(0.96 0.02 160);
+  --secondary-foreground: oklch(0.35 0.1 160);
+
+  --muted: oklch(0.96 0.01 250);
+  --muted-foreground: oklch(0.55 0 0);
+
+  --accent: oklch(0.96 0.02 160);
+  --accent-foreground: oklch(0.35 0.1 160);
+
+  /* Destructive: Giữ màu Đỏ/Rose để cảnh báo/hủy đơn */
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+
+  --border: oklch(0.92 0.01 250);
+  --input: oklch(0.92 0.01 250);
+
+  /* Ring màu ngọc để khi focus input viền sẽ sáng màu brand */
+  --ring: oklch(0.55 0.15 160);
+
+  --chart-1: oklch(0.55 0.15 160);
+  --chart-2: oklch(0.439 0 0);
+  --chart-3: oklch(0.371 0 0);
+  --chart-4: oklch(0.269 0 0);
+  --chart-5: oklch(0.87 0 0);
+
+  /* Tăng độ bo góc lên 16px (1rem) cho hiện đại giống app mobile */
+  --radius: 1rem;
+
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.55 0.15 160);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(0.96 0.02 160);
+  --sidebar-accent-foreground: oklch(0.35 0.1 160);
+  --sidebar-border: oklch(0.92 0.01 250);
+  --sidebar-ring: oklch(0.55 0.15 160);
 }
 
 .dark {
-  --background: oklch(0.12 0.005 260);
+  /* Nền tối có ám một chút sắc xanh ngọc cực tối, không dùng đen xám xịt */
+  --background: oklch(0.15 0.015 160);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.16 0.008 260);
+
+  --card: oklch(0.18 0.015 160);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.15 0.008 260);
+  --popover: oklch(0.18 0.015 160);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.98 0 0);
-  --primary-foreground: oklch(0.12 0.005 260);
-  --secondary: oklch(0.20 0.01 260);
-  --secondary-foreground: oklch(0.92 0 0);
-  --muted: oklch(0.18 0.008 260);
-  --muted-foreground: oklch(0.65 0.01 260);
-  --accent: oklch(0.22 0.015 260);
+
+  /* Brand Color (Dark mode): Xanh ngọc sáng hơn để nổi bật trên nền đen */
+  --primary: oklch(0.65 0.18 160);
+  --primary-foreground: oklch(0.15 0.015 160);
+
+  --secondary: oklch(0.22 0.02 160);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  --muted: oklch(0.22 0.01 250);
+  --muted-foreground: oklch(0.7 0.01 250);
+
+  --accent: oklch(0.25 0.03 160);
   --accent-foreground: oklch(0.98 0 0);
+
   --destructive: oklch(0.62 0.22 25);
-  --border: oklch(0.24 0.01 260);
-  --input: oklch(0.22 0.01 260);
-  --ring: oklch(0.98 0 0 / 20%);
-  --chart-1: oklch(0.98 0 0);
-  --chart-2: oklch(0.60 0.18 160);
-  --chart-3: oklch(0.70 0.18 70);
-  --chart-4: oklch(0.65 0.20 310);
-  --chart-5: oklch(0.62 0.22 25);
-  --sidebar: oklch(0.13 0.005 260);
+
+  --border: oklch(0.25 0.01 250);
+  --input: oklch(0.25 0.01 250);
+  --ring: oklch(0.65 0.18 160 / 30%);
+
+  --chart-1: oklch(0.65 0.18 160);
+  --chart-2: oklch(0.70 0.18 70);
+  --chart-3: oklch(0.65 0.20 310);
+  --chart-4: oklch(0.62 0.22 25);
+  --chart-5: oklch(0.98 0 0);
+
+  --sidebar: oklch(0.15 0.015 160);
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.65 0.22 265);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.20 0.01 260);
+  --sidebar-primary: oklch(0.65 0.18 160);
+  --sidebar-primary-foreground: oklch(0.15 0.015 160);
+  --sidebar-accent: oklch(0.22 0.02 160);
   --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.22 0.01 260);
-  --sidebar-ring: oklch(0.65 0.22 265 / 40%);
+  --sidebar-border: oklch(0.25 0.01 250);
+  --sidebar-ring: oklch(0.65 0.18 160 / 40%);
 }
 
 @layer base {
@@ -162,7 +190,7 @@
 }
 
 @utility glass {
-  background: var(--card);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border);

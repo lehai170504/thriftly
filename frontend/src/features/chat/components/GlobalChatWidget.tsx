@@ -73,9 +73,9 @@ export function GlobalChatWidget() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {isOpen && (
-        <div className="glass border border-border shadow-2xl rounded-[24px] w-80 sm:w-96 mb-4 overflow-hidden flex flex-col h-[500px]">
+        <div className="glass border border-border/50 shadow-2xl shadow-primary/20 rounded-[24px] w-80 sm:w-96 mb-4 overflow-hidden flex flex-col h-[500px]">
           {/* Header */}
-          <div className="bg-card border-b border-border text-foreground p-3 flex items-center justify-between shadow-sm z-10">
+          <div className="bg-card/30 border-b border-border/50 text-foreground p-3 flex items-center justify-between shadow-sm z-10">
             {activeUser ? (
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground hover:bg-secondary rounded-full" onClick={() => clearActiveUser()}>
@@ -96,7 +96,7 @@ export function GlobalChatWidget() {
           </div>
 
           {/* Body */}
-          <div className="flex-1 overflow-y-auto bg-background/50 flex flex-col">
+          <div className="flex-1 overflow-y-auto bg-transparent flex flex-col">
             {!activeUser ? (
               // Conversation List
               <div className="p-2">
@@ -204,7 +204,7 @@ export function GlobalChatWidget() {
 
           {/* Input Area */}
           {activeUser && (
-            <div className="p-3 bg-background/50 border-t border-border">
+            <div className="p-3 bg-card/30 border-t border-border/50">
               <form onSubmit={handleSend} className="flex items-center gap-2">
                 <Input
                   value={message}

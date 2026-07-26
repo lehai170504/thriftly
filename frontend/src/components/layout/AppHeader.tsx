@@ -134,9 +134,9 @@ export default function AppHeader() {
               {/* Mega Menu Dropdown */}
               {isCategoryOpen && (
                 <div className="absolute top-full left-0 pt-4 z-50">
-                  <div className="w-[750px] bg-background rounded-[32px] shadow-2xl shadow-primary/10 border border-border/50 overflow-hidden flex min-h-[380px] animate-in fade-in slide-in-from-top-4 zoom-in-95 duration-300 ease-out">
+                  <div className="w-[750px] bg-popover/98 backdrop-blur-2xl rounded-[16px] shadow-xl border border-border/60 text-popover-foreground overflow-hidden flex min-h-[380px] animate-in fade-in slide-in-from-top-4 zoom-in-95 duration-300 ease-out">
                     {/* Left Sidebar - Main Categories */}
-                    <div className="w-1/3 bg-muted/20 border-r border-border/50 py-4 flex flex-col gap-1 px-2">
+                    <div className="w-1/3 bg-transparent border-r border-border/50 py-4 flex flex-col gap-1 px-2">
                       {categories?.map((c) => (
                         <div
                           key={c.id}
@@ -156,7 +156,7 @@ export default function AppHeader() {
                     </div>
 
                     {/* Right Content - Subcategories */}
-                    <div className="w-2/3 p-6 bg-background/50">
+                    <div className="w-2/3 p-6 bg-transparent">
                       {activeCategory && (
                         <div className="h-full flex flex-col animate-in fade-in duration-500">
                           <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/30">
@@ -175,15 +175,15 @@ export default function AppHeader() {
                                     onClick={() => router.push(`/products?category=${sub.id}`)}
                                     className="group cursor-pointer flex flex-col items-center text-center gap-3"
                                   >
-                                    <div className="w-[72px] h-[72px] bg-muted/40 rounded-[24px] overflow-hidden border border-border/40 group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:shadow-lg group-hover:shadow-primary/10 group-hover:-translate-y-1 transition-all duration-300 flex items-center justify-center p-3">
+                                    <div className="w-[72px] h-[72px] bg-muted/40 rounded-[24px] overflow-hidden border border-border/40 group-hover:border-primary/30 group-hover:bg-primary/5 group-hover:shadow-lg group-hover:shadow-primary/10 group-hover:-translate-y-1 transition-all duration-300 flex items-center justify-center relative">
                                       {sub.icon ? (
                                         sub.icon.startsWith('http') || sub.icon.startsWith('/') ? (
-                                          <img src={sub.icon} alt={sub.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300" />
+                                          <img src={sub.icon} alt={sub.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                                         ) : (
-                                          <CategoryIcon name={sub.icon} className="w-8 h-8 text-muted-foreground/70 group-hover:text-primary transition-colors duration-300" />
+                                          <CategoryIcon name={sub.icon} className="w-8 h-8 text-muted-foreground/70 group-hover:text-primary transition-colors duration-300 z-10" />
                                         )
                                       ) : (
-                                        <Package className="w-6 h-6 text-muted-foreground/40 group-hover:text-primary/60 transition-colors duration-300" />
+                                        <Package className="w-6 h-6 text-muted-foreground/40 group-hover:text-primary/60 transition-colors duration-300 z-10" />
                                       )}
                                     </div>
                                     <p className="text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors duration-300 line-clamp-2 px-1">{sub.name}</p>

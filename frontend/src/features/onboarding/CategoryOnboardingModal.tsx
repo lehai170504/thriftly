@@ -7,7 +7,7 @@ import { useUpdateProfile } from '@/features/users/hooks/useUsers';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CategoryIcon } from '@/components/ui/category-icon';
-import { CheckCircle2, Sparkles } from 'lucide-react';
+import { CheckCircle2, Compass } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function CategoryOnboardingModal() {
@@ -81,9 +81,11 @@ export function CategoryOnboardingModal() {
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto [&>button:last-child]:hidden glass border-border rounded-[24px]">
         <DialogHeader>
+          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
+            <Compass className="w-6 h-6 text-primary" />
+          </div>
           <DialogTitle className="text-2xl font-heading font-bold text-center flex items-center justify-center gap-2 text-foreground">
             Chào mừng bạn đến với Thriftly!
-            <Sparkles className="w-6 h-6 text-primary" />
           </DialogTitle>
           <DialogDescription className="text-center text-base text-muted-foreground">
             Hãy chọn những danh mục bạn quan tâm để chúng mình gợi ý sản phẩm phù hợp nhất nhé.

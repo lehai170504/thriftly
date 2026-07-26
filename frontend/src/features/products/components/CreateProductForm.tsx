@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectGroup, SelectLabel } from '@/components/ui/select';
-import { ShoppingBag, Gavel, Upload, X, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { ShoppingBag, Gavel, Upload, X, TrendingUp } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { useCategories, useCreateProduct } from '../hooks/useProducts';
 import { useGenerateDescription, useSuggestPrice } from '@/features/ai/api/aiApi';
@@ -214,35 +214,36 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                     };
 
                     return (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="h-12 focus:ring-primary">
-                        <span className="flex flex-1 text-left">
-                          {renderCategoryName(field.value)}
-                        </span>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories?.map((cat) => {
-                          if (cat.subCategories && cat.subCategories.length > 0) {
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="h-12 focus:ring-primary">
+                          <span className="flex flex-1 text-left">
+                            {renderCategoryName(field.value)}
+                          </span>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories?.map((cat) => {
+                            if (cat.subCategories && cat.subCategories.length > 0) {
+                              return (
+                                <SelectGroup key={cat.id}>
+                                  <SelectLabel className="font-bold text-foreground bg-muted/30">{cat.name}</SelectLabel>
+                                  {cat.subCategories.map((sub: any) => (
+                                    <SelectItem key={sub.id} value={sub.id} className="ml-4">
+                                      {sub.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              );
+                            }
                             return (
-                              <SelectGroup key={cat.id}>
-                                <SelectLabel className="font-bold text-foreground bg-muted/30">{cat.name}</SelectLabel>
-                                {cat.subCategories.map((sub: any) => (
-                                  <SelectItem key={sub.id} value={sub.id} className="ml-4">
-                                    {sub.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectGroup>
+                              <SelectItem key={cat.id} value={cat.id} className="font-bold">
+                                {cat.name}
+                              </SelectItem>
                             );
-                          }
-                          return (
-                            <SelectItem key={cat.id} value={cat.id} className="font-bold">
-                              {cat.name}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  )}}
+                          })}
+                        </SelectContent>
+                      </Select>
+                    )
+                  }}
                 />
                 {errors.categoryId && <p className="text-red-500 text-xs mt-1">{errors.categoryId.message}</p>}
               </div>
@@ -287,7 +288,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                   onClick={handleGenerateDescription}
                   disabled={generateDescMutation.isPending}
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <TrendingUp className="w-4 h-4" />
                   {generateDescMutation.isPending ? 'Đang viết...' : 'Viết bằng AI'}
                 </Button>
               </div>
@@ -343,11 +344,11 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                     </button>
                   </div>
                 ))}
-                
+
                 {imagePreviews.length < 5 && (
                   <label className="w-32 h-32 flex-shrink-0 border-2 border-dashed border-border hover:border-primary hover:bg-primary/5 rounded-[16px] flex flex-col items-center justify-center cursor-pointer transition-colors bg-background/50 group">
                     <Upload className="w-6 h-6 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
-                    <span className="text-xs text-muted-foreground font-medium group-hover:text-primary text-center px-2">Thêm ảnh<br/>({imagePreviews.length}/5)</span>
+                    <span className="text-xs text-muted-foreground font-medium group-hover:text-primary text-center px-2">Thêm ảnh<br />({imagePreviews.length}/5)</span>
                     <input
                       type="file"
                       multiple
@@ -357,7 +358,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                     />
                   </label>
                 )}
-                
+
                 <div className="text-sm text-muted-foreground flex flex-col justify-center gap-1.5 ml-2">
                   <p>• Hỗ trợ JPG, PNG, WEBP</p>
                   <p>• Kích thước tối đa 5MB/ảnh</p>
@@ -462,7 +463,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                   onClick={handleSuggestPrice}
                   disabled={suggestPriceMutation.isPending}
                 >
-                  <Sparkles className="w-4 h-4" />
+                  <TrendingUp className="w-4 h-4" />
                   {suggestPriceMutation.isPending ? 'Đang phân tích...' : 'AI Gợi ý giá'}
                 </Button>
               </div>
@@ -487,7 +488,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
               )}
               {suggestedPriceText && (
                 <div className="mt-3 p-4 bg-primary/10 border border-primary/20 rounded-xl text-sm text-foreground leading-relaxed glass">
-                  <span className="font-bold text-primary flex items-center gap-2 mb-2"><Sparkles className="w-4 h-4" /> AI Phân tích giá:</span>
+                  <span className="font-bold text-primary flex items-center gap-2 mb-2"><TrendingUp className="w-4 h-4" /> AI Phân tích giá:</span>
                   {suggestedPriceText}
                 </div>
               )}

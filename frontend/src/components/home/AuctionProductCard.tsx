@@ -41,7 +41,7 @@ export function AuctionProductCard({ product }: { product: any }) {
 
   return (
     <Link href={`/auctions/${product.id}`} className="block group h-full">
-      <Card className="overflow-hidden flex flex-col hover:shadow-xl hover:border-primary/30 hover:-translate-y-1.5 transition-all duration-500 rounded-[24px] bg-background h-full cursor-pointer relative group/inner border-border/50">
+      <Card className="overflow-hidden flex flex-col hover:shadow-xl hover:shadow-primary/20 hover:border-primary/50 hover:-translate-y-1.5 transition-all duration-500 rounded-[24px] bg-background h-full cursor-pointer relative group/inner border-border/50">
         <div className="relative aspect-[4/3] bg-muted overflow-hidden">
           <img
             src={imageUrl}
@@ -61,7 +61,7 @@ export function AuctionProductCard({ product }: { product: any }) {
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
           {product.isLive && (
-            <Badge className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 shadow-sm border-none gap-1.5 px-3 py-1.5 text-sm backdrop-blur-md rounded-full z-10 animate-pulse">
+            <Badge className="absolute top-4 right-4 bg-red-500 hover:bg-red-600 shadow-sm border-none gap-1.5 px-3 py-1.5 text-sm backdrop-blur-md rounded-full z-10 neon-glow">
               <span className="w-2 h-2 rounded-full bg-white animate-ping"></span> LIVE
             </Badge>
           )}

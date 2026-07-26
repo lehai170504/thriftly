@@ -204,7 +204,7 @@ export const ChatMainArea = ({
               <div key={idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1`}>
                 <div className={`max-w-[70%] rounded-2xl px-4 py-2.5 text-[15px] shadow-sm relative ${isMe
                   ? 'bg-primary text-primary-foreground rounded-br-md'
-                  : 'bg-white dark:bg-zinc-800 border border-border text-foreground rounded-bl-md'
+                  : 'bg-card border border-border text-foreground rounded-bl-md'
                   }`}>
                   {msg.imageUrl && (
                     <img src={msg.imageUrl} alt="Chat attachment" className="max-w-full rounded-xl mb-2 cursor-pointer hover:opacity-90 transition-opacity" />
@@ -212,7 +212,7 @@ export const ChatMainArea = ({
                   {msg.content}
 
                   {/* Message Tail */}
-                  <div className={`absolute bottom-0 w-4 h-4 ${isMe ? '-right-2 text-primary' : '-left-2 text-white dark:text-zinc-800'}`}>
+                  <div className={`absolute bottom-0 w-4 h-4 ${isMe ? '-right-2 text-primary' : '-left-2 text-card'}`}>
                     <svg viewBox="0 0 8 13" width="8" height="13" className="fill-current">
                       <path opacity=".51" d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z" />
                       <path fill="currentColor" d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z" />
@@ -241,13 +241,13 @@ export const ChatMainArea = ({
         {/* Typing Indicator */}
         {isTyping && (
           <div className="flex flex-col items-start mb-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white dark:bg-zinc-800 border border-border rounded-2xl rounded-bl-md px-4 py-3 shadow-sm relative">
+            <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3 shadow-sm relative">
               <div className="flex items-center gap-1.5 h-4">
                 <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '0ms' }}></span>
                 <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '150ms' }}></span>
                 <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '300ms' }}></span>
               </div>
-              <div className="absolute bottom-0 -left-2 w-4 h-4 text-white dark:text-zinc-800">
+              <div className="absolute bottom-0 -left-2 w-4 h-4 text-card">
                 <svg viewBox="0 0 8 13" width="8" height="13" className="fill-current">
                   <path opacity=".51" d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z" />
                   <path fill="currentColor" d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z" />
@@ -316,7 +316,7 @@ export const ChatMainArea = ({
                 value={message}
                 onChange={onInputChange || ((e) => setMessage(e.target.value))}
                 placeholder="Nhập tin nhắn..."
-                className="rounded-full bg-white dark:bg-zinc-800 border-border focus-visible:ring-2 focus-visible:ring-primary/20 h-11 px-4 text-[15px] text-foreground shadow-sm"
+                className="rounded-full bg-card border-border focus-visible:ring-2 focus-visible:ring-primary/20 h-11 px-4 text-[15px] text-foreground shadow-sm"
                 disabled={isBlockLoading}
               />
             </div>

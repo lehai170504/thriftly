@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectGroup, SelectLabel } from '@/components/ui/select';
-import { ShoppingBag, Gavel, Upload, X, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { ShoppingBag, Gavel, Upload, X, TrendingUp } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { useCategories, useUpdateProduct } from '../hooks/useProducts';
 import { useGenerateDescription, useSuggestPrice } from '@/features/ai/api/aiApi';
@@ -257,7 +257,7 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
               onClick={handleGenerateDescription}
               disabled={generateDescMutation.isPending}
             >
-              <Sparkles className="w-4 h-4" />
+              <TrendingUp className="w-4 h-4" />
               {generateDescMutation.isPending ? 'Đang viết...' : 'Viết bằng AI'}
             </Button>
           </div>
@@ -424,7 +424,7 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
               onClick={handleSuggestPrice}
               disabled={suggestPriceMutation.isPending}
             >
-              <Sparkles className="w-4 h-4" />
+              <TrendingUp className="w-4 h-4" />
               {suggestPriceMutation.isPending ? 'Đang phân tích...' : 'AI Gợi ý giá'}
             </Button>
           </div>
@@ -449,7 +449,7 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
           )}
           {suggestedPriceText && (
             <div className="mt-3 p-4 bg-primary/10 border border-primary/20 rounded-xl text-sm text-foreground leading-relaxed glass">
-              <span className="font-bold text-primary flex items-center gap-2 mb-1"><Sparkles className="w-4 h-4" /> Gợi ý từ AI:</span>
+              <span className="font-bold text-primary flex items-center gap-2 mb-1"><TrendingUp className="w-4 h-4" /> Gợi ý từ AI:</span>
               {suggestedPriceText}
             </div>
           )}

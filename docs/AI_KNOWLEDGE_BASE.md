@@ -168,9 +168,15 @@ Hệ thống chat 1-1 theo thời gian thực hoạt động hoàn toàn qua STO
     - **Tính năng Chặn Người Dùng (Block User):** Backend xây dựng luồng chặn (Entity `BlockedUser`, check blocked list để drop tin nhắn gửi đi). Frontend tích hợp Component `ConfirmDialog` và Dropdown Header Chat để Chặn/Bỏ chặn, tự động ẩn khung gõ khi bị chặn.
     - **Typing Indicator (WebSockets):** Bắt sự kiện gõ phím (`handleTyping`), debounce và gửi STOMP message qua kênh `/topic/typing`, xử lý UI dấu 3 chấm nhấp nháy 3D bằng Framer Motion mượt mà. Đã fix lỗi Infinite Re-render vòng lặp vô tận bằng `useCallback` do hàm `handleTyping` tạo mới liên tục.
     - **Hạ tầng Kênh Người Bán (Seller Dashboard):** Xây dựng Layout chung (`seller/layout.tsx`) và `SellerSidebar.tsx` gom tất cả các tính năng của người bán (Thống kê, Đơn bán, Sản phẩm, Mã giảm giá) vào một Dashboard thống nhất chuyên nghiệp thay vì để dropdown lộn xộn trên Header.
+  - **[PHIÊN 2026-07-26 (UI/UX Revamp & Animation)]**
+    - Đại tu Typography: Chuyển toàn bộ font chữ sang **Be Vietnam Pro** để tối ưu hóa hiển thị tiếng Việt, khắc phục triệt để tình trạng vỡ dấu, lệch nét của các font cũ.
+    - Cấu trúc lại Hero Banner (`LiveAuctionHero.tsx`) theo phong cách Luxury: Hình nền full, lớp phủ tối màu (`bg-black/60`), chữ trắng viền nổi (`drop-shadow`) và bố cục căn giữa (Centered Layout).
+    - Tích hợp **Framer Motion** tạo các hiệu ứng "Chuẩn đẹp thực tế": Scroll Reveal (Fade-in khi cuộn), Staggered animations (Hiệu ứng Domino), và Ken Burns (Zoom out ảnh nền).
+    - Dọn dẹp thẩm mỹ "Techy/AI": Loại bỏ toàn bộ icon lấp lánh (`Sparkles`) mang hơi hướng công nghệ, thay bằng hệ thống icon chuyên nghiệp, ngữ cảnh hơn (`Flame`, `ShieldCheck`, `TrendingUp`, `Compass`, `Zap`).
+    - Nâng cấp **Glassmorphism**: Áp dụng hiệu ứng kính mờ xuyên thấu cho toàn bộ Navbar, Dropdown Menu, Command Palette và các Badge, tạo cảm giác sang trọng đồng nhất trên toàn hệ thống.
 
 ### 🏆 Đã hoàn thành 100% mục tiêu Đồ Án! 
-Hệ thống hiện tại đã sở hữu đủ các chức năng phức tạp của một sàn TMĐT đấu giá chuyên nghiệp, đồng thời được gia cố bảo mật kỹ càng.
+Hệ thống hiện tại đã sở hữu đủ các chức năng phức tạp của một sàn TMĐT đấu giá chuyên nghiệp, thẩm mỹ cao (Luxury Vibe) đồng thời được gia cố bảo mật kỹ càng.
 
 ---
 

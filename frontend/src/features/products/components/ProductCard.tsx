@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
-import { ArrowRight, Gavel, Sparkles, Heart, Clock } from 'lucide-react';
+import { Gavel, Flame, Heart, Clock } from 'lucide-react';
 import { useFavorites, useToggleFavorite } from '@/features/products/hooks/useProducts';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -71,7 +71,7 @@ export function ProductCard({ product }: { product: any }) {
 
   return (
     <Link href={`/products/${product.id}`} className="block group h-full">
-      <Card className="overflow-hidden flex flex-col hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 transition-all duration-300 rounded-xl bg-card h-full cursor-pointer relative group/inner border-border/60">
+      <Card className="overflow-hidden flex flex-col hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 rounded-xl bg-card h-full cursor-pointer relative group/inner border-border/60">
         <div className="relative aspect-square bg-muted overflow-hidden">
           <img
             src={imageUrl}
@@ -96,7 +96,7 @@ export function ProductCard({ product }: { product: any }) {
             <div className="flex flex-col gap-1.5">
               {isBoosted && (
                 <Badge className="bg-background/95 text-amber-600 hover:bg-background shadow-sm border-none gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md backdrop-blur-md">
-                  <Sparkles className="w-3 h-3" /> Nổi bật
+                  <Flame className="w-3 h-3" /> Nổi bật
                 </Badge>
               )}
             </div>
@@ -117,7 +117,7 @@ export function ProductCard({ product }: { product: any }) {
                 </Badge>
               )}
               {product.isLive && (
-                <Badge variant="destructive" className="border-none gap-1 px-2 py-0.5 text-[9px] font-black tracking-widest shadow-sm rounded-md">
+                <Badge variant="destructive" className="border-none gap-1 px-2 py-0.5 text-[9px] font-black tracking-widest shadow-sm rounded-md neon-glow">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive-foreground opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-destructive-foreground"></span>
