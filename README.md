@@ -1,73 +1,73 @@
-# Thriftly 🚀
+# Thriftly
 
-Thriftly là nền tảng Thương mại điện tử Thời trang Vintage & Đồ cũ (Second-hand) cao cấp kết hợp **Đấu giá thời gian thực (Real-time Auction)**, **Thanh toán đảm bảo (Escrow Payment)**, và **Mua sắm Trực tiếp (Live Commerce)**. Dự án giải quyết triệt để vấn nạn lừa đảo, "bom hàng", và ép giá trong thị trường mua bán đồ cũ truyền thống tại Việt Nam, mang lại một trải nghiệm Luxury Vibe đích thực.
+Thriftly is a premium vintage and second-hand fashion E-Commerce platform that integrates **Real-time Bidding (Auction)**, **Escrow Payment**, and **Live Commerce**. The project completely resolves the issues of scams, order cancellations, and price squeezing in the traditional second-hand market in Vietnam, delivering an authentic luxury shopping experience.
 
-## 🌟 Tính năng nổi bật
+## Core Features
 
-1. **Đấu Giá Thời Gian Thực (WebSocket & Agora):**
-   - Phòng đấu giá live đếm ngược, cập nhật giá thầu ngay lập tức qua WebSocket không cần tải lại trang. Tự động chốt đơn khi hết giờ.
-   - Tích hợp **Agora RTC** cho luồng Video Live Streaming siêu mượt với trải nghiệm Split-screen hiện đại, có cả Floating Widget xem dạng Picture-in-Picture.
+1. **Real-time Auction (WebSocket & Agora):**
+   - Live auction rooms with countdowns and instant bid updates via WebSocket without page reloads. Automated order closing when the timer ends.
+   - Integrated **Agora RTC** for ultra-smooth Live Video Streaming featuring a modern Split-screen layout and a Picture-in-Picture Floating Widget.
 
-2. **Thanh Toán Đảm Bảo (Escrow) & Fintech:**
-   - Tích hợp cổng thanh toán thực tế **PayOS**.
-   - Cơ chế Escrow: Tiền người mua nạp vào Ví sẽ được hệ thống "Tạm giữ (Hold)" khi thanh toán đơn hàng, và chỉ "Giải phóng (Release)" cho người bán khi giao hàng thành công.
-   - Tích hợp **Bucket4j Rate Limiting** và hệ thống chống **CSRF/IDOR** cấp độ ngân hàng.
+2. **Escrow Payment & Fintech:**
+   - Integrated with the **PayOS** payment gateway.
+   - Escrow mechanism: Funds deposited by the buyer are "Held" by the system upon payment and are only "Released" to the seller after successful delivery.
+   - Integrated **Bucket4j Rate Limiting** and bank-grade **CSRF/IDOR** protection systems.
 
-3. **Chat 1-1 Real-time (Messenger Style):**
-   - Hệ thống chat qua **STOMP WebSocket**. Hỗ trợ Read Receipts (Đã xem/Đã gửi), Typing Indicator (Đang gõ...), xoá tin nhắn một chiều (Soft Delete), và Gửi ảnh qua Cloudinary.
+3. **1-to-1 Real-time Chat (Messenger Style):**
+   - Built with **STOMP WebSocket**. Features include Read Receipts (Sent/Seen), Typing Indicators, One-way Message Deletion (Soft Delete), and Image Uploads via Cloudinary.
 
-4. **Trải nghiệm Giao diện Cao cấp (Luxury Vibe):**
-   - **Framer Motion Animations:** Hiệu ứng Scroll Reveal, Staggered Domino, Ken Burns mượt mà.
-   - **Glassmorphism:** Hiệu ứng kính mờ xuyên thấu tinh tế.
-   - **Typography:** Tối ưu hóa 100% tiếng Việt với font chữ `Be Vietnam Pro`.
-   - **Thiết kế:** Dark Mode Pro Max, Bento Box (Apple-esque), hoàn toàn Responsive.
+4. **Premium User Experience (Luxury Vibe):**
+   - **Framer Motion Animations:** Smooth Scroll Reveal, Staggered Domino effects, and Ken Burns transitions.
+   - **Glassmorphism:** Sophisticated frosted glass effects.
+   - **Typography:** Fully optimized for Vietnamese with the `Be Vietnam Pro` font.
+   - **Design:** Dark Mode Pro Max, Bento Box layout (Apple-esque), and fully responsive on all devices.
 
-5. **AI Generative & Trí tuệ Nhân tạo:**
-   - Tích hợp **Meta LLaMA 3.1** (thông qua Groq API) siêu tốc để Phân tích & Gợi ý giá thầu, Viết mô tả sản phẩm tự động chuẩn SEO.
+5. **Generative AI Integration:**
+   - Powered by **Meta LLaMA 3.1** (via Groq API) for ultra-fast price analysis, automated bidding suggestions, and SEO-optimized product descriptions.
 
-6. **Logistics & Admin Panel Toàn Diện:**
-   - Tích hợp **Giao Hàng Nhanh (GHN) API & Webhooks** tự động cập nhật trạng thái đơn hàng.
-   - Bảng điều khiển Admin theo dõi dòng tiền, duyệt rút tiền, xử lý khiếu nại với hệ thống Audit Logs toàn diện.
+6. **Logistics & Comprehensive Admin Panel:**
+   - Integrated with **Giao Hang Nhanh (GHN) API & Webhooks** for automated order status tracking.
+   - Admin Dashboard to monitor cash flow, approve withdrawals, and resolve disputes backed by a comprehensive Audit Log system.
 
-## 🛠 Tech Stack
+## Tech Stack
 
-### 🖥 Frontend (Next.js)
+### Frontend (Next.js)
 - **Framework:** Next.js 15 (App Router), React 19, TypeScript
 - **Styling:** Tailwind CSS v4, shadcn/ui, Lucide Icons
-- **State/API:** React Query, Zustand, Axios (với JWT Interceptors)
+- **State/API:** React Query, Zustand, Axios (with JWT Interceptors)
 - **Real-time:** SockJS & StompJS, Agora RTC React SDK, Framer Motion
 
-### ⚙️ Backend (Spring Boot)
+### Backend (Spring Boot)
 - **Framework:** Spring Boot 3.3.x, Java 17, Clean Architecture
 - **Database:** PostgreSQL (Spring Data JPA, Hibernate)
 - **Security:** Spring Security 6, JWT (Refresh/Access Tokens), Bucket4j, CSRF Cookie
 - **Real-time & AI:** Spring WebSocket + STOMP, Groq API (LLaMA 3)
-- **Concurrency:** Pessimistic Locking chống lỗi mua trùng đơn hàng (Double-buy).
+- **Concurrency:** Pessimistic Locking to prevent double-buy conditions.
 
-## 🚀 Hướng dẫn chạy dự án
+## Local Development Guide
 
-### 1. Khởi động Backend (Spring Boot)
-Yêu cầu: Java 17+, PostgreSQL đang chạy ở port 5432.
-Tạo database `thrift_auction` trên PostgreSQL.
+### 1. Start the Backend (Spring Boot)
+Prerequisites: Java 17+, PostgreSQL running on port 5432.
+Create a database named `thrift_auction` in PostgreSQL.
 ```bash
 cd backend
 ./mvnw clean spring-boot:run
 ```
-Backend sẽ chạy ở `http://localhost:8081`.
+The backend will be available at `http://localhost:8081`.
 
-### 2. Khởi động Frontend (Next.js)
-Yêu cầu: Node.js 18+
+### 2. Start the Frontend (Next.js)
+Prerequisites: Node.js 18+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Frontend sẽ chạy ở `http://localhost:3000`.
+The frontend will be available at `http://localhost:3000`.
 
-## 📁 Cấu trúc thư mục chính
-- `/backend`: Mã nguồn Spring Boot theo mô hình Domain-driven/Clean Architecture (API, Entities, Services, WebSocket Config).
-- `/frontend`: Mã nguồn Next.js UI (App Router, Components, Hooks, API Clients, Contexts).
-- `/docs`: Tài liệu kỹ thuật, AI Context để duy trì logic dự án (`AI_KNOWLEDGE_BASE.md`).
+## Project Structure
+- `/backend`: Spring Boot API following Domain-driven/Clean Architecture (Controllers, Entities, Services, WebSocket Config).
+- `/frontend`: Next.js UI source code (App Router, Components, Hooks, API Clients, Contexts).
+- `/docs`: Technical documentation and AI Context (`AI_KNOWLEDGE_BASE.md`) to maintain project logic.
 
-## 🛡️ License
-Phát triển bởi cộng đồng Thriftly (2026). Đồ án tốt nghiệp / Dự án thực tế chất lượng cao.
+## License
+Developed by the Thriftly community (2026). A high-quality graduation / practical project.
