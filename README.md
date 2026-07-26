@@ -1,6 +1,6 @@
-# ThriftSwap 🚀
+# Thriftly 🚀
 
-ThriftSwap là nền tảng Thương mại điện tử Thời trang Vintage & Đồ cũ (Second-hand) cao cấp kết hợp **Đấu giá thời gian thực (Real-time Auction)**, **Thanh toán đảm bảo (Escrow Payment)**, và **Mua sắm Trực tiếp (Live Commerce)**. Dự án giải quyết triệt để vấn nạn lừa đảo, "bom hàng", và ép giá trong thị trường mua bán đồ cũ truyền thống tại Việt Nam, mang lại một trải nghiệm Luxury Vibe đích thực.
+Thriftly là nền tảng Thương mại điện tử Thời trang Vintage & Đồ cũ (Second-hand) cao cấp kết hợp **Đấu giá thời gian thực (Real-time Auction)**, **Thanh toán đảm bảo (Escrow Payment)**, và **Mua sắm Trực tiếp (Live Commerce)**. Dự án giải quyết triệt để vấn nạn lừa đảo, "bom hàng", và ép giá trong thị trường mua bán đồ cũ truyền thống tại Việt Nam, mang lại một trải nghiệm Luxury Vibe đích thực.
 
 ## 🌟 Tính năng nổi bật
 
@@ -70,4 +70,4 @@ Frontend sẽ chạy ở `http://localhost:3000`.
 - `/docs`: Tài liệu kỹ thuật, AI Context để duy trì logic dự án (`AI_KNOWLEDGE_BASE.md`).
 
 ## 🛡️ License
-Phát triển bởi cộng đồng ThriftSwap (2026). Đồ án tốt nghiệp / Dự án thực tế chất lượng cao.
+Phát triển bởi cộng đồng Thriftly (2026). Đồ án tốt nghiệp / Dự án thực tế chất lượng cao.

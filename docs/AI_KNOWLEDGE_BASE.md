@@ -1,6 +1,6 @@
-# ThriftSwap - AI Knowledge Base & Context
+# Thriftly - AI Knowledge Base & Context
 
-Tài liệu này dùng để lưu trữ toàn bộ ngữ cảnh (Context), quy chuẩn giao diện (UI/UX Guidelines), và luồng logic (Business Logic Flow) của dự án ThriftSwap. Khi AI bắt đầu một phiên làm việc mới, hãy đọc file này để nắm bắt hiện trạng dự án.
+Tài liệu này dùng để lưu trữ toàn bộ ngữ cảnh (Context), quy chuẩn giao diện (UI/UX Guidelines), và luồng logic (Business Logic Flow) của dự án Thriftly. Khi AI bắt đầu một phiên làm việc mới, hãy đọc file này để nắm bắt hiện trạng dự án.
 
 ## 1. Kiến Trúc Hệ Thống (Architecture)
 - **Backend:** Spring Boot (Cổng 8081). Phục vụ RESTful APIs tại `/api/v1/*` và WebSocket tại `/ws`.
