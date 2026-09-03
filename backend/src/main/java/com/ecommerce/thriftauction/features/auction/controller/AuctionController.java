@@ -5,20 +5,23 @@ import com.ecommerce.thriftauction.features.common.dto.BidResponse;
 import com.ecommerce.thriftauction.features.auction.service.AuctionService;
 import com.ecommerce.thriftauction.features.order.service.OrderService;
 import com.ecommerce.thriftauction.core.security.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Auction")
+@Tag(name = "Auction", description = "Quản lý đấu giá: Đặt giá thầu, lịch sử đấu giá, đặt cọc và kết thúc phiên")
 public class AuctionController {
 
     private final AuctionService auctionService;
@@ -28,7 +31,7 @@ public class AuctionController {
 
     @MessageMapping("/auction/bid")
     public void placeBid(@Payload BidRequest request,
-            @org.springframework.messaging.handler.annotation.Header(value = "Authorization", defaultValue = "") String authHeader,
+            @Header(value = "Authorization", defaultValue = "") String authHeader,
             SimpMessageHeaderAccessor headerAccessor) {
         System.out.println(
                 "Received bid request for: " + request.getAuctionSessionId() + " amount: " + request.getBidAmount());
@@ -38,7 +41,7 @@ public class AuctionController {
             }
             if (authHeader == null || authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
                 System.out.println("Unauthorized STOMP request. Auth header: " + authHeader);
-                return; // Unauthorized
+                return;
             }
             String token = authHeader.substring(7);
             String username = jwtService.extractUsername(token);
@@ -55,7 +58,6 @@ public class AuctionController {
             e.printStackTrace();
             System.err.println("Bid Error: " + e.getMessage());
 
-            // Send error message back to the specific user's queue
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 try {
                     String username = jwtService.extractUsername(authHeader.substring(7));
@@ -69,6 +71,7 @@ public class AuctionController {
         }
     }
 
+    @Operation(summary = "Lấy lịch sử đấu giá", description = "Xem danh sách các lượt đặt giá (bids) của một sản phẩm đấu giá theo ID.")
     @GetMapping("/api/v1/auctions/{productId}/bids")
     public ResponseEntity<List<BidResponse>> getAuctionHistory(@PathVariable String productId) {
         try {
@@ -79,7 +82,9 @@ public class AuctionController {
         }
     }
 
-    @org.springframework.web.bind.annotation.PostMapping("/api/v1/auctions/{productId}/end")
+    @Operation(summary = "Kết thúc phiên đấu giá", description = "Chốt phiên đấu giá sản phẩm, xác định người thắng cuộc và tự động tạo đơn hàng tương ứng.")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PostMapping("/api/v1/auctions/{productId}/end")
     public ResponseEntity<?> endAuction(@PathVariable String productId) {
         try {
             return ResponseEntity.ok(orderService.endAuctionAndCreateOrder(productId));
@@ -88,9 +93,11 @@ public class AuctionController {
         }
     }
 
-    @org.springframework.web.bind.annotation.GetMapping("/api/v1/auctions/{productId}/deposit-status")
+    @Operation(summary = "Kiểm tra trạng thái đặt cọc", description = "Kiểm tra xem người dùng hiện tại đã đặt cọc để tham gia đấu giá sản phẩm này hay chưa.")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @GetMapping("/api/v1/auctions/{productId}/deposit-status")
     public ResponseEntity<Boolean> getDepositStatus(@PathVariable String productId,
-            @org.springframework.web.bind.annotation.RequestHeader(value = "Authorization", defaultValue = "") String authHeader) {
+            @RequestHeader(value = "Authorization", defaultValue = "") String authHeader) {
         try {
             if (authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
@@ -104,16 +111,18 @@ public class AuctionController {
         }
     }
 
-    @org.springframework.web.bind.annotation.PostMapping("/api/v1/auctions/{productId}/deposit")
+    @Operation(summary = "Đặt cọc tham gia đấu giá", description = "Trừ tiền cọc từ ví của người dùng để đủ điều kiện tham gia đấu giá sản phẩm.")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PostMapping("/api/v1/auctions/{productId}/deposit")
     public ResponseEntity<?> placeDeposit(@PathVariable String productId,
-            @org.springframework.web.bind.annotation.RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.substring(7);
             String username = jwtService.extractUsername(token);
             auctionService.placeDeposit(productId, username);
-            return ResponseEntity.ok(java.util.Map.of("message", "Đặt cọc thành công"));
+            return ResponseEntity.ok(Map.of("message", "Đặt cọc thành công"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
 }

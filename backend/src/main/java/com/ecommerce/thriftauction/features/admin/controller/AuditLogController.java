@@ -22,7 +22,7 @@ public class AuditLogController {
 
     private final AuditLogService auditLogService;
 
-    @Operation(summary = "Lấy toàn bộ audit log")
+    @Operation(summary = "Lấy toàn bộ audit log", description = "Admin xem danh sách nhật ký hành động toàn hệ thống có phân trang và bộ lọc.")
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<AuditLogResponse>> getLogs(

@@ -26,7 +26,7 @@ public class AdminProductController {
     private final AdminProductService adminProductService;
     private final AuditLogService auditLogService;
 
-    @Operation(summary = "Lấy toàn bộ sản phẩm")
+    @Operation(summary = "Lấy toàn bộ sản phẩm", description = "Admin lấy danh sách toàn bộ sản phẩm trên hệ thống có phân trang và tìm kiếm theo từ khóa.")
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> getAllProducts(
@@ -36,7 +36,7 @@ public class AdminProductController {
         return ResponseEntity.ok(adminProductService.getAllProducts(search, PageRequest.of(page, size)));
     }
 
-    @Operation(summary = "Xóa sản phẩm vi phạm")
+    @Operation(summary = "Xóa sản phẩm vi phạm", description = "Admin xóa bỏ sản phẩm vi phạm chính sách hoặc có báo cáo sai phạm.")
     @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(

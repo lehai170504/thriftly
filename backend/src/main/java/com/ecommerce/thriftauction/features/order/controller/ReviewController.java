@@ -2,6 +2,9 @@ package com.ecommerce.thriftauction.features.order.controller;
 
 import com.ecommerce.thriftauction.features.order.dto.ReviewRequest;
 import com.ecommerce.thriftauction.features.order.service.ReviewService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -10,11 +13,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/reviews")
 @RequiredArgsConstructor
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Review")
+@Tag(name = "Reviews", description = "Quản lý đánh giá và nhận xét chất lượng đơn hàng/người bán")
 public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @Operation(summary = "Đánh giá đơn hàng", description = "Người mua gửi nhận xét và chấm điểm sao cho đơn hàng sau khi hoàn tất giao dịch.")
+    @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/order/{orderId}")
     public ResponseEntity<?> createReview(
             @PathVariable String orderId,
@@ -27,6 +32,7 @@ public class ReviewController {
         }
     }
 
+    @Operation(summary = "Lấy danh sách đánh giá của người dùng", description = "Xem tất cả các đánh giá mà một người dùng/người bán đã nhận được.")
     @GetMapping("/user/{username}")
     public ResponseEntity<?> getReviewsByUser(@PathVariable String username, Authentication authentication) {
         try {

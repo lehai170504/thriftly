@@ -1,8 +1,11 @@
 package com.ecommerce.thriftauction.features.order.controller;
 
+import com.ecommerce.thriftauction.features.notification.entity.NotificationType;
 import com.ecommerce.thriftauction.features.order.entity.OrderStatus;
 import com.ecommerce.thriftauction.features.order.repository.OrderRepository;
 import com.ecommerce.thriftauction.features.notification.service.NotificationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +15,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/webhooks")
 @RequiredArgsConstructor
+@Tag(name = "Webhooks", description = "Tiếp nhận webhook từ các dịch vụ bên ngoài (Giao Hàng Nhanh, PayOS...)")
 public class WebhookController {
 
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
 
+    @Operation(summary = "Webhook cập nhật trạng thái GHN", description = "Tiếp nhận callback từ đơn vị vận chuyển Giao Hàng Nhanh (GHN) để cập nhật trạng thái đơn hàng và gửi thông báo tới người mua.")
     @PostMapping("/ghn")
     public ResponseEntity<String> handleGhnWebhook(@RequestBody Map<String, Object> payload) {
         try {
@@ -29,11 +34,9 @@ public class WebhookController {
                 return ResponseEntity.badRequest().body("Missing OrderCode or Status");
             }
 
-            // Find order by tracking code
             orderRepository.findByTrackingCode(orderCode).ifPresent(order -> {
                 OrderStatus oldStatus = order.getStatus();
 
-                // Map GHN status to our OrderStatus
                 switch (status) {
                     case "ready_to_pick":
                     case "picking":
@@ -52,7 +55,6 @@ public class WebhookController {
                 if (oldStatus != order.getStatus()) {
                     orderRepository.save(order);
 
-                    // Notify buyer
                     String message = "Đơn hàng của bạn đang được giao.";
                     if (order.getStatus() == OrderStatus.DELIVERED) {
                         message = "Đơn hàng của bạn đã được giao thành công!";
@@ -64,7 +66,7 @@ public class WebhookController {
                             order.getBuyer(),
                             "Cập nhật trạng thái vận chuyển",
                             message + " Mã vận đơn: " + orderCode,
-                            com.ecommerce.thriftauction.features.notification.entity.NotificationType.SYSTEM,
+                            NotificationType.SYSTEM,
                             order.getId());
                 }
             });
