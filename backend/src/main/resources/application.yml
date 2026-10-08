@@ -1,77 +1,33 @@
 spring:
   application:
     name: ThriftAuction
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   jackson:
     serialization:
       write-dates-as-timestamps: false
     time-zone: UTC
   datasource:
-    url: jdbc:postgresql://localhost:5432/thrift_auction
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${SPRING_MAIL_USERNAME:your-email@gmail.com}
-    password: ${SPRING_MAIL_PASSWORD:your-app-password}
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
+
 server:
-  port: ${PORT:8081}
-
-app:
-  admin:
-    email: ${ADMIN_EMAIL:admin@thrift.com}
-    password: ${ADMIN_PASSWORD:admin123}
-    allowed-ips: ${ADMIN_ALLOWED_IPS:127.0.0.1,0:0:0:0:0:0:0:1}
-  staff:
-    email: ${STAFF_EMAIL:staff@thriftly.com}
-    password: ${STAFF_PASSWORD:staff123}
-
-google:
-  client:
-    id: ${GOOGLE_CLIENT_ID:default-google-client-id}
-
-application:
-  security:
-    jwt:
-      secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-      expiration: 900000 # 15 mins
+  forward-headers-strategy: framework
 
 payos:
-  client-id: ${PAYOS_CLIENT_ID:default-client-id}
-  api-key: ${PAYOS_API_KEY:default-api-key}
-  checksum-key: ${PAYOS_CHECKSUM_KEY:default-checksum-key}
-  return-url: ${FRONTEND_URL:http://localhost:3000}/payment/payos-return
-  cancel-url: ${FRONTEND_URL:http://localhost:3000}/payment/payos-return?cancel=true
+  return-url: ${FRONTEND_URL}/payment/payos-return
+  cancel-url: ${FRONTEND_URL}/payment/payos-return?cancel=true
 
-cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME:default-cloud-name}
-  api-key: ${CLOUDINARY_API_KEY:default-api-key}
-  api-secret: ${CLOUDINARY_API_SECRET:default-api-secret}
-
-ai:
-  openai:
-    api-key: ${AI_API_KEY:default-api-key}
-    url: ${AI_API_URL:https://api.groq.com/openai/v1/chat/completions}
-    model: ${AI_MODEL_NAME:llama3-8b-8192}
-
-ghn:
-  token: ${GHN_TOKEN:fake-token}
-  shop-id: ${GHN_SHOP_ID:12345}
-  api:
-    url: ${GHN_API_URL:https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized

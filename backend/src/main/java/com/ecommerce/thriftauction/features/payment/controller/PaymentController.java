@@ -1,6 +1,6 @@
 package com.ecommerce.thriftauction.features.payment.controller;
 
-import com.ecommerce.thriftauction.core.config.PayOSConfig;
+import com.ecommerce.thriftauction.core.config.properties.PayosProperties;
 import com.ecommerce.thriftauction.features.payment.dto.DepositRequest;
 import com.ecommerce.thriftauction.features.payment.service.WalletService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 public class PaymentController {
 
     private final PayOS payOS;
-    private final PayOSConfig payOSConfig;
+    private final PayosProperties payosProperties;
     private final WalletService walletService;
 
     @Operation(summary = "Tạo URL Thanh toán PayOS", description = "Tạo đường link PayOS để người dùng tiến hành nạp tiền.")
@@ -59,8 +59,8 @@ public class PaymentController {
                     .orderCode(orderCode)
                     .amount(request.getAmount().longValue())
                     .description(payosDescription)
-                    .returnUrl(payOSConfig.getReturnUrl() + "?orderCode=" + orderCode)
-                    .cancelUrl(payOSConfig.getCancelUrl())
+                    .returnUrl(payosProperties.getReturnUrl() + "?orderCode=" + orderCode)
+                    .cancelUrl(payosProperties.getCancelUrl())
                     .items(itemList)
                     .build();
 

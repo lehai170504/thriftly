@@ -24,10 +24,11 @@ import com.ecommerce.thriftauction.features.product.entity.ProductStatus;
 import com.ecommerce.thriftauction.features.product.repository.CategoryRepository;
 import com.ecommerce.thriftauction.features.product.repository.ProductRepository;
 import java.util.Arrays;
-import java.util.List;
+import org.springframework.context.annotation.Profile;
 
 @Component
 @RequiredArgsConstructor
+@Profile("!prod")
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;

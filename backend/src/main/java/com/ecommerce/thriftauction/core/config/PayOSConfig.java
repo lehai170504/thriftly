@@ -1,31 +1,20 @@
 package com.ecommerce.thriftauction.core.config;
 
-import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import vn.payos.PayOS;
 
-@Getter
+import com.ecommerce.thriftauction.core.config.properties.PayosProperties;
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 public class PayOSConfig {
-    @Value("${payos.client-id}")
-    private String clientId;
 
-    @Value("${payos.api-key}")
-    private String apiKey;
-
-    @Value("${payos.checksum-key}")
-    private String checksumKey;
-
-    @Value("${payos.return-url}")
-    private String returnUrl;
-
-    @Value("${payos.cancel-url}")
-    private String cancelUrl;
+    private final PayosProperties payosProperties;
 
     @Bean
     public PayOS payOS() {
-        return new PayOS(clientId, apiKey, checksumKey);
+        return new PayOS(payosProperties.getClientId(), payosProperties.getApiKey(), payosProperties.getChecksumKey());
     }
 }

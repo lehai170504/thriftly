@@ -1,0 +1,64 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/thrift_auction_test
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+
+server:
+  port: 0
+
+app:
+  admin:
+    email: admin@test.com
+    password: test
+    allowed-ips: 127.0.0.1
+  staff:
+    email: staff@test.com
+    password: test
+
+google:
+  client:
+    id: test-client
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 900000
+
+payos:
+  client-id: test
+  api-key: test
+  checksum-key: test
+
+cloudinary:
+  cloud-name: test
+  api-key: test
+  api-secret: test
+
+ai:
+  openai:
+    api-key: test
+    url: http://localhost:8080
+    model: test
+
+ghn:
+  token: test
+  shop-id: 123
+  api:
+    url: http://localhost:8080
+
+FRONTEND_URL: http://localhost:3000

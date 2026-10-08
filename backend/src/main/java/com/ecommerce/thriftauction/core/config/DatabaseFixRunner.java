@@ -4,9 +4,11 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.core.annotation.Order;
+import org.springframework.context.annotation.Profile;
 
 @Component
 @Order(1) // Run early
+@Profile("!prod")
 public class DatabaseFixRunner implements CommandLineRunner {
     private final JdbcTemplate jdbcTemplate;
 

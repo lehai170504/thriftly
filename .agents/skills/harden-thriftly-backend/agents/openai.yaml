@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harden Thriftly Backend"
+  short_description: "Production hardening workflow for Thriftly"
+  default_prompt: "Use $harden-thriftly-backend to execute one production-hardening phase with tests and verification."
