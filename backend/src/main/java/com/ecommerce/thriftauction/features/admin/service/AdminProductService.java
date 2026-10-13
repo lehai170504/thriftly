@@ -2,22 +2,24 @@ package com.ecommerce.thriftauction.features.admin.service;
 
 import com.ecommerce.thriftauction.features.product.dto.ProductResponse;
 import com.ecommerce.thriftauction.features.product.entity.Product;
+import com.ecommerce.thriftauction.features.product.entity.ProductStatus;
+import com.ecommerce.thriftauction.features.product.entity.SellType;
 import com.ecommerce.thriftauction.features.product.repository.ProductRepository;
 import com.ecommerce.thriftauction.features.auction.repository.AuctionSessionRepository;
 import com.ecommerce.thriftauction.features.auction.repository.AuctionDepositRepository;
 import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
-import com.ecommerce.thriftauction.features.payment.repository.TransactionRepository;
 import com.ecommerce.thriftauction.features.auction.entity.AuctionSession;
 import com.ecommerce.thriftauction.features.auction.entity.AuctionStatus;
 import com.ecommerce.thriftauction.features.auction.entity.AuctionDeposit;
-import com.ecommerce.thriftauction.features.payment.entity.Transaction;
 import com.ecommerce.thriftauction.features.payment.entity.TransactionType;
-import com.ecommerce.thriftauction.features.payment.entity.TransactionStatus;
+import com.ecommerce.thriftauction.features.payment.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class AdminProductService {
     private final AuctionSessionRepository auctionSessionRepository;
     private final AuctionDepositRepository auctionDepositRepository;
     private final WalletRepository walletRepository;
-    private final TransactionRepository transactionRepository;
+    private final WalletService walletService;
 
     @Transactional(readOnly = true)
     public Page<ProductResponse> getAllProducts(String search, Pageable pageable) {
@@ -61,7 +63,7 @@ public class AdminProductService {
     public void deleteProduct(String id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setStatus(com.ecommerce.thriftauction.features.product.entity.ProductStatus.HIDDEN);
+        product.setStatus(ProductStatus.HIDDEN);
         productRepository.save(product);
     }
 
@@ -70,7 +72,7 @@ public class AdminProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (product.getSellType() == com.ecommerce.thriftauction.features.product.entity.SellType.AUCTION) {
+        if (product.getSellType() == SellType.AUCTION) {
             AuctionSession session = auctionSessionRepository.findByProductId(product.getId())
                     .orElse(null);
 
@@ -79,22 +81,12 @@ public class AdminProductService {
                 auctionSessionRepository.save(session);
 
                 // Refund all deposits
-                java.util.List<AuctionDeposit> deposits = auctionDepositRepository
+                List<AuctionDeposit> deposits = auctionDepositRepository
                         .findByAuctionSessionIdAndIsRefundedFalse(session.getId());
                 for (AuctionDeposit d : deposits) {
                     walletRepository.findByUserId(d.getUser().getId()).ifPresent(w -> {
-                        w.setHeldBalance(w.getHeldBalance().subtract(d.getAmount()));
-                        w.setBalance(w.getBalance().add(d.getAmount()));
-                        walletRepository.save(w);
-
-                        Transaction tx = Transaction.builder()
-                                .wallet(w)
-                                .amount(d.getAmount())
-                                .type(TransactionType.AUCTION_REFUND)
-                                .status(TransactionStatus.COMPLETED)
-                                .description("Hủy đấu giá vi phạm & hoàn cọc: " + product.getTitle())
-                                .build();
-                        transactionRepository.save(tx);
+                        walletService.executeEscrowRefund(w, d.getAmount(), TransactionType.AUCTION_REFUND,
+                                "Hủy đấu giá vi phạm & hoàn cọc: " + product.getTitle(), null, null);
 
                         d.setRefunded(true);
                         auctionDepositRepository.save(d);
@@ -103,7 +95,7 @@ public class AdminProductService {
             }
         }
 
-        product.setStatus(com.ecommerce.thriftauction.features.product.entity.ProductStatus.BANNED);
+        product.setStatus(ProductStatus.BANNED);
         product.setIsLive(false);
         productRepository.save(product);
     }

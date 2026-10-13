@@ -7,6 +7,7 @@ import com.ecommerce.thriftauction.features.payment.entity.TransactionType;
 import com.ecommerce.thriftauction.features.payment.entity.Wallet;
 import com.ecommerce.thriftauction.features.payment.repository.TransactionRepository;
 import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
+import com.ecommerce.thriftauction.features.payment.service.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class AdminWalletService {
 
     private final TransactionRepository transactionRepository;
     private final WalletRepository walletRepository;
+    private final WalletService walletService;
 
     @Transactional(readOnly = true)
     public BigDecimal getTotalEscrow() {
@@ -53,7 +55,7 @@ public class AdminWalletService {
 
     @Transactional
     public TransactionResponse approveWithdrawal(String transactionId) {
-        Transaction tx = transactionRepository.findById(transactionId)
+        Transaction tx = transactionRepository.findByIdForUpdate(transactionId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
         if (tx.getType() != TransactionType.WITHDRAW || tx.getStatus() != TransactionStatus.PENDING) {
@@ -63,21 +65,12 @@ public class AdminWalletService {
         tx.setStatus(TransactionStatus.COMPLETED);
         transactionRepository.save(tx);
 
-        return TransactionResponse.builder()
-                .id(tx.getId())
-                .amount(tx.getAmount())
-                .type(tx.getType())
-                .status(tx.getStatus())
-                .description(tx.getDescription())
-                .username(tx.getWallet().getUser().getUsername())
-                .walletId(tx.getWallet().getId())
-                .createdAt(tx.getCreatedAt())
-                .build();
+        return toResponse(tx);
     }
 
     @Transactional
     public TransactionResponse rejectWithdrawal(String transactionId) {
-        Transaction tx = transactionRepository.findById(transactionId)
+        Transaction tx = transactionRepository.findByIdForUpdate(transactionId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
         if (tx.getType() != TransactionType.WITHDRAW || tx.getStatus() != TransactionStatus.PENDING) {
@@ -87,11 +80,39 @@ public class AdminWalletService {
         tx.setStatus(TransactionStatus.CANCELLED);
         transactionRepository.save(tx);
 
-        // Refund the money to the user's wallet
-        Wallet wallet = tx.getWallet();
-        wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
-        walletRepository.save(wallet);
+        Wallet wallet = walletRepository.findByIdForUpdate(tx.getWallet().getId())
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+        walletService.executeCredit(wallet, tx.getAmount(), TransactionType.REFUND, "Hoàn tiền rút thất bại",
+                "withdrawal-reject:" + tx.getId(), null);
 
+        return toResponse(tx);
+    }
+
+    @Transactional
+    public TransactionResponse manualAdjustBalance(String userId, BigDecimal amount, String reason) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) == 0) {
+            throw new IllegalArgumentException("Adjustment amount must not be zero");
+        }
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("Adjustment reason is required");
+        }
+
+        Wallet wallet = walletRepository.findByUserIdForUpdate(userId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+        if (amount.compareTo(BigDecimal.ZERO) < 0 && wallet.getBalance().add(amount).compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("Số dư không đủ để trừ tiền");
+        }
+
+        String description = "Admin điều chỉnh: " + reason.trim();
+        Transaction tx = amount.signum() > 0
+                ? walletService.executeCredit(wallet, amount, TransactionType.DEPOSIT, description, null, null)
+                : walletService.executeDebit(wallet, amount.abs(), TransactionType.WITHDRAW, description, null, null);
+
+        return toResponse(tx);
+    }
+
+    private TransactionResponse toResponse(Transaction tx) {
         return TransactionResponse.builder()
                 .id(tx.getId())
                 .amount(tx.getAmount())
@@ -100,40 +121,6 @@ public class AdminWalletService {
                 .description(tx.getDescription())
                 .username(tx.getWallet().getUser().getUsername())
                 .walletId(tx.getWallet().getId())
-                .createdAt(tx.getCreatedAt())
-                .build();
-    }
-
-    @Transactional
-    public TransactionResponse manualAdjustBalance(String userId, BigDecimal amount, String reason) {
-        Wallet wallet = walletRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Wallet not found"));
-
-        if (amount.compareTo(BigDecimal.ZERO) < 0 && wallet.getBalance().add(amount).compareTo(BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("Số dư không đủ để trừ tiền");
-        }
-
-        wallet.setBalance(wallet.getBalance().add(amount));
-        walletRepository.save(wallet);
-
-        Transaction tx = Transaction.builder()
-                .wallet(wallet)
-                .amount(amount.abs())
-                .type(amount.compareTo(BigDecimal.ZERO) > 0 ? TransactionType.DEPOSIT : TransactionType.WITHDRAW)
-                .status(TransactionStatus.COMPLETED)
-                .description("Admin điều chỉnh: " + reason)
-                .build();
-
-        transactionRepository.save(tx);
-
-        return TransactionResponse.builder()
-                .id(tx.getId())
-                .amount(tx.getAmount())
-                .type(tx.getType())
-                .status(tx.getStatus())
-                .description(tx.getDescription())
-                .username(wallet.getUser().getUsername())
-                .walletId(wallet.getId())
                 .createdAt(tx.getCreatedAt())
                 .build();
     }

@@ -6,14 +6,19 @@ import com.ecommerce.thriftauction.features.admin.service.AuditLogService;
 import com.ecommerce.thriftauction.features.common.dto.BidRequest;
 import com.ecommerce.thriftauction.features.common.dto.BidResponse;
 import com.ecommerce.thriftauction.features.auction.entity.AuctionBid;
+import com.ecommerce.thriftauction.features.auction.entity.AuctionDeposit;
 import com.ecommerce.thriftauction.features.auction.entity.AuctionSession;
 import com.ecommerce.thriftauction.features.auction.entity.AuctionStatus;
 import com.ecommerce.thriftauction.features.auth.entity.User;
 import com.ecommerce.thriftauction.features.auction.repository.AuctionBidRepository;
+import com.ecommerce.thriftauction.features.auction.repository.AuctionDepositRepository;
 import com.ecommerce.thriftauction.features.auction.repository.AuctionSessionRepository;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
+import com.ecommerce.thriftauction.features.payment.entity.TransactionType;
 import com.ecommerce.thriftauction.features.payment.entity.Wallet;
+import com.ecommerce.thriftauction.features.payment.repository.TransactionRepository;
 import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
+import com.ecommerce.thriftauction.features.payment.service.WalletService;
 import com.ecommerce.thriftauction.features.notification.entity.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,9 +39,10 @@ public class AuctionService {
         private final UserRepository userRepository;
         private final NotificationService notificationService;
         private final WalletRepository walletRepository;
-        private final com.ecommerce.thriftauction.features.auction.repository.AuctionDepositRepository auctionDepositRepository;
-        private final com.ecommerce.thriftauction.features.payment.repository.TransactionRepository transactionRepository;
+        private final AuctionDepositRepository auctionDepositRepository;
+        private final TransactionRepository transactionRepository;
         private final AuditLogService auditLogService;
+        private final WalletService walletService;
 
         @Transactional
         public BidResponse placeBid(BidRequest request, String username) {
@@ -43,7 +50,9 @@ public class AuctionService {
                                 .or(() -> userRepository.findByUsername(username))
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                AuctionSession session = auctionSessionRepository.findByProductId(request.getAuctionSessionId())
+                AuctionSession session = auctionSessionRepository
+                                .findByProductIdForUpdate(request.getAuctionSessionId())
+                                .or(() -> auctionSessionRepository.findByIdForUpdate(request.getAuctionSessionId()))
                                 .orElseThrow(() -> new RuntimeException(
                                                 "Auction session not found for product: "
                                                                 + request.getAuctionSessionId()));
@@ -103,7 +112,7 @@ public class AuctionService {
                                 bidder.getUsername(), "PLACE_BID",
                                 "AUCTION", session.getId(),
                                 session.getProduct().getTitle(),
-                                "Đặt giá " + String.format(new java.util.Locale("vi", "VN"), "%,.0f VNĐ",
+                                "Đặt giá " + String.format(new Locale("vi", "VN"), "%,.0f VNĐ",
                                                 request.getBidAmount()));
 
                 // Send outbid notification
@@ -163,6 +172,7 @@ public class AuctionService {
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
                 AuctionSession session = auctionSessionRepository.findByProductId(productId)
+                                .or(() -> auctionSessionRepository.findById(productId))
                                 .orElseThrow(() -> new RuntimeException("Auction session not found"));
 
                 if (session.getStatus() != AuctionStatus.ONGOING) {
@@ -177,7 +187,7 @@ public class AuctionService {
                         throw new RuntimeException("Bạn đã đặt cọc cho phiên đấu giá này rồi.");
                 }
 
-                Wallet wallet = walletRepository.findByUserId(user.getId())
+                Wallet wallet = walletRepository.findByUserIdForUpdate(user.getId())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "Bạn chưa mở ví điện tử. Vui lòng vào trang cá nhân để mở ví."));
 
@@ -188,22 +198,11 @@ public class AuctionService {
                                         "Số dư ví không đủ. Cần tối thiểu 50.000đ để đặt cọc tham gia đấu giá. Vui lòng nạp thêm tiền.");
                 }
 
-                wallet.setBalance(wallet.getBalance().subtract(depositAmount));
-                wallet.setHeldBalance(wallet.getHeldBalance() != null ? wallet.getHeldBalance().add(depositAmount)
-                                : depositAmount);
-                walletRepository.save(wallet);
+                walletService.executeEscrowHold(wallet, depositAmount,
+                                TransactionType.AUCTION_DEPOSIT,
+                                "Cọc tham gia đấu giá: " + session.getProduct().getTitle(), null, null);
 
-                com.ecommerce.thriftauction.features.payment.entity.Transaction tx = com.ecommerce.thriftauction.features.payment.entity.Transaction
-                                .builder()
-                                .wallet(wallet)
-                                .amount(depositAmount)
-                                .type(com.ecommerce.thriftauction.features.payment.entity.TransactionType.AUCTION_DEPOSIT)
-                                .status(com.ecommerce.thriftauction.features.payment.entity.TransactionStatus.COMPLETED)
-                                .description("Cọc tham gia đấu giá: " + session.getProduct().getTitle())
-                                .build();
-                transactionRepository.save(tx);
-
-                com.ecommerce.thriftauction.features.auction.entity.AuctionDeposit deposit = com.ecommerce.thriftauction.features.auction.entity.AuctionDeposit
+                AuctionDeposit deposit = AuctionDeposit
                                 .builder()
                                 .user(user)
                                 .auctionSession(session)
