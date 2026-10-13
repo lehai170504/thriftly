@@ -18,6 +18,8 @@ import { ProductSortAndPrice } from '@/features/products/components/ProductSortA
 import { ProductPagination } from '@/features/products/components/ProductPagination';
 import { ProductEmptyState } from '@/features/products/components/ProductEmptyState';
 import { normalizePageResponse } from '@/lib/pagination';
+import { PageHeader } from '@/components/patterns/page-header';
+import { ErrorState, LoadingState } from '@/components/patterns/state-panel';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -80,23 +82,8 @@ function ProductsContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        {/* Premium Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-serif font-medium tracking-tight text-foreground mb-4">
-              {query ? (
-                <>Kết quả cho <span className="italic text-primary">"{query}"</span></>
-              ) : (
-                <>Khám phá <span className="italic text-primary font-normal">Sản phẩm</span></>
-              )}
-            </h1>
-            <p className="text-lg text-muted-foreground font-medium">Khám phá những món đồ cũ chất lượng với giá tốt nhất, được tuyển chọn dành riêng cho bạn.</p>
-          </div>
-          <div className="shrink-0">
-            <CreateProductModal />
-          </div>
-        </div>
+      <div className="page-container py-6 md:py-8">
+        <PageHeader className="mb-8" title={query ? <>Kết quả cho “<span className="text-primary">{query}</span>”</> : "Khám phá sản phẩm"} description="Khám phá những món đồ cũ chất lượng với giá tốt nhất, được tuyển chọn dành riêng cho bạn." actions={<CreateProductModal />} />
 
         <div className="flex flex-col lg:flex-row gap-8">
           <ProductSidebar
@@ -151,9 +138,7 @@ function ProductsContent() {
             {isLoading ? (
               <ProductGridSkeleton />
             ) : error ? (
-              <div className="text-center py-20 bg-background/50 glass rounded-2xl shadow-sm border border-border">
-                <p className="text-red-500 font-medium text-lg">Không thể tải danh sách sản phẩm lúc này. Vui lòng thử lại sau.</p>
-              </div>
+              <ErrorState title="Không thể tải sản phẩm" description="Vui lòng thử lại sau." />
             ) : products?.length === 0 ? (
               <ProductEmptyState />
             ) : (
@@ -176,7 +161,6 @@ function ProductsContent() {
                       hidden: { opacity: 0, y: 30 },
                       show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
                     }}
-                    whileHover={{ y: -8 }}
                   >
                     <ProductCard product={product} />
                   </motion.div>
@@ -198,7 +182,7 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-foreground">Đang tải...</div>}>
+    <Suspense fallback={<div className="page-container py-8"><LoadingState title="Đang tải sản phẩm…" /></div>}>
       <ProductsContent />
     </Suspense>
   );

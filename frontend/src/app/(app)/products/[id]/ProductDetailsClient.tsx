@@ -9,11 +9,12 @@ import { SellerInfoCard } from '@/features/products/components/SellerInfoCard';
 import { ProductGallery } from '@/features/products/components/ProductGallery';
 import { ProductMainInfo } from '@/features/products/components/ProductMainInfo';
 import { ProductActionPanel } from '@/features/products/components/ProductActionPanel';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProductDetailSkeleton } from '@/components/ui/loading-skeletons';
+import { ErrorState } from '@/components/patterns/state-panel';
 
 export default function ProductDetailsClient() {
   const params = useParams();
@@ -27,12 +28,15 @@ export default function ProductDetailsClient() {
 
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-32 text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-4">Không tìm thấy sản phẩm</h2>
-        <p className="text-muted-foreground mb-8">Sản phẩm này có thể đã bị xóa hoặc không tồn tại.</p>
-        <Link href="/products">
-          <Button variant="outline"><ArrowLeft className="mr-2 w-4 h-4" /> Quay lại danh sách</Button>
-        </Link>
+      <div className="page-container py-24">
+        <ErrorState
+          title="Không tìm thấy sản phẩm"
+          description="Sản phẩm này có thể đã bị xóa hoặc không tồn tại."
+          onRetry={() => window.location.reload()}
+        />
+        <div className="mt-4 flex justify-center">
+          <Link href="/products" className={buttonVariants({ variant: 'outline' })}><ArrowLeft className="mr-2 size-4" />Quay lại danh sách</Link>
+        </div>
       </div>
     );
   }
@@ -41,7 +45,7 @@ export default function ProductDetailsClient() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] pb-24 dark:bg-background">
-      <div className="container mx-auto px-4 py-6">
+      <div className="page-container py-6">
 
         {/* Breadcrumb */}
         <div className="flex items-center text-sm text-muted-foreground mb-6">
@@ -72,7 +76,7 @@ export default function ProductDetailsClient() {
         {/* Product Details & Description */}
         <div className="bg-card text-card-foreground rounded-2xl shadow-sm border border-border p-6 md:p-8 mb-6">
           <div className="bg-muted px-4 py-3 rounded-md mb-6">
-            <h2 className="text-lg font-medium uppercase text-foreground">Chi tiết sản phẩm</h2>
+            <h2 className="text-lg font-semibold text-foreground">Chi tiết sản phẩm</h2>
           </div>
           <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap max-w-4xl">
             {product.description || 'Không có mô tả cho sản phẩm này.'}

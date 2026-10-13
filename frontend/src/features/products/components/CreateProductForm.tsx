@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { CreateProductRequest } from '@/features/products/types/product';
 import { createProductSchema, CreateProductFormData } from '../schemas';
 import { LocationSelector } from '@/components/ui/LocationSelector';
+import { ProductFormSectionHeader } from './ProductFormSectionHeader';
 
 interface CreateProductFormProps {
   onSuccess?: () => void;
@@ -179,7 +180,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
           {/* Step 1: Basic Info */}
           <div className={`space-y-6 transition-all duration-500 w-full animate-in fade-in slide-in-from-right-4 ${currentStep === 1 ? 'block' : 'hidden'}`}>
             <div>
-              <h3 className="text-lg font-heading font-bold border-b border-border pb-2 text-foreground">Thông tin cơ bản</h3>
+              <ProductFormSectionHeader title="Thông tin cơ bản" />
               <p className="text-sm text-muted-foreground mt-2">Điền đầy đủ và chính xác thông tin giúp sản phẩm của bạn dễ dàng tiếp cận người mua hơn.</p>
             </div>
 
@@ -318,7 +319,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
           {/* Step 2: Media */}
           <div className={`space-y-6 transition-all duration-500 w-full animate-in fade-in slide-in-from-right-4 ${currentStep === 2 ? 'block' : 'hidden'}`}>
             <div>
-              <h3 className="text-lg font-heading font-bold border-b border-border pb-2 text-foreground">Hình ảnh & Video</h3>
+              <ProductFormSectionHeader title="Hình ảnh & Video" />
               <p className="text-sm text-muted-foreground mt-2">Hình ảnh chân thực, rõ nét giúp sản phẩm bán nhanh hơn gấp 3 lần.</p>
             </div>
 
@@ -419,7 +420,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
           {/* Step 3: Pricing & Format */}
           <div className={`space-y-6 transition-all duration-500 w-full animate-in fade-in slide-in-from-right-4 ${currentStep === 3 ? 'block' : 'hidden'}`}>
             <div>
-              <h3 className="text-lg font-heading font-bold border-b border-border pb-2 text-foreground">Hình thức & Định giá</h3>
+              <ProductFormSectionHeader title="Hình thức & Định giá" />
               <p className="text-sm text-muted-foreground mt-2">Chọn hình thức bán phù hợp với mục tiêu của bạn.</p>
             </div>
 

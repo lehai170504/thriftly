@@ -2,6 +2,7 @@ import type { Decorator, Preview } from "@storybook/nextjs-vite";
 import { Be_Vietnam_Pro, Inter, Playfair_Display } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import React from "react";
+import Providers from "../src/components/providers";
 import "../src/app/globals.css";
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -27,9 +28,11 @@ const withTheme: Decorator = (Story, context) => {
 
   return (
     <ThemeProvider attribute="class" forcedTheme={theme} enableSystem={false}>
-      <div className={`${beVietnamPro.variable} ${inter.variable} ${playfair.variable} min-h-screen bg-background p-6 text-foreground`}>
-        <Story />
-      </div>
+      <Providers>
+        <div className={`${beVietnamPro.variable} ${inter.variable} ${playfair.variable} min-h-screen bg-background p-6 text-foreground`}>
+          <Story />
+        </div>
+      </Providers>
     </ThemeProvider>
   );
 };

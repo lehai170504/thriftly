@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useMyOrders, usePayOrder, useConfirmReceipt, useDisputeOrder, useReturnShipped, useHideOrder } from '@/features/orders/hooks/useOrders';
 import { Order } from '@/features/orders/api/orderApi';
-import { extractError, formatCurrency } from '@/lib/utils';
+import { extractError } from '@/lib/utils';
 import { ReviewModal } from '@/features/reviews/components/ReviewModal';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,6 +14,10 @@ import { OrderListSkeleton } from '@/components/ui/loading-skeletons';
 import { InvoiceGenerator } from '@/features/orders/components/InvoiceGenerator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useChatStore } from '@/features/chat/store/useChatStore';
+import { PageHeader } from '@/components/patterns/page-header';
+import { EmptyState } from '@/components/patterns/state-panel';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { EntityId, Money } from '@/components/ui/typography';
 
 export default function OrdersPage() {
   const { data: ordersData, isLoading } = useMyOrders();
@@ -146,27 +150,9 @@ export default function OrdersPage() {
     });
   };
 
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case 'PENDING_PAYMENT': return <span className="text-orange-500 uppercase font-medium text-sm">Chờ thanh toán</span>;
-      case 'PAID': return <span className="text-blue-500 uppercase font-medium text-sm">Chờ lấy hàng</span>;
-      case 'SHIPPED': return <span className="text-purple-500 uppercase font-medium text-sm">Đang giao</span>;
-      case 'DELIVERED': return <span className="text-indigo-500 uppercase font-medium text-sm">Chờ xác nhận</span>;
-      case 'DISPUTED': return <span className="text-red-500 uppercase font-medium text-sm">Đang khiếu nại</span>;
-      case 'COMPLETED': return <span className="text-emerald-500 uppercase font-medium text-sm">Hoàn thành</span>;
-      case 'RETURNING': return <span className="text-orange-500 uppercase font-medium text-sm">Chờ trả hàng</span>;
-      case 'RETURNED': return <span className="text-emerald-500 uppercase font-medium text-sm">Đã hoàn tiền</span>;
-      case 'CANCELED': return <span className="text-muted-foreground uppercase font-medium text-sm">Đã hủy</span>;
-      default: return <span className="text-muted-foreground uppercase font-medium text-sm">{status}</span>;
-    }
-  };
-
   return (
-    <div className="container px-4 sm:px-6 py-8 max-w-5xl mx-auto space-y-6 min-h-[70vh]">
-      <div className="flex flex-col gap-2 mb-6">
-        <h1 className="text-2xl font-heading font-bold text-foreground">Đơn mua</h1>
-        <p className="text-muted-foreground text-sm">Quản lý và theo dõi các đơn hàng của bạn</p>
-      </div>
+    <div className="page-container py-8 space-y-6 min-h-[70vh]">
+      <PageHeader title="Đơn mua" description="Quản lý và theo dõi các đơn hàng của bạn" />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full flex justify-between bg-muted/50 border border-border rounded-xl p-1 h-auto overflow-x-auto custom-scrollbar">
@@ -180,12 +166,7 @@ export default function OrdersPage() {
       </Tabs>
 
       {!filteredOrders || filteredOrders.length === 0 ? (
-        <div className="text-center p-16 bg-card rounded-[12px] border border-border flex flex-col items-center justify-center mt-4 shadow-sm">
-          <div className="w-24 h-24 bg-muted/50 rounded-full flex items-center justify-center mb-6">
-            <ShoppingBag className="w-10 h-10 text-muted-foreground/50" />
-          </div>
-          <p className="text-muted-foreground text-lg">Chưa có đơn hàng</p>
-        </div>
+        <EmptyState title="Chưa có đơn hàng" description="Các giao dịch của bạn sẽ xuất hiện tại đây." icon={<ShoppingBag className="size-8" />} />
       ) : (
         <div className="space-y-4 mt-4">
           {filteredOrders.map((order) => (
@@ -205,7 +186,7 @@ export default function OrdersPage() {
                   </Button>
                 </div>
                 <div className="flex items-center">
-                  {getStatusDisplay(order.status)}
+                  <StatusBadge domain="order" status={order.status} />
                 </div>
               </div>
 
@@ -224,14 +205,14 @@ export default function OrdersPage() {
                   <div className="mt-auto text-sm font-medium text-foreground">x{order.quantity || 1}</div>
                 </div>
                 <div className="text-right flex flex-col justify-center">
-                  <div className="text-primary font-medium">{formatCurrency((order.totalAmount || 0) / (order.quantity || 1))}</div>
+                  <Money value={(order.totalAmount || 0) / (order.quantity || 1)} className="text-primary" />
                 </div>
               </div>
 
               {/* Footer */}
               <div className="px-5 py-4 border-t border-border bg-muted/10 flex flex-col sm:flex-row items-end sm:items-center justify-between gap-4">
                 <div className="text-sm text-muted-foreground flex flex-col gap-1 w-full sm:w-auto">
-                  <span className="text-xs">Mã đơn hàng: #{order.id.substring(0, 12).toUpperCase()}</span>
+                  <span className="text-xs">Mã đơn hàng: <EntityId value={order.id} visibleLength={12} /></span>
                   {order.trackingCode && (
                     <span className="flex items-center gap-1 text-foreground/80"><Truck className="w-4 h-4 text-emerald-500" /> Vận đơn: <strong className="font-mono">{order.trackingCode}</strong></span>
                   )}
@@ -239,7 +220,7 @@ export default function OrdersPage() {
 
                 <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
                   <div className="text-sm text-foreground flex items-center">
-                    Thành tiền: <span className="text-xl font-bold text-primary ml-2">{formatCurrency(order.totalAmount)}</span>
+                    Thành tiền: <Money value={order.totalAmount} className="ml-2 text-xl font-bold text-primary" />
                   </div>
 
                   <div className="flex flex-wrap items-center justify-end gap-2 w-full">

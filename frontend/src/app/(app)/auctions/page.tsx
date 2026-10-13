@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useSearchProducts, useCategories } from '@/features/products/hooks/useProducts';
 import { useActiveLiveAuctions } from '@/features/live/hooks/useLive';
-import { ProductCard } from '@/features/products/components/ProductCard';
+import { MarketplaceProductCard } from '@/features/products/components/MarketplaceProductCard';
 import { ProductGridSkeleton } from '@/components/ui/loading-skeletons';
 import { Gavel, Activity, Flame } from 'lucide-react';
 import { useProfile } from '@/features/users/hooks/useUsers';
@@ -17,6 +17,7 @@ import { ProductSortAndPrice } from '@/features/products/components/ProductSortA
 import { ProductPagination } from '@/features/products/components/ProductPagination';
 import { ProductEmptyState } from '@/features/products/components/ProductEmptyState';
 import { normalizePageResponse } from '@/lib/pagination';
+import { ErrorState, LoadingState } from '@/components/patterns/state-panel';
 
 function AuctionsContent() {
   const searchParams = useSearchParams();
@@ -140,7 +141,7 @@ function AuctionsContent() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4">
+      <div className="page-container">
         <div className="flex flex-col lg:flex-row gap-8">
           <ProductSidebar
             profile={profile}
@@ -194,9 +195,7 @@ function AuctionsContent() {
             {isLoading ? (
               <ProductGridSkeleton />
             ) : error ? (
-              <div className="text-center py-20 bg-background/50 glass rounded-2xl shadow-sm border border-border">
-                <p className="text-red-500 font-medium text-lg">Không thể tải danh sách phiên đấu giá lúc này. Vui lòng thử lại sau.</p>
-              </div>
+              <ErrorState title="Không thể tải phiên đấu giá" description="Vui lòng thử lại sau." />
             ) : sortedProducts.length === 0 ? (
               <ProductEmptyState />
             ) : (
@@ -219,9 +218,8 @@ function AuctionsContent() {
                       hidden: { opacity: 0, y: 30 },
                       show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
                     }}
-                    whileHover={{ y: -8 }}
                   >
-                    <ProductCard product={product} />
+                    <MarketplaceProductCard product={product} variant="auction" />
                   </motion.div>
                 ))}
               </motion.div>
@@ -241,7 +239,7 @@ function AuctionsContent() {
 
 export default function AuctionsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-foreground">Đang tải...</div>}>
+    <Suspense fallback={<div className="page-container py-8"><LoadingState title="Đang tải phiên đấu giá…" /></div>}>
       <AuctionsContent />
     </Suspense>
   );

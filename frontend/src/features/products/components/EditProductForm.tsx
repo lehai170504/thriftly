@@ -20,6 +20,7 @@ import { useState } from 'react';
 import { CreateProductRequest, Product } from '@/features/products/types/product';
 import { createProductSchema, CreateProductFormData } from '../schemas';
 import { LocationSelector } from '@/components/ui/LocationSelector';
+import { ProductFormSectionHeader } from './ProductFormSectionHeader';
 
 interface EditProductFormProps {
   initialData: Product;
@@ -145,7 +146,7 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
       {/* Basic Info */}
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-heading font-bold border-b border-border pb-2 text-foreground">Thông tin cơ bản</h3>
+          <ProductFormSectionHeader title="Thông tin cơ bản" />
           <p className="text-sm text-muted-foreground mt-2">Cập nhật đầy đủ và chính xác thông tin giúp sản phẩm của bạn dễ dàng tiếp cận người mua hơn và tăng tỉ lệ chốt đơn.</p>
         </div>
 
@@ -391,7 +392,7 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
 
       {/* Selling Format */}
       <div className="space-y-6 pt-4">
-        <h3 className="text-lg font-heading font-bold border-b border-border pb-2 text-foreground">Hình thức bán</h3>
+        <ProductFormSectionHeader title="Hình thức bán" />
 
         <div className="grid grid-cols-2 gap-4">
           <div

@@ -11,6 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { TransactionResponse } from '@/features/wallet/types/wallet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
+import { PageHeader } from '@/components/patterns/page-header';
+import { EmptyState, ErrorState, LoadingState } from '@/components/patterns/state-panel';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { DateTime, Money } from '@/components/ui/typography';
 
 export default function WalletPage() {
   const router = useRouter();
@@ -27,11 +31,11 @@ export default function WalletPage() {
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
 
   if (isLoading) {
-    return <div className="container py-8 flex justify-center"><div className="animate-pulse w-full max-w-4xl h-96 bg-muted rounded-xl"></div></div>;
+    return <div className="page-container py-8"><LoadingState title="Đang tải thông tin ví…" /></div>;
   }
 
   if (!wallet) {
-    return <div className="container py-8 text-center text-muted-foreground">Không thể tải thông tin ví.</div>;
+    return <div className="page-container py-8"><ErrorState title="Không thể tải thông tin ví" description="Vui lòng thử lại sau." /></div>;
   }
 
   const handleDeposit = () => {
@@ -73,12 +77,12 @@ export default function WalletPage() {
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
-      case 'DEPOSIT': return <ArrowDownToLine className="w-5 h-5 text-green-500" />;
-      case 'WITHDRAW': return <ArrowUpRight className="w-5 h-5 text-red-500" />;
-      case 'ESCROW_HOLD': return <ShieldCheck className="w-5 h-5 text-orange-500" />;
-      case 'ESCROW_RELEASE': return <ShieldCheck className="w-5 h-5 text-green-500" />;
-      case 'PAYMENT': return <ArrowUpRight className="w-5 h-5 text-blue-500" />;
-      case 'REFUND': return <ArrowDownToLine className="w-5 h-5 text-purple-500" />;
+      case 'DEPOSIT': return <ArrowDownToLine className="w-5 h-5 text-success" />;
+      case 'WITHDRAW': return <ArrowUpRight className="w-5 h-5 text-destructive" />;
+      case 'ESCROW_HOLD': return <ShieldCheck className="w-5 h-5 text-warning" />;
+      case 'ESCROW_RELEASE': return <ShieldCheck className="w-5 h-5 text-success" />;
+      case 'PAYMENT': return <ArrowUpRight className="w-5 h-5 text-info" />;
+      case 'REFUND': return <ArrowDownToLine className="w-5 h-5 text-info" />;
       default: return <History className="w-5 h-5 text-muted-foreground" />;
     }
   };
@@ -102,27 +106,19 @@ export default function WalletPage() {
   };
 
   const getTransactionColor = (type: string) => {
-    if (['DEPOSIT', 'ESCROW_RELEASE', 'REFUND'].includes(type)) return 'text-green-600 dark:text-green-400';
-    if (['WITHDRAW', 'PAYMENT', 'ESCROW_HOLD'].includes(type)) return 'text-red-600 dark:text-red-400';
+    if (['DEPOSIT', 'ESCROW_RELEASE', 'REFUND'].includes(type)) return 'text-success';
+    if (['WITHDRAW', 'PAYMENT', 'ESCROW_HOLD'].includes(type)) return 'text-destructive';
     return 'text-foreground';
   };
 
   return (
-    <div className="container px-4 sm:px-6 py-8 max-w-6xl mx-auto space-y-8">
+    <div className="page-container py-8 space-y-8">
       <Button variant="ghost" onClick={() => router.back()} className="mb-2 -ml-4 text-muted-foreground hover:text-foreground">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Quay lại
       </Button>
 
-      <div className="flex items-center gap-4 mb-6">
-        <div className="p-4 bg-primary/20 rounded-[24px] border border-primary/20 flex-shrink-0">
-          <Wallet className="w-8 h-8 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-heading font-bold tracking-tight text-foreground">Ví điện tử</h1>
-          <p className="text-muted-foreground">Quản lý số dư và lịch sử giao dịch của bạn</p>
-        </div>
-      </div>
+      <PageHeader title="Ví điện tử" description="Quản lý số dư và lịch sử giao dịch của bạn" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
         <div className="lg:col-span-1 space-y-6">
@@ -134,9 +130,7 @@ export default function WalletPage() {
               <h3 className="text-primary font-bold text-lg mb-4">Số dư khả dụng</h3>
               <div className="space-y-6">
                 <div>
-                  <p className="text-4xl font-bold tracking-tight text-foreground break-words">
-                    {formatCurrency(wallet.balance)}
-                  </p>
+                  <Money value={wallet.balance} className="text-4xl font-bold tracking-tight text-foreground break-words" />
                 </div>
 
                 {(wallet.heldBalance || 0) > 0 && (
@@ -144,7 +138,7 @@ export default function WalletPage() {
                     <span className="text-sm text-foreground/80 flex items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-primary" /> Số dư đang tạm giữ
                     </span>
-                    <span className="font-semibold text-foreground text-lg">{formatCurrency(wallet.heldBalance || 0)}</span>
+                    <Money value={wallet.heldBalance || 0} className="text-lg" />
                   </div>
                 )}
               </div>
@@ -162,7 +156,7 @@ export default function WalletPage() {
             </Button>
 
             <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
-              <DialogContent className="sm:max-w-[425px] rounded-[32px]">
+              <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle className="text-xl font-bold text-foreground">Nạp tiền vào ví</DialogTitle>
                 </DialogHeader>
@@ -222,7 +216,7 @@ export default function WalletPage() {
             </Button>
 
             <Dialog open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen}>
-              <DialogContent className="sm:max-w-[425px] rounded-[32px]">
+              <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle className="text-xl font-bold text-orange-500 flex items-center gap-2">
                     <Banknote className="w-5 h-5" /> Rút tiền về Ngân hàng
@@ -302,10 +296,7 @@ export default function WalletPage() {
           </h3>
 
           {(wallet.recentTransactions || []).length === 0 ? (
-            <div className="py-16 text-center flex flex-col items-center justify-center text-muted-foreground bg-background rounded-[24px] border border-dashed border-border">
-              <Clock className="w-12 h-12 mb-3 opacity-20" />
-              <p>Chưa có giao dịch nào phát sinh.</p>
-            </div>
+            <EmptyState title="Chưa có giao dịch" description="Giao dịch mới sẽ xuất hiện tại đây." icon={<Clock className="size-8" />} />
           ) : (
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
               {(wallet.recentTransactions || []).map((tx: TransactionResponse) => (
@@ -322,17 +313,15 @@ export default function WalletPage() {
                         </p>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(tx.createdAt).toLocaleString('vi-VN')}
+                        <DateTime value={tx.createdAt} />
                       </p>
                     </div>
                   </div>
                   <div className="sm:text-right flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
                     <p className={`font-black text-lg ${getTransactionColor(tx.type)}`}>
-                      {getTransactionSign(tx.type)}{formatCurrency(tx.amount)}
+                      {getTransactionSign(tx.type)}<Money value={tx.amount} />
                     </p>
-                    <p className="text-xs text-muted-foreground font-medium mt-1">
-                      {tx.status === 'COMPLETED' ? 'Thành công' : tx.status === 'PENDING' ? 'Đang chờ' : tx.status === 'FAILED' ? 'Thất bại' : tx.status}
-                    </p>
+                    <StatusBadge domain="transaction" status={tx.status} className="mt-1" />
                   </div>
                 </div>
               ))}

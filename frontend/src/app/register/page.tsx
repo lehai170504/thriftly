@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { extractError } from '@/lib/utils';
+import { BrandWordmark } from '@/components/layout/BrandWordmark';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -114,14 +115,7 @@ export default function RegisterPage() {
 
         {/* Content */}
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-foreground hover:opacity-90 transition-opacity">
-            <div className="w-10 h-10 bg-background rounded-xl flex items-center justify-center shadow-lg overflow-hidden border border-border">
-              <img src="/logo.png?v=5" alt="Thriftly Logo" className="w-[120%] h-[120%] object-contain" />
-            </div>
-            <span className="text-2xl font-serif font-semibold tracking-tight text-foreground drop-shadow-sm">
-              Thriftly.
-            </span>
-          </Link>
+          <BrandWordmark className="hover:opacity-90" />
         </div>
 
         <div className="relative z-10 mb-10">
@@ -149,13 +143,8 @@ export default function RegisterPage() {
         <div className="lg:hidden absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] opacity-20 blur-[120px] rounded-full bg-gradient-to-tr from-blue-600 to-transparent -translate-x-1/2 translate-y-1/3 pointer-events-none"></div>
 
         <div className="w-full max-w-[420px] relative z-10 my-auto py-8">
-          <div className="lg:hidden flex items-center justify-center gap-2 mb-10">
-            <div className="w-12 h-12 bg-background/50 glass rounded-[24px] flex items-center justify-center shadow-lg overflow-hidden border border-border">
-              <img src="/logo.png?v=5" alt="Thriftly Logo" className="w-[120%] h-[120%] object-contain" />
-            </div>
-            <span className="text-2xl font-serif font-semibold tracking-tight text-foreground">
-              Thriftly.
-            </span>
+          <div className="mb-10 flex justify-center lg:hidden">
+            <BrandWordmark />
           </div>
 
           <div className="mb-8">

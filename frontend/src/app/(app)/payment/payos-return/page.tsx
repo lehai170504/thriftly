@@ -61,7 +61,7 @@ function PayOSReturnContent() {
   }, [intent.data, queryClient]);
 
   return (
-    <div className="w-full max-w-md bg-background/50 rounded-[24px] shadow-xl border border-border glass p-8 text-center space-y-6">
+    <div className="w-full max-w-md space-y-6 rounded-xl border border-border bg-card p-8 text-center text-card-foreground shadow-elevated">
 
       {status === 'loading' && (
         <div className="flex flex-col items-center justify-center space-y-4">
@@ -73,7 +73,7 @@ function PayOSReturnContent() {
 
       {status === 'processing' && (
         <div className="flex flex-col items-center justify-center space-y-4 animate-in zoom-in duration-300">
-          <div className="w-20 h-20 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center justify-center text-amber-400 mb-2">
+          <div className="mb-2 flex size-20 items-center justify-center rounded-full border border-warning/30 bg-warning/15 text-warning">
             <Clock3 className="w-12 h-12" />
           </div>
           <h2 className="text-2xl font-heading font-bold text-foreground">Đang xác nhận thanh toán</h2>
@@ -92,7 +92,7 @@ function PayOSReturnContent() {
 
       {status === 'success' && (
         <div className="flex flex-col items-center justify-center space-y-4 animate-in zoom-in duration-300">
-          <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 mb-2">
+          <div className="mb-2 flex size-20 items-center justify-center rounded-full border border-success/30 bg-success/15 text-success">
             <CheckCircle2 className="w-12 h-12" />
           </div>
           <h2 className="text-2xl font-heading font-bold text-foreground">Thanh toán thành công</h2>
@@ -108,7 +108,7 @@ function PayOSReturnContent() {
 
       {status === 'error' && (
         <div className="flex flex-col items-center justify-center space-y-4 animate-in zoom-in duration-300">
-          <div className="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center text-red-400 mb-2">
+          <div className="mb-2 flex size-20 items-center justify-center rounded-full border border-destructive/30 bg-destructive/10 text-destructive">
             <XCircle className="w-12 h-12" />
           </div>
           <h2 className="text-2xl font-heading font-bold text-foreground">Giao dịch thất bại</h2>
