@@ -4,8 +4,10 @@ import com.ecommerce.thriftauction.features.auth.entity.User;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -49,10 +51,11 @@ public class Product {
 
     private String imageUrl;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
+    @BatchSize(size = 25)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
-    private java.util.List<String> images;
+    private List<String> images;
 
     private String videoUrl;
 
