@@ -8,6 +8,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-be-vietnam), var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-ui: var(--font-be-vietnam), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-brand: var(--font-playfair), ui-serif, Georgia, serif;
+  --font-numeric: var(--font-inter), var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-heading: var(--font-be-vietnam), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
@@ -28,6 +31,15 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-live: var(--live);
+  --color-live-foreground: var(--live-foreground);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -40,13 +52,16 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 1.5rem;
+  --shadow-surface: 0 1px 2px oklch(0.15 0.02 160 / 6%), 0 1px 3px oklch(0.15 0.02 160 / 8%);
+  --shadow-elevated: 0 12px 32px oklch(0.15 0.02 160 / 12%);
+  --shadow-overlay: 0 24px 64px oklch(0.1 0.02 160 / 22%);
 }
 
 :root {
@@ -75,6 +90,15 @@
 
   /* Destructive: Giữ màu Đỏ/Rose để cảnh báo/hủy đơn */
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.56 0.15 150);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.76 0.16 75);
+  --warning-foreground: oklch(0.24 0.05 65);
+  --info: oklch(0.58 0.15 245);
+  --info-foreground: oklch(0.985 0 0);
+  --live: oklch(0.59 0.24 25);
+  --live-foreground: oklch(0.985 0 0);
 
   --border: oklch(0.92 0.01 250);
   --input: oklch(0.92 0.01 250);
@@ -125,6 +149,15 @@
   --accent-foreground: oklch(0.98 0 0);
 
   --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.68 0.17 150);
+  --success-foreground: oklch(0.15 0.03 150);
+  --warning: oklch(0.78 0.15 75);
+  --warning-foreground: oklch(0.2 0.04 65);
+  --info: oklch(0.7 0.14 245);
+  --info-foreground: oklch(0.16 0.03 245);
+  --live: oklch(0.68 0.22 25);
+  --live-foreground: oklch(0.985 0 0);
 
   --border: oklch(0.25 0.01 250);
   --input: oklch(0.25 0.01 250);
@@ -172,6 +205,11 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
   h1,
   h2,
   h3,
@@ -197,7 +235,18 @@
 }
 
 @utility neon-glow {
-  box-shadow: 0 0 15px oklch(0.75 0.18 250 / 40%), 0 0 5px oklch(0.75 0.18 250 / 20%);
+  box-shadow: 0 0 15px color-mix(in oklab, var(--live) 40%, transparent), 0 0 5px color-mix(in oklab, var(--live) 20%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @utility scrollbar-hide {
@@ -238,4 +287,31 @@
 @utility animate-gradient {
   background-size: 200% 200%;
   animation: gradient 3s ease infinite;
+}
+
+@layer utilities {
+  .font-brand {
+    font-family: var(--font-playfair), ui-serif, Georgia, serif;
+  }
+
+  .font-ui {
+    font-family: var(--font-be-vietnam), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .font-numeric {
+    font-family: var(--font-inter), var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .shadow-surface {
+    box-shadow: var(--shadow-surface);
+  }
+
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .shadow-overlay {
+    box-shadow: var(--shadow-overlay);
+  }
 }
