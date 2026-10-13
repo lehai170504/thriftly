@@ -10,11 +10,14 @@ import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
 import com.ecommerce.thriftauction.features.voucher.repository.VoucherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.ecommerce.thriftauction.features.product.entity.Category;
 import com.ecommerce.thriftauction.features.product.entity.Product;
@@ -39,16 +42,16 @@ public class DataSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbcTemplate;
 
-    @org.springframework.beans.factory.annotation.Value("${app.admin.email}")
+    @Value("${app.admin.email}")
     private String adminEmail;
 
-    @org.springframework.beans.factory.annotation.Value("${app.admin.password}")
+    @Value("${app.admin.password}")
     private String adminPassword;
 
-    @org.springframework.beans.factory.annotation.Value("${app.staff.email}")
+    @Value("${app.staff.email}")
     private String staffEmail;
 
-    @org.springframework.beans.factory.annotation.Value("${app.staff.password}")
+    @Value("${app.staff.password}")
     private String staffPassword;
 
     @Override
@@ -70,7 +73,7 @@ public class DataSeeder implements CommandLineRunner {
         }, () -> {
             String adminUsername = adminEmail.split("@")[0];
             if (userRepository.existsByUsername(adminUsername)) {
-                adminUsername += "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
+                adminUsername += "_" + UUID.randomUUID().toString().substring(0, 4);
             }
             User admin = User.builder()
                     .username(adminUsername)
@@ -101,7 +104,7 @@ public class DataSeeder implements CommandLineRunner {
         }, () -> {
             String staffUsername = staffEmail.split("@")[0];
             if (userRepository.existsByUsername(staffUsername)) {
-                staffUsername += "_" + java.util.UUID.randomUUID().toString().substring(0, 4);
+                staffUsername += "_" + UUID.randomUUID().toString().substring(0, 4);
             }
             User staff = User.builder()
                     .username(staffUsername)
@@ -131,82 +134,12 @@ public class DataSeeder implements CommandLineRunner {
                     .discountValue(new BigDecimal("50000"))
                     .minOrderValue(new BigDecimal("100000"))
                     .quantity(100)
-                    .expiryDate(java.time.LocalDateTime.now().plusMonths(1))
+                    .expiryDate(LocalDateTime.now().plusMonths(1))
                     .isActive(true)
                     .seller(null)
                     .build();
             voucherRepository.save(voucher);
             System.out.println("Platform voucher seeded: WELCOME2026 (50k off for orders >= 100k)");
-        }
-
-        seedDummyProducts(userRepository.findByEmail(adminEmail).orElse(null));
-    }
-
-    private void seedDummyProducts(User admin) {
-        if (admin == null) {
-            return;
-        }
-
-        Category electronics = categoryRepository.findByName("Điện tử")
-                .orElseGet(() -> {
-                    Category cat = new Category();
-                    cat.setName("Điện tử");
-                    cat.setDescription("Đồ điện tử");
-                    return categoryRepository.save(cat);
-                });
-        Category fashion = categoryRepository.findByName("Thời trang")
-                .orElseGet(() -> {
-                    Category cat = new Category();
-                    cat.setName("Thời trang");
-                    cat.setDescription("Thời trang nam nữ");
-                    return categoryRepository.save(cat);
-                });
-
-        if (productRepository.findAll().stream()
-                .noneMatch(p -> p.getTitle().equals("MacBook Pro M1 2020 16GB/512GB"))) {
-            Product p1 = Product.builder()
-                    .seller(admin)
-                    .category(electronics)
-                    .title("MacBook Pro M1 2020 16GB/512GB")
-                    .description("Máy đang dùng tốt, không cấn móp, pin 95%. Bao test 1 tuần. Kèm sạc cáp zin.")
-                    .condition(ProductCondition.GOOD)
-                    .sellType(SellType.BUY_NOW)
-                    .price(new BigDecimal("18500000"))
-                    .quantity(1)
-                    .imageUrl(
-                            "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&q=80&w=1000")
-                    .images(Arrays.asList(
-                            "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&q=80&w=1000",
-                            "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?auto=format&fit=crop&q=80&w=1000",
-                            "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?auto=format&fit=crop&q=80&w=1000"))
-                    .videoUrl("https://www.w3schools.com/html/mov_bbb.mp4")
-                    .location("Quận 1, TP. HCM")
-                    .status(ProductStatus.ACTIVE)
-                    .build();
-
-            Product p2 = Product.builder()
-                    .seller(admin)
-                    .category(fashion)
-                    .title("Áo khoác da thật 100% (Vintage 90s)")
-                    .description(
-                            "Hàng hiệu chuẩn Auth, da thật bao test lửa. Phong cách Vintage cực bụi. Size L châu Á.")
-                    .condition(ProductCondition.FAIR)
-                    .sellType(SellType.BUY_NOW)
-                    .price(new BigDecimal("950000"))
-                    .quantity(1)
-                    .imageUrl(
-                            "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=1000")
-                    .images(Arrays.asList(
-                            "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=1000",
-                            "https://images.unsplash.com/photo-1520975954732-57dd22299614?auto=format&fit=crop&q=80&w=1000",
-                            "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?auto=format&fit=crop&q=80&w=1000",
-                            "https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9?auto=format&fit=crop&q=80&w=1000"))
-                    .location("Cầu Giấy, Hà Nội")
-                    .status(ProductStatus.ACTIVE)
-                    .build();
-
-            productRepository.saveAll(Arrays.asList(p1, p2));
-            System.out.println("Seeded dummy products with galleries!");
         }
     }
 }

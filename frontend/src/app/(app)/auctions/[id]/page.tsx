@@ -26,10 +26,10 @@ const LiveVideoChat = dynamic(() => import('@/features/live/components/LiveVideo
 export default function LiveRoomPage() {
   const params = useParams();
   const router = useRouter();
-  const auctionSessionId = params.id as string;
+  const productId = params.id as string;
   const { user } = useAuth();
 
-  const { data: liveSession, isLoading, error } = useLiveSession(auctionSessionId);
+  const { data: liveSession, isLoading, error } = useLiveSession(productId);
 
   if (isLoading) {
     return (
@@ -51,7 +51,7 @@ export default function LiveRoomPage() {
           </div>
           <h1 className="text-3xl font-heading font-bold mb-3 text-foreground">Phiên Live không khả dụng</h1>
           <p className="text-muted-foreground mb-8 max-w-sm text-lg">Phiên live này chưa bắt đầu, đã kết thúc hoặc không tồn tại.</p>
-          <Button onClick={() => router.push(`/products/${auctionSessionId}`)} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-[24px] font-bold h-12 px-8">
+          <Button onClick={() => router.push(`/products/${productId}`)} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-[24px] font-bold h-12 px-8">
             Quay lại sản phẩm
           </Button>
         </div>
@@ -66,7 +66,7 @@ export default function LiveRoomPage() {
       <LiveVideoChat
         liveSession={liveSession}
         isHost={isHost}
-        auctionSessionId={auctionSessionId}
+        auctionSessionId={productId}
       />
     </div>
   );

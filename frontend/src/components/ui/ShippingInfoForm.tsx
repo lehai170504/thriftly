@@ -67,11 +67,11 @@ export function ShippingInfoForm({
           if (data && data.length > 0) {
             setMapCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
           }
-        } catch (e) { }
+        } catch { }
       };
       getCoords();
     }
-  }, [showMap]); // We only want this to run once or when showMap changes
+  }, [showMap, address, mapCoordinates]);
 
   return (
     <div className="space-y-6">

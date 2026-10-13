@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { extractError } from '@/lib/utils';
 
 interface VoucherFormModalProps {
   isOpen: boolean;
@@ -16,7 +17,7 @@ interface VoucherFormModalProps {
 export function VoucherFormModal({ isOpen, onClose }: VoucherFormModalProps) {
   const { createVoucher } = useAdminVouchers();
 
-  const [formData, setFormData] = useState<CreateVoucherRequest>({
+  const [formData, setFormData] = useState<CreateVoucherRequest>(() => ({
     code: '',
     type: 'PERCENTAGE',
     discountValue: 0,
@@ -25,7 +26,7 @@ export function VoucherFormModal({ isOpen, onClose }: VoucherFormModalProps) {
     quantity: 100,
     usageLimitPerUser: 1,
     expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] + 'T23:59',
-  });
+  }));
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +34,8 @@ export function VoucherFormModal({ isOpen, onClose }: VoucherFormModalProps) {
       await createVoucher.mutateAsync(formData);
       toast.success('Tạo mã giảm giá thành công');
       onClose();
-    } catch (err: any) {
-      toast.error(err?.response?.data || 'Có lỗi xảy ra');
+    } catch (error) {
+      toast.error(extractError(error, 'Có lỗi xảy ra'));
     }
   };
 

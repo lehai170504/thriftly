@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { normalizePageResponse } from '@/lib/pagination';
 
 export default function AdminWithdrawalsPage() {
   const [page, setPage] = useState(0);
@@ -37,8 +38,7 @@ export default function AdminWithdrawalsPage() {
 
   const { data: withdrawalsData, isLoading } = useAdminWithdrawals(page, size, debouncedSearchTerm);
 
-  const withdrawals: AdminTransactionResponse[] = withdrawalsData?.content || [];
-  const totalPages = withdrawalsData?.page?.totalPages || withdrawalsData?.totalPages || 1;
+  const { content: withdrawals, totalPages, totalElements } = normalizePageResponse<AdminTransactionResponse>(withdrawalsData);
 
   const approveMutation = useApproveWithdrawal();
   const rejectMutation = useRejectWithdrawal();
@@ -90,7 +90,7 @@ export default function AdminWithdrawalsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Duyệt Rút Tiền</h1>
-            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{withdrawalsData?.page?.totalElements || withdrawalsData?.totalElements || withdrawals.length || 0}</span> yêu cầu</p>
+            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{totalElements}</span> yêu cầu</p>
           </div>
         </div>
 

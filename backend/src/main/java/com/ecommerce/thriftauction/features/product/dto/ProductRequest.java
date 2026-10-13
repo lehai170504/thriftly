@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -31,7 +32,7 @@ public class ProductRequest {
 
     private String imageUrl;
     
-    private java.util.List<String> images;
+    private List<String> images;
 
     private String videoUrl;
 

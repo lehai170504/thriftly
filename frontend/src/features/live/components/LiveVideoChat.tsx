@@ -178,15 +178,19 @@ function LiveVideoChat({ liveSession, isHost, auctionSessionId }: LiveVideoChatP
       <div className="flex-1 relative flex flex-col items-center justify-center bg-background">
         {/* Floating Reactions overlay */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
-          {reactions.map((r) => (
-            <div
-              key={r.id}
-              className="absolute text-5xl animate-[floatUp_2s_ease-out_forwards]"
-              style={{ bottom: '10%', left: `${Math.random() * 80 + 10}%` }}
-            >
-              {r.emoji}
-            </div>
-          ))}
+          {reactions.map((r) => {
+            const charSum = r.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const leftPos = 10 + (Math.abs(charSum) % 80);
+            return (
+              <div
+                key={r.id}
+                className="absolute text-5xl animate-[floatUp_2s_ease-out_forwards]"
+                style={{ bottom: '10%', left: `${leftPos}%` }}
+              >
+                {r.emoji}
+              </div>
+            );
+          })}
         </div>
 
         <div className="absolute top-4 left-4 z-10 flex flex-col items-start gap-3 pointer-events-none w-full pr-8">
@@ -210,7 +214,7 @@ function LiveVideoChat({ liveSession, isHost, auctionSessionId }: LiveVideoChatP
 
           {product && (
             <div className="bg-background/50 backdrop-blur-xl border border-border/50 rounded-[24px] p-2 flex gap-3 max-w-[280px] sm:max-w-[320px] pointer-events-auto mt-2 shadow-xl">
-              <img src={product.imageUrl || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?seed=${product.id}`} className="w-14 h-14 rounded-2xl object-cover" />
+              <img src={product.imageUrl || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?seed=${product.id}`} alt={product.title} className="w-14 h-14 rounded-2xl object-cover" />
               <div className="flex flex-col justify-center flex-1 min-w-0 pr-2">
                 <p className="text-foreground font-bold text-sm truncate">{product.title}</p>
                 <p className="text-amber-400 font-black text-sm mt-0.5">{formatCurrency(currentHighestBid || product?.price || 0)}</p>

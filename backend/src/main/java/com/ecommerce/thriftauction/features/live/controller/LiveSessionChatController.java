@@ -2,41 +2,30 @@ package com.ecommerce.thriftauction.features.live.controller;
 
 import com.ecommerce.thriftauction.features.live.dto.LiveChatMessage;
 import com.ecommerce.thriftauction.features.live.repository.LiveSessionRepository;
-import com.ecommerce.thriftauction.core.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor
 public class LiveSessionChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final JwtService jwtService;
     private final LiveSessionRepository liveSessionRepository;
 
     @MessageMapping("/live.chat/{sessionId}")
     public void processMessage(@Payload LiveChatMessage message,
             @DestinationVariable String sessionId,
-            SimpMessageHeaderAccessor headerAccessor) {
+            Principal principal) {
 
-        String authHeader = headerAccessor.getFirstNativeHeader("Authorization");
-        String username = "Anonymous";
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String extracted = jwtService.extractUsername(token);
-            if (extracted != null) {
-                username = extracted;
-            }
-        }
+        String username = principal != null ? principal.getName() : "Anonymous";
 
         if (message.getType() == LiveChatMessage.MessageType.CHAT
                 || message.getType() == LiveChatMessage.MessageType.REACTION) {

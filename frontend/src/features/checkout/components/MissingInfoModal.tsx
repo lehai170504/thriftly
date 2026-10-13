@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,7 +28,7 @@ export function MissingInfoModal({ isOpen, onOpenChange, onSuccess }: MissingInf
   const { user, login } = useAuth();
   const updateProfileMutation = useUpdateProfile();
 
-  const { handleSubmit, watch, setValue, formState: { errors } } = useForm<MissingInfoFormData>({
+  const { handleSubmit, control, setValue, formState: { errors } } = useForm<MissingInfoFormData>({
     resolver: zodResolver(missingInfoSchema),
     defaultValues: {
       fullName: user?.fullName || '',
@@ -37,9 +37,9 @@ export function MissingInfoModal({ isOpen, onOpenChange, onSuccess }: MissingInf
     }
   });
 
-  const fullName = watch('fullName');
-  const phone = watch('phone');
-  const address = watch('address');
+  const fullName = useWatch({ control, name: 'fullName' });
+  const phone = useWatch({ control, name: 'phone' });
+  const address = useWatch({ control, name: 'address' });
 
   const onSubmit = (data: MissingInfoFormData) => {
     updateProfileMutation.mutate({

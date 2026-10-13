@@ -1,16 +1,21 @@
 spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
   datasource:
-    url: jdbc:postgresql://localhost:5432/thrift_auction_test
-    username: postgres
+    url: jdbc:tc:postgresql:15.3:///thrift_auction_test
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     password: postgres
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
   mail:
     host: localhost
     port: 3025
@@ -21,6 +26,8 @@ server:
   port: 0
 
 app:
+  cache:
+    redis-enabled: false
   admin:
     email: admin@test.com
     password: test
@@ -28,16 +35,18 @@ app:
   staff:
     email: staff@test.com
     password: test
+  security:
+    browser:
+      allowed-origins: http://localhost:3000
+      session-cookie-name: THRIFTLY_SESSION
+      secure-cookie: false
+      same-site: Lax
+      trusted-proxies: 127.0.0.1
+      absolute-timeout: 12h
 
 google:
   client:
     id: test-client
-
-application:
-  security:
-    jwt:
-      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-      expiration: 900000
 
 payos:
   client-id: test
@@ -58,6 +67,9 @@ ai:
 ghn:
   token: test
   shop-id: 123
+  webhook-secret: test-webhook-secret
+  order-creation-enabled: false
+  default-shipping-fee: 35000
   api:
     url: http://localhost:8080
 

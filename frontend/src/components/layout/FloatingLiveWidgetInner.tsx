@@ -79,7 +79,7 @@ function FloatingLivePlayer({ session, onDismiss }: { session: LiveSessionRespon
             // MUTE AUDIO in PiP to avoid annoying the user unexpectedly
             <RemoteUser user={hostUser} playVideo={true} playAudio={false} className="w-full h-full object-cover scale-105" />
           ) : (
-            <img src={session.productThumbnail || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?seed=${session.productId}`} className="w-full h-full object-cover opacity-50" />
+            <img src={session.productThumbnail || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?seed=${session.productId}`} alt={session.productTitle || 'Live stream'} className="w-full h-full object-cover opacity-50" />
           )}
 
           {/* Hover Overlay */}

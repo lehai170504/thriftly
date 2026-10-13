@@ -4,16 +4,16 @@ import { LiveSessionResponse } from '../types/live';
 export type { LiveSessionResponse };
 
 export const liveApi = {
-  startLiveSession: async (auctionSessionId: string): Promise<LiveSessionResponse> => {
-    const { data } = await api.post(`/lives/start/${auctionSessionId}`);
+  startLiveSession: async (productId: string): Promise<LiveSessionResponse> => {
+    const { data } = await api.post(`/lives/start/${productId}`);
     return data;
   },
-  endLiveSession: async (auctionSessionId: string, endAuction?: boolean): Promise<LiveSessionResponse> => {
-    const { data } = await api.post(`/lives/end/${auctionSessionId}${endAuction ? '?endAuction=true' : ''}`);
+  endLiveSession: async (productId: string, endAuction?: boolean): Promise<LiveSessionResponse> => {
+    const { data } = await api.post(`/lives/end/${productId}${endAuction ? '?endAuction=true' : ''}`);
     return data;
   },
-  getLiveSession: async (auctionSessionId: string): Promise<LiveSessionResponse> => {
-    const { data } = await api.get(`/lives/auction/${auctionSessionId}`);
+  getLiveSession: async (productId: string): Promise<LiveSessionResponse> => {
+    const { data } = await api.get(`/lives/auction/${productId}`);
     return data;
   },
   getActiveLiveAuctions: async (): Promise<LiveSessionResponse[]> => {

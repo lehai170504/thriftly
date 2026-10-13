@@ -5,7 +5,7 @@ spring:
     password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -34,16 +34,13 @@ app:
   staff:
     email: ${STAFF_EMAIL:staff@thriftly.com}
     password: ${STAFF_PASSWORD:staff123}
+  security:
+    browser:
+      trusted-proxies: ${TRUSTED_PROXY_IPS:127.0.0.1,0:0:0:0:0:0:0:1}
 
 google:
   client:
     id: ${GOOGLE_CLIENT_ID:default-google-client-id}
-
-application:
-  security:
-    jwt:
-      secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-      expiration: 900000
 
 payos:
   client-id: ${PAYOS_CLIENT_ID:default-client-id}
@@ -66,6 +63,9 @@ ai:
 ghn:
   token: ${GHN_TOKEN:fake-token}
   shop-id: ${GHN_SHOP_ID:12345}
+  webhook-secret: ${GHN_WEBHOOK_SECRET:local-ghn-webhook-secret}
+  order-creation-enabled: ${GHN_ORDER_CREATION_ENABLED:false}
+  default-shipping-fee: ${GHN_DEFAULT_SHIPPING_FEE:35000}
   api:
     url: ${GHN_API_URL:https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create}
 

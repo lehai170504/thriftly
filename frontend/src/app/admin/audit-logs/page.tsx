@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuditLogs } from '@/features/admin/hooks/useAuditLogs';
+import { normalizePageResponse } from '@/lib/pagination';
 import {
   Shield, Search, ChevronLeft, ChevronRight, Clock,
   User, Filter, ShieldAlert, Layers, Activity,
@@ -51,9 +52,10 @@ export default function AuditLogsPage() {
 
   const { data, isLoading } = useAuditLogs(page, search, actionFilter, roleFilter);
 
-  const logs: AuditLog[] = data?.content ?? [];
-  const totalPages: number = data?.totalPages ?? 0;
-  const totalElements: number = data?.totalElements ?? 0;
+  const normalized = normalizePageResponse<AuditLog>(data);
+  const logs: AuditLog[] = normalized.content;
+  const totalPages: number = normalized.totalPages;
+  const totalElements: number = normalized.totalElements;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

@@ -5,6 +5,8 @@ import com.ecommerce.thriftauction.features.auth.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "reviews")
@@ -45,7 +47,7 @@ public class Review {
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @Builder.Default
-    private java.util.Set<User> likedByUsers = new java.util.HashSet<>();
+    private Set<User> likedByUsers = new HashSet<>();
 
     private LocalDateTime createdAt;
 

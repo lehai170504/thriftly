@@ -9,14 +9,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb';
+import { normalizePageResponse } from '@/lib/pagination';
 
 export default function FavoritesPage() {
   const [page, setPage] = useState(0);
   const { data: productsPage, isLoading, error } = useFavoriteProducts(page, 12);
 
-  const products = productsPage?.content || [];
-  const totalPages = productsPage?.totalPages || 1;
-  const totalElements = productsPage?.totalElements || 0;
+  const normalized = normalizePageResponse(productsPage);
+  const products = normalized.content;
+  const totalPages = normalized.totalPages;
+  const totalElements = normalized.totalElements;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 min-h-[70vh]">

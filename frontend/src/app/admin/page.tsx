@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { LayoutDashboard, Users, ShoppingBag, Wallet, TrendingUp } from 'lucide-react';
 import { useAdminDashboard } from '@/features/admin/hooks/useAdminDashboard';
+import { useAdminOrders } from '@/features/admin/hooks/useAdminOrders';
 import { formatCurrency } from '@/lib/utils';
 import {
   AreaChart,
@@ -162,7 +163,6 @@ export default function AdminDashboardPage() {
 }
 
 function RecentOrders() {
-  const { useAdminOrders } = require('@/features/admin/hooks/useAdminOrders');
   const { data: ordersData, isLoading } = useAdminOrders(0, 5, '');
   const orders = ordersData?.content || [];
 
@@ -198,9 +198,9 @@ function RecentOrders() {
                     <td className="px-4 py-3 font-bold text-primary">{formatCurrency(order.totalAmount)}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${order.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400' :
-                          order.status === 'DISPUTED' ? 'bg-red-500/10 text-red-400' :
-                            order.status === 'PAID' ? 'bg-blue-500/10 text-blue-400' :
-                              'bg-orange-500/10 text-orange-400'
+                        order.status === 'DISPUTED' ? 'bg-red-500/10 text-red-400' :
+                          order.status === 'PAID' ? 'bg-blue-500/10 text-blue-400' :
+                            'bg-orange-500/10 text-orange-400'
                         }`}>
                         {order.status}
                       </span>

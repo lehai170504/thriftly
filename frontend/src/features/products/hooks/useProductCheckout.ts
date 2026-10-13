@@ -39,7 +39,7 @@ export function useProductCheckout(product: Product | null | undefined, user: an
         }
       );
     }
-  }, [product?.id, appliedVoucherCode, purchaseQuantity, user]);
+  }, [product, user, isSeller, previewMutation, appliedVoucherCode, purchaseQuantity]);
 
   const handleApplyVoucher = (codeParam?: string) => {
     const codeToApply = (codeParam !== undefined ? codeParam : voucherCode).trim();

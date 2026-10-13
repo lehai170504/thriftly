@@ -6,6 +6,7 @@ import { LockKeyhole } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { extractError } from '@/lib/utils';
 
 export function ChangePasswordForm() {
   const changePasswordMutation = useChangePassword();
@@ -34,9 +35,8 @@ export function ChangePasswordForm() {
           setNewPassword('');
           setConfirmPassword('');
         },
-        onError: (err: any) => {
-          const msg = err.response?.data || err.message;
-          toast.error('Lỗi: ' + msg);
+        onError: (error) => {
+          toast.error('Lỗi: ' + extractError(error));
         }
       }
     );

@@ -18,6 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimitInterceptor implements HandlerInterceptor {
 
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private final ClientIpResolver clientIpResolver;
+
+    public RateLimitInterceptor(ClientIpResolver clientIpResolver) {
+        this.clientIpResolver = clientIpResolver;
+    }
 
     public Bucket resolveBucket(String ip) {
         return cache.computeIfAbsent(ip, this::newBucket);
@@ -32,10 +37,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null) {
-            ip = request.getRemoteAddr();
-        }
+        String ip = clientIpResolver.resolve(request);
 
         Bucket bucket = resolveBucket(ip);
 

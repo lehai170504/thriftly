@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -23,5 +24,5 @@ public class LiveSessionDto {
     private Integer viewerCount;
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
-    private java.math.BigDecimal currentPrice;
+    private BigDecimal currentPrice;
 }

@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useDisputedOrders, useResolveDispute } from '@/features/orders/hooks/useOrders';
 import { Order } from '@/features/orders/types/order';
-import { formatCurrency } from '@/lib/utils';
+import { extractError, formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ShieldAlert, Check, X, Scale, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { normalizePageResponse } from '@/lib/pagination';
 
 import { OrderListSkeleton } from '@/components/ui/loading-skeletons';
 
@@ -24,8 +25,8 @@ export default function AdminDisputesPage() {
   }, [searchTerm]);
 
   const { data: ordersData, isLoading } = useDisputedOrders(page, size, debouncedSearchTerm);
-  const orders: Order[] = ordersData?.content || [];
-  const totalPages = ordersData?.page?.totalPages || ordersData?.totalPages || 1;
+  const { content: orders, totalPages, totalElements } = normalizePageResponse<Order>(ordersData);
+
   const resolveMutation = useResolveDispute();
 
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
@@ -52,8 +53,8 @@ export default function AdminDisputesPage() {
           toast.success('Đã giải quyết khiếu nại thành công!');
           setResolveModalOpen(false);
         },
-        onError: (err: any) => {
-          toast.error(err.response?.data || 'Có lỗi xảy ra khi giải quyết.');
+        onError: (error) => {
+          toast.error(extractError(error, 'Có lỗi xảy ra khi giải quyết.'));
         }
       }
     );
@@ -68,7 +69,7 @@ export default function AdminDisputesPage() {
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Giải quyết Khiếu nại</h1>
-            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{ordersData?.page?.totalElements || ordersData?.totalElements || orders.length || 0}</span> khiếu nại</p>
+            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{totalElements}</span> khiếu nại</p>
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { voucherApi } from '../api/voucherApi';
 import { Voucher, CreateVoucherDTO, VoucherUsage } from '../types/voucher';
 import { toast } from 'sonner';
+import { extractError } from '@/lib/utils';
 export type { Voucher, CreateVoucherDTO, VoucherUsage };
 
 export const useAvailableVouchers = (sellerId?: string) => {
@@ -34,8 +35,8 @@ export const useCreateVoucher = () => {
       queryClient.invalidateQueries({ queryKey: ['my-vouchers'] });
       toast.success('Tạo mã giảm giá thành công!');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data || 'Có lỗi xảy ra khi tạo mã giảm giá');
+    onError: (error) => {
+      toast.error(extractError(error, 'Có lỗi xảy ra khi tạo mã giảm giá'));
     }
   });
 };
@@ -51,8 +52,8 @@ export const useToggleVoucherStatus = () => {
       queryClient.invalidateQueries({ queryKey: ['my-vouchers'] });
       toast.success('Cập nhật trạng thái thành công!');
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data || 'Có lỗi xảy ra khi cập nhật');
+    onError: (error) => {
+      toast.error(extractError(error, 'Có lỗi xảy ra khi cập nhật'));
     }
   });
 };

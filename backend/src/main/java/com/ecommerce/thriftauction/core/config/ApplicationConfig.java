@@ -1,5 +1,6 @@
 package com.ecommerce.thriftauction.core.config;
 
+import com.ecommerce.thriftauction.core.security.UserDetailsImpl;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,7 @@ public class ApplicationConfig {
     public UserDetailsService userDetailsService() {
         return identifier -> repository.findByEmail(identifier)
                 .or(() -> repository.findByUsername(identifier))
-                .map(user -> new com.ecommerce.thriftauction.core.security.UserDetailsImpl(user))
+                .map(UserDetailsImpl::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 

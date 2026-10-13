@@ -1,4 +1,23 @@
 spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:true}
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
   jpa:
     hibernate:
       ddl-auto: validate
@@ -9,7 +28,46 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+
+app:
+  admin:
+    allowed-ips: ${ADMIN_ALLOWED_IPS}
+  security:
+    browser:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS}
+      secure-cookie: true
+      same-site: ${SESSION_COOKIE_SAME_SITE:Lax}
+      trusted-proxies: ${TRUSTED_PROXY_IPS}
+
+google:
+  client:
+    id: ${GOOGLE_CLIENT_ID}
+
+payos:
+  client-id: ${PAYOS_CLIENT_ID}
+  api-key: ${PAYOS_API_KEY}
+  checksum-key: ${PAYOS_CHECKSUM_KEY}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
+
+ai:
+  openai:
+    api-key: ${AI_API_KEY}
+    url: ${AI_API_URL}
+    model: ${AI_MODEL_NAME}
+
+ghn:
+  token: ${GHN_TOKEN}
+  shop-id: ${GHN_SHOP_ID}
+  webhook-secret: ${GHN_WEBHOOK_SECRET}
+  order-creation-enabled: ${GHN_ORDER_CREATION_ENABLED:false}
+  default-shipping-fee: ${GHN_DEFAULT_SHIPPING_FEE}
+  api:
+    url: ${GHN_API_URL}
 
 springdoc:
   swagger-ui:

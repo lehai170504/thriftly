@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -124,7 +125,7 @@ public class LiveSessionService {
 
     public LiveSessionDto mapToDto(LiveSession session) {
         String thumbnail = session.getAuctionSession().getProduct().getImageUrl();
-        java.math.BigDecimal currentPrice = session.getAuctionSession().getCurrentHighestPrice() != null
+        BigDecimal currentPrice = session.getAuctionSession().getCurrentHighestPrice() != null
                 ? session.getAuctionSession().getCurrentHighestPrice()
                 : session.getAuctionSession().getStartingPrice();
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAdminOrders } from '@/features/admin/hooks/useAdminOrders';
 import { Order } from '@/features/orders/types/order';
 import { formatCurrency, downloadCSV } from '@/lib/utils';
+import { normalizePageResponse } from '@/lib/pagination';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingBag, Package, Clock } from 'lucide-react';
@@ -26,8 +27,10 @@ export default function AdminOrdersPage() {
 
   const { data: ordersData, isLoading } = useAdminOrders(page, size, debouncedSearchTerm);
 
-  const orders: Order[] = ordersData?.content || [];
-  const totalPages = ordersData?.page?.totalPages || ordersData?.totalPages || 1;
+  const normalized = normalizePageResponse(ordersData);
+  const orders: Order[] = normalized.content;
+  const totalPages = normalized.totalPages;
+  const totalElements = normalized.totalElements;
 
   if (isLoading) {
     return <OrderListSkeleton title="Quản lý Đơn hàng" subtitle="Đang tải danh sách đơn hàng..." />;
@@ -61,7 +64,7 @@ export default function AdminOrdersPage() {
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Quản lý Đơn hàng</h1>
-            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{ordersData?.page?.totalElements || ordersData?.totalElements || orders.length || 0}</span> đơn hàng</p>
+            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{totalElements}</span> đơn hàng</p>
           </div>
         </div>
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <conversionRule conversionWord="mask" converterClass="com.ecommerce.thriftauction.core.logging.MaskingMessageConverter" />
+
+    <springProfile name="!prod">
+        <appender name="CONSOLE_DEV" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [traceId=%X{correlationId}] - %mask(%msg)%n</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_DEV" />
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <appender name="CONSOLE_PROD" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}","level":"%level","thread":"%thread","logger":"%logger{36}","correlationId":"%X{correlationId}","message":"%mask(%msg)","exception":"%rEx"}%n</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_PROD" />
+        </root>
+    </springProfile>
+</configuration>

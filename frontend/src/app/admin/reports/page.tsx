@@ -8,6 +8,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { normalizePageResponse } from '@/lib/pagination';
 
 export default function AdminReportsPage() {
   const [page, setPage] = useState(0);
@@ -16,8 +17,10 @@ export default function AdminReportsPage() {
   const { data: reportsData, isLoading } = useAdminReports(page, size);
   const updateStatusMutation = useUpdateReportStatus();
 
-  const reports = reportsData?.content || [];
-  const totalPages = reportsData?.page?.totalPages || reportsData?.totalPages || 1;
+  const normalized = normalizePageResponse(reportsData);
+  const reports = normalized.content;
+  const totalPages = normalized.totalPages;
+  const totalElements = normalized.totalElements;
 
   const handleUpdateStatus = (id: string, status: string) => {
     updateStatusMutation.mutate({ id, status }, {
@@ -48,7 +51,7 @@ export default function AdminReportsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Trung tâm Báo cáo</h1>
-            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{reportsData?.page?.totalElements || reportsData?.totalElements || reports.length || 0}</span> báo cáo</p>
+            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{totalElements}</span> báo cáo</p>
           </div>
         </div>
       </div>

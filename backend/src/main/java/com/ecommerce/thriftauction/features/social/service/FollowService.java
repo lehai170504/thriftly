@@ -1,6 +1,8 @@
 package com.ecommerce.thriftauction.features.social.service;
 
+import com.ecommerce.thriftauction.features.auth.dto.UserResponse;
 import com.ecommerce.thriftauction.features.notification.service.NotificationService;
+import com.ecommerce.thriftauction.features.notification.entity.NotificationType;
 import com.ecommerce.thriftauction.features.social.entity.Follow;
 import com.ecommerce.thriftauction.features.auth.entity.User;
 import com.ecommerce.thriftauction.features.social.repository.FollowRepository;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,7 +55,7 @@ public class FollowService {
                     following,
                     "Có người theo dõi mới!",
                     follower.getFullName() + " vừa nhấn theo dõi bạn.",
-                    com.ecommerce.thriftauction.features.notification.entity.NotificationType.SYSTEM,
+                    NotificationType.SYSTEM,
                     follower.getId());
 
             response.put("isFollowing", true);
@@ -93,14 +96,14 @@ public class FollowService {
     }
 
     @Transactional(readOnly = true)
-    public java.util.List<com.ecommerce.thriftauction.features.auth.dto.UserResponse> getFollowers(String username) {
+    public List<UserResponse> getFollowers(String username) {
         User following = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return followRepository.findByFollowing(following).stream()
                 .map(f -> {
                     User u = f.getFollower();
-                    return com.ecommerce.thriftauction.features.auth.dto.UserResponse.builder()
+                    return UserResponse.builder()
                             .id(u.getId())
                             .username(u.getUsername())
                             .fullName(u.getFullName())

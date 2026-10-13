@@ -1,24 +1,29 @@
-// Shared pagination type used across multiple features
+export interface PageMetadata {
+  size: number;
+  number: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface PageResponse<T> {
   content: T[];
-
-  // Spring Boot <= 3.2 format
+  page?: PageMetadata;
   totalPages?: number;
   totalElements?: number;
-  size?: number;
   number?: number;
-  last?: boolean;
+  size?: number;
   first?: boolean;
-  pageable?: {
-    pageNumber: number;
-    pageSize: number;
-  };
+  last?: boolean;
+}
 
-  // Spring Boot >= 3.3 format
-  page?: {
-    size: number;
-    number: number;
-    totalElements: number;
-    totalPages: number;
-  };
+export interface NormalizedPage<T> {
+  content: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isFirst: boolean;
+  isLast: boolean;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }

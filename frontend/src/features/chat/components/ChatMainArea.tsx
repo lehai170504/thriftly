@@ -12,6 +12,8 @@ import { MoreVertical, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useBlockStatus, useBlockUser, useUnblockUser } from '@/features/chat/hooks/useBlockUser';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { extractError } from '@/lib/utils';
+import { IMAGE_ACCEPT, validateImageFile } from '@/features/media/validation/mediaValidation';
 
 interface ChatMainAreaProps {
   activeUser: ConversationResponse | null;
@@ -86,6 +88,13 @@ export const ChatMainArea = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    try {
+      validateImageFile(file);
+    } catch (error) {
+      toast.error(extractError(error, 'File ảnh không hợp lệ'));
+      return;
+    }
+
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Kích thước ảnh phải nhỏ hơn 5MB');
       return;
@@ -105,7 +114,7 @@ export const ChatMainArea = ({
       // Send message with image URL
       handleSend(undefined, res.data.url);
     } catch (error) {
-      toast.error('Lỗi khi tải ảnh lên. Vui lòng thử lại.');
+      toast.error(extractError(error, 'Lỗi khi tải ảnh lên. Vui lòng thử lại.'));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -278,7 +287,7 @@ export const ChatMainArea = ({
               type="file"
               ref={fileInputRef}
               onChange={handleImageUpload}
-              accept="image/*"
+              accept={IMAGE_ACCEPT}
               className="hidden"
             />
             <Button

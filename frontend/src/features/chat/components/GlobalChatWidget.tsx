@@ -31,7 +31,7 @@ export function GlobalChatWidget() {
   const { sendMessage } = useChatSocket(isAuthenticated, user?.username, pathname.includes('/chat'));
   const { data: conversations, isLoading: isConversationsLoading } = useChatConversations(isAuthenticated);
   const { data: history, isLoading: isHistoryLoading } = useChatHistory(activeUser?.username);
-  const markAsReadMutation = useMarkAsRead();
+  const { mutate: markAsRead } = useMarkAsRead();
   const deleteConversationMutation = useDeleteConversation();
 
   useEffect(() => {
@@ -40,10 +40,10 @@ export function GlobalChatWidget() {
     if (isOpen && activeUser?.username) {
       const hasUnread = history?.some(msg => !msg.isRead && msg.senderUsername !== user?.username);
       if (hasUnread) {
-        markAsReadMutation.mutate(activeUser.username);
+        markAsRead(activeUser.username);
       }
     }
-  }, [history, isOpen, activeUser, user?.username]);
+  }, [history, isOpen, activeUser, user?.username, markAsRead]);
 
   if (!isAuthenticated || pathname === '/chat' || pathname.startsWith('/admin') || pathname.startsWith('/portal-secure-entry')) return null;
 
@@ -113,7 +113,7 @@ export function GlobalChatWidget() {
                       onClick={() => {
                         setActiveUser(c);
                         if (c.unreadCount && c.unreadCount > 0) {
-                          markAsReadMutation.mutate(c.username);
+                          markAsRead(c.username);
                         }
                       }}
                       className="group relative flex items-center gap-3 p-3 hover:bg-accent rounded-xl cursor-pointer transition-colors"

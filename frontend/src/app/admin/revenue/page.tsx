@@ -6,6 +6,7 @@ import { LineChart, DollarSign, ArrowUpRight, Activity } from 'lucide-react';
 import { formatCurrency, downloadCSV } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { normalizePageResponse } from '@/lib/pagination';
 
 export default function AdminRevenuePage() {
   const [page, setPage] = useState(0);
@@ -14,8 +15,7 @@ export default function AdminRevenuePage() {
   const { data: stats, isLoading: isStatsLoading } = useAdminRevenueStats();
   const { data: transactionsData, isLoading: isTxLoading } = useAdminRevenueTransactions(page, size);
 
-  const transactions = transactionsData?.content || [];
-  const totalPages = transactionsData?.page?.totalPages || transactionsData?.totalPages || 1;
+  const { content: transactions, totalPages } = normalizePageResponse(transactionsData);
 
   if (isStatsLoading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Đang tải dữ liệu doanh thu...</div>;
 

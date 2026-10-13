@@ -17,10 +17,7 @@ export default function LiveFeedClient() {
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const clientRef = useRef<any>(null);
-  if (typeof window !== 'undefined' && !clientRef.current) {
-    clientRef.current = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-  }
+  const [client] = useState(() => (typeof window !== 'undefined' ? AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' }) : null));
 
   const { data: activeLiveSessions = [], isLoading } = useActiveLiveAuctions();
 
@@ -65,12 +62,12 @@ export default function LiveFeedClient() {
     );
   }
 
-  if (!clientRef.current) return null;
+  if (!client) return null;
 
   const activeSession = activeLiveSessions[activeIndex];
 
   return (
-    <AgoraRTCProvider client={clientRef.current}>
+    <AgoraRTCProvider client={client}>
       <div className="h-[calc(100vh-4rem)] w-full bg-zinc-950 flex justify-center items-center relative overflow-hidden">
         {/* Blurred Background */}
         {activeSession && (

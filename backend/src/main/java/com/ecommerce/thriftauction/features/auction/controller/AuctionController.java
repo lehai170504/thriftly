@@ -4,20 +4,19 @@ import com.ecommerce.thriftauction.features.common.dto.BidRequest;
 import com.ecommerce.thriftauction.features.common.dto.BidResponse;
 import com.ecommerce.thriftauction.features.auction.service.AuctionService;
 import com.ecommerce.thriftauction.features.order.service.OrderService;
-import com.ecommerce.thriftauction.core.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.Map;
+import java.security.Principal;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,28 +26,17 @@ public class AuctionController {
     private final AuctionService auctionService;
     private final OrderService orderService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final JwtService jwtService;
 
     @MessageMapping("/auction/bid")
-    public void placeBid(@Payload BidRequest request,
-            @Header(value = "Authorization", defaultValue = "") String authHeader,
-            SimpMessageHeaderAccessor headerAccessor) {
+    public void placeBid(@Payload BidRequest request, Principal principal) {
         System.out.println(
                 "Received bid request for: " + request.getAuctionSessionId() + " amount: " + request.getBidAmount());
         try {
-            if (authHeader == null || authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
-                authHeader = headerAccessor.getFirstNativeHeader("Authorization");
-            }
-            if (authHeader == null || authHeader.isEmpty() || !authHeader.startsWith("Bearer ")) {
-                System.out.println("Unauthorized STOMP request. Auth header: " + authHeader);
+            if (principal == null) {
+                System.out.println("Unauthorized STOMP request");
                 return;
             }
-            String token = authHeader.substring(7);
-            String username = jwtService.extractUsername(token);
-            if (username == null) {
-                System.out.println("Username could not be extracted from token");
-                return;
-            }
+            String username = principal.getName();
 
             BidResponse response = auctionService.placeBid(request, username);
 
@@ -58,15 +46,8 @@ public class AuctionController {
             e.printStackTrace();
             System.err.println("Bid Error: " + e.getMessage());
 
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                try {
-                    String username = jwtService.extractUsername(authHeader.substring(7));
-                    if (username != null) {
-                        messagingTemplate.convertAndSendToUser(username, "/queue/errors", e.getMessage());
-                    }
-                } catch (Exception ex) {
-                    System.err.println("Could not send error back: " + ex.getMessage());
-                }
+            if (principal != null) {
+                messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/errors", e.getMessage());
             }
         }
     }
@@ -87,7 +68,11 @@ public class AuctionController {
     @PostMapping("/api/v1/auctions/{productId}/end")
     public ResponseEntity<?> endAuction(@PathVariable String productId) {
         try {
-            return ResponseEntity.ok(orderService.endAuctionAndCreateOrder(productId));
+            var response = orderService.endAuctionAndCreateOrder(productId);
+            if (response == null) {
+                return ResponseEntity.ok(java.util.Map.of("message", "Phiên đấu giá đã kết thúc thành công."));
+            }
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -96,13 +81,10 @@ public class AuctionController {
     @Operation(summary = "Kiểm tra trạng thái đặt cọc", description = "Kiểm tra xem người dùng hiện tại đã đặt cọc để tham gia đấu giá sản phẩm này hay chưa.")
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/api/v1/auctions/{productId}/deposit-status")
-    public ResponseEntity<Boolean> getDepositStatus(@PathVariable String productId,
-            @RequestHeader(value = "Authorization", defaultValue = "") String authHeader) {
+    public ResponseEntity<Boolean> getDepositStatus(@PathVariable String productId, Authentication authentication) {
         try {
-            if (authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-                String username = jwtService.extractUsername(token);
-                boolean hasDeposited = auctionService.hasDeposited(productId, username);
+            if (authentication != null) {
+                boolean hasDeposited = auctionService.hasDeposited(productId, authentication.getName());
                 return ResponseEntity.ok(hasDeposited);
             }
             return ResponseEntity.ok(false);
@@ -114,12 +96,9 @@ public class AuctionController {
     @Operation(summary = "Đặt cọc tham gia đấu giá", description = "Trừ tiền cọc từ ví của người dùng để đủ điều kiện tham gia đấu giá sản phẩm.")
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/api/v1/auctions/{productId}/deposit")
-    public ResponseEntity<?> placeDeposit(@PathVariable String productId,
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> placeDeposit(@PathVariable String productId, Authentication authentication) {
         try {
-            String token = authHeader.substring(7);
-            String username = jwtService.extractUsername(token);
-            auctionService.placeDeposit(productId, username);
+            auctionService.placeDeposit(productId, authentication.getName());
             return ResponseEntity.ok(Map.of("message", "Đặt cọc thành công"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

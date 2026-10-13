@@ -5,6 +5,8 @@ import com.ecommerce.thriftauction.features.chat.entity.ChatMessage;
 import com.ecommerce.thriftauction.features.auth.entity.User;
 import com.ecommerce.thriftauction.features.chat.repository.ChatMessageRepository;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
+import com.ecommerce.thriftauction.features.social.repository.BlockedUserRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -14,13 +16,13 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Chat")
+@Tag(name = "Chat")
 public class ChatController {
 
         private final SimpMessagingTemplate messagingTemplate;
         private final ChatMessageRepository chatMessageRepository;
         private final UserRepository userRepository;
-        private final com.ecommerce.thriftauction.features.social.repository.BlockedUserRepository blockedUserRepository;
+        private final BlockedUserRepository blockedUserRepository;
 
         @MessageMapping("/chat.sendMessage")
         public void sendMessage(@Payload ChatMessageDto chatMessageDto, SimpMessageHeaderAccessor headerAccessor) {

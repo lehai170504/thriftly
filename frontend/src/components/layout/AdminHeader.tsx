@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { useAdminSearch, useAdminNotifications } from '@/features/admin/hooks/useAdminHeaderHooks';
+import { normalizePageResponse } from '@/lib/pagination';
 import { ThemeToggle } from './ThemeToggle';
 
 export function AdminHeader() {
@@ -38,8 +39,8 @@ export function AdminHeader() {
 
   const { withdrawalsData, disputesData } = useAdminNotifications();
 
-  const pendingWithdrawalsCount = (withdrawalsData as any)?.totalElements || (withdrawalsData as any)?.content?.length || 0;
-  const pendingDisputesCount = (disputesData as any)?.totalElements || (disputesData as any)?.content?.length || 0;
+  const pendingWithdrawalsCount = normalizePageResponse(withdrawalsData).totalElements;
+  const pendingDisputesCount = normalizePageResponse(disputesData).totalElements;
   const totalNotifications = pendingWithdrawalsCount + pendingDisputesCount;
 
   const handleResultClick = (type: 'user' | 'order' | 'product', id?: string) => {

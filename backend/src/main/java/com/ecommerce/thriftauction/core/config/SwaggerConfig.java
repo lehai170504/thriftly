@@ -9,9 +9,14 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import com.ecommerce.thriftauction.core.config.properties.BrowserSecurityProperties;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
+@RequiredArgsConstructor
 public class SwaggerConfig {
+
+        private final BrowserSecurityProperties browserSecurityProperties;
 
         @Bean
         public OpenAPI openAPI() {
@@ -32,8 +37,9 @@ public class SwaggerConfig {
 
         private SecurityScheme createAPIKeyScheme() {
                 return new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .bearerFormat("JWT")
-                                .scheme("bearer");
+                                .type(SecurityScheme.Type.APIKEY)
+                                .in(SecurityScheme.In.COOKIE)
+                                .name(browserSecurityProperties.getSessionCookieName())
+                                .description("Opaque HttpOnly browser session cookie");
         }
 }

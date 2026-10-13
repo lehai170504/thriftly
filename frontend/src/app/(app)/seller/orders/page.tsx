@@ -2,7 +2,7 @@
 
 import { useMySales, useConfirmReturnReceived } from '@/features/orders/hooks/useOrders';
 import { Order } from '@/features/orders/api/orderApi';
-import { formatCurrency } from '@/lib/utils';
+import { extractError, formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Package, Store, Star } from 'lucide-react';
@@ -22,8 +22,8 @@ export default function SellerOrdersPage() {
       onSuccess: () => {
         toast.success('Đã xác nhận nhận hàng trả! Hệ thống đang hoàn tiền cho người mua.');
       },
-      onError: (err: any) => {
-        toast.error(err.response?.data || 'Có lỗi xảy ra.');
+      onError: (error) => {
+        toast.error(extractError(error, 'Có lỗi xảy ra.'));
       }
     });
   };

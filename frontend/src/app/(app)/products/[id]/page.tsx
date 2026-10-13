@@ -9,11 +9,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const resolvedParams = await params;
     const id = resolvedParams.id;
-    // We fetch data directly from our Spring Boot backend
-    // Since this runs on the server, we use the internal Docker URL if available, or just the public API URL
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+    const baseApi = (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/+$/, '');
+    const endpoint = baseApi.endsWith('/api/v1') ? `${baseApi}/products/${id}` : `${baseApi}/api/v1/products/${id}`;
 
-    const res = await fetch(`${apiUrl}/api/v1/products/${id}`, { next: { revalidate: 60 } }); // Cache for 60 seconds
+    const res = await fetch(endpoint, { next: { revalidate: 60 } });
 
     if (!res.ok) {
       return {
@@ -22,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     const data = await res.json();
-    const product = data.data; // our generic ApiResponse wraps data in 'data'
+    const product = data?.data || data;
 
     if (!product) {
       return { title: 'Sản phẩm không tồn tại | ThriftSwap' };

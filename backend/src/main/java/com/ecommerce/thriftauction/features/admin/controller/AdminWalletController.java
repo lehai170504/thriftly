@@ -89,6 +89,7 @@ public class AdminWalletController {
     @Operation(summary = "Điều chỉnh số dư", description = "Admin nạp/trừ tiền thủ công cho người dùng.")
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/users/{userId}/adjust-balance")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TransactionResponse> adjustUserBalance(
             @PathVariable String userId,
             @RequestParam BigDecimal amount,

@@ -1,0 +1,139 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: thriftly-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?DB_NAME is required}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    expose:
+      - "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME:?DB_USERNAME is required} -d ${DB_NAME:?DB_NAME is required}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+
+  redis:
+    image: redis:7-alpine
+    container_name: thriftly-redis
+    restart: unless-stopped
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD is required}", "--maxmemory", "512mb", "--maxmemory-policy", "volatile-lru", "--appendonly", "yes" ]
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:?REDIS_PASSWORD is required}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thriftly-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: 8080
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:?DB_NAME is required}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DB_POOL_MAX_SIZE: ${DB_POOL_MAX_SIZE:-20}
+      DB_POOL_MIN_IDLE: ${DB_POOL_MIN_IDLE:-5}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      REDIS_SSL_ENABLED: "false"
+      REDIS_CONNECT_TIMEOUT: ${REDIS_CONNECT_TIMEOUT:-2s}
+      REDIS_TIMEOUT: ${REDIS_TIMEOUT:-2s}
+      SESSION_REDIS_NAMESPACE: ${SESSION_REDIS_NAMESPACE:-thriftly:session}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?CORS_ALLOWED_ORIGINS is required}
+      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL is required}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-THRIFTLY_SESSION}
+      SESSION_COOKIE_DOMAIN: ${SESSION_COOKIE_DOMAIN:-}
+      SESSION_COOKIE_SAME_SITE: ${SESSION_COOKIE_SAME_SITE:-Lax}
+      SESSION_IDLE_TIMEOUT: ${SESSION_IDLE_TIMEOUT:-30m}
+      SESSION_ABSOLUTE_TIMEOUT: ${SESSION_ABSOLUTE_TIMEOUT:-12h}
+      ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:?ADMIN_ALLOWED_IPS is required}
+      TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS:?TRUSTED_PROXY_IPS is required}
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:?SPRING_MAIL_HOST is required}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:?SPRING_MAIL_USERNAME is required}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:?SPRING_MAIL_PASSWORD is required}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
+      PAYOS_CLIENT_ID: ${PAYOS_CLIENT_ID:?PAYOS_CLIENT_ID is required}
+      PAYOS_API_KEY: ${PAYOS_API_KEY:?PAYOS_API_KEY is required}
+      PAYOS_CHECKSUM_KEY: ${PAYOS_CHECKSUM_KEY:?PAYOS_CHECKSUM_KEY is required}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:?CLOUDINARY_CLOUD_NAME is required}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:?CLOUDINARY_API_KEY is required}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:?CLOUDINARY_API_SECRET is required}
+      AI_API_KEY: ${AI_API_KEY:?AI_API_KEY is required}
+      AI_API_URL: ${AI_API_URL:-https://api.groq.com/openai/v1/chat/completions}
+      AI_MODEL_NAME: ${AI_MODEL_NAME:-llama3-8b-8192}
+      GHN_TOKEN: ${GHN_TOKEN:?GHN_TOKEN is required}
+      GHN_SHOP_ID: ${GHN_SHOP_ID:?GHN_SHOP_ID is required}
+      GHN_WEBHOOK_SECRET: ${GHN_WEBHOOK_SECRET:?GHN_WEBHOOK_SECRET is required}
+      GHN_API_URL: ${GHN_API_URL:-https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/create}
+      GHN_ORDER_CREATION_ENABLED: ${GHN_ORDER_CREATION_ENABLED:-false}
+      GHN_DEFAULT_SHIPPING_FEE: ${GHN_DEFAULT_SHIPPING_FEE:?GHN_DEFAULT_SHIPPING_FEE is required}
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?NEXT_PUBLIC_API_URL is required at build time}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:?NEXT_PUBLIC_WS_URL is required at build time}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:?NEXT_PUBLIC_GOOGLE_CLIENT_ID is required at build time}
+        NEXT_PUBLIC_FACEBOOK_APP_ID: ${NEXT_PUBLIC_FACEBOOK_APP_ID:-}
+        NEXT_PUBLIC_AGORA_APP_ID: ${NEXT_PUBLIC_AGORA_APP_ID:?NEXT_PUBLIC_AGORA_APP_ID is required at build time}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
+        NEXT_PUBLIC_FB_PIXEL_ID: ${NEXT_PUBLIC_FB_PIXEL_ID:-}
+    container_name: thriftly-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      INTERNAL_API_URL: http://backend:8080/api/v1
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { normalizePageResponse } from '@/lib/pagination';
 
 export default function AdminProductsPage() {
   const [page, setPage] = useState(0);
@@ -54,9 +55,10 @@ export default function AdminProductsPage() {
     });
   };
 
-  const products = productsData?.content || [];
-  const totalPages = productsData?.page?.totalPages || productsData?.totalPages || 1;
-  const totalElements = productsData?.page?.totalElements || productsData?.totalElements || 0;
+  const normalized = normalizePageResponse(productsData);
+  const products = normalized.content;
+  const totalPages = normalized.totalPages;
+  const totalElements = normalized.totalElements;
 
   if (isLoading) return <div className="p-8 text-center text-neutral-500 font-medium">Đang tải danh sách sản phẩm...</div>;
 

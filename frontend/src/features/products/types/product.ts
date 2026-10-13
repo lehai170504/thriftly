@@ -9,7 +9,7 @@ export interface Category {
 
 export type ProductCondition = 'NEW' | 'LIKE_NEW' | 'GOOD' | 'FAIR';
 export type SellType = 'BUY_NOW' | 'AUCTION';
-export type ProductStatus = 'ACTIVE' | 'SOLD' | 'CANCELLED' | 'HIDDEN' | 'DELETED';
+export type ProductStatus = 'ACTIVE' | 'SOLD' | 'CANCELLED' | 'HIDDEN' | 'DELETED' | 'BANNED';
 
 export interface Product {
   id: string;
@@ -43,6 +43,7 @@ export interface CreateProductRequest {
   title: string;
   description: string;
   price: number;
+  quantity?: number;
   categoryId: string;
   condition: ProductCondition;
   sellType: SellType;

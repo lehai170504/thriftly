@@ -6,9 +6,10 @@ export const useStartLiveSession = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (auctionSessionId: string) => liveApi.startLiveSession(auctionSessionId),
-    onSuccess: (data) => {
-      queryClient.setQueryData(['liveSession', data.auctionSessionId], data);
+    mutationFn: (productId: string) => liveApi.startLiveSession(productId),
+    onSuccess: (data, productId) => {
+      queryClient.setQueryData(['liveSession', data.productId || productId], data);
+      queryClient.invalidateQueries({ queryKey: ['activeLiveAuctions'] });
       toast.success('Đã bắt đầu phiên Livestream');
     },
     onError: (error: any) => {
@@ -21,10 +22,14 @@ export const useEndLiveSession = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ auctionSessionId, endAuction }: { auctionSessionId: string, endAuction?: boolean }) =>
-      liveApi.endLiveSession(auctionSessionId, endAuction),
-    onSuccess: (data) => {
-      queryClient.setQueryData(['liveSession', data.auctionSessionId], data);
+    mutationFn: ({ productId, auctionSessionId, endAuction }: { productId?: string; auctionSessionId?: string; endAuction?: boolean }) => {
+      const targetId = productId || auctionSessionId || '';
+      return liveApi.endLiveSession(targetId, endAuction);
+    },
+    onSuccess: (data, variables) => {
+      const targetId = data.productId || variables.productId || variables.auctionSessionId;
+      queryClient.setQueryData(['liveSession', targetId], data);
+      queryClient.invalidateQueries({ queryKey: ['activeLiveAuctions'] });
       toast.success('Phiên Livestream đã kết thúc');
     },
     onError: (error: any) => {
@@ -33,12 +38,12 @@ export const useEndLiveSession = () => {
   });
 };
 
-export const useLiveSession = (auctionSessionId: string, enabled: boolean = true) => {
+export const useLiveSession = (productId: string, enabled: boolean = true) => {
   return useQuery({
-    queryKey: ['liveSession', auctionSessionId],
-    queryFn: () => liveApi.getLiveSession(auctionSessionId),
-    enabled: !!auctionSessionId && enabled,
-    retry: false, // Don't retry if not found, it just means no active live
+    queryKey: ['liveSession', productId],
+    queryFn: () => liveApi.getLiveSession(productId),
+    enabled: !!productId && enabled,
+    retry: false,
   });
 };
 

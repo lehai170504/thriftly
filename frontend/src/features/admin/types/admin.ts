@@ -1,10 +1,14 @@
+import { TransactionType } from '@/features/wallet/types/wallet';
+
+export type { TransactionType };
+
 export interface AdminTransactionResponse {
   id: string;
   userId: string;
   userEmail: string;
   username: string;
   amount: number;
-  type: 'DEPOSIT' | 'WITHDRAW' | 'PURCHASE' | 'SALE' | 'REFUND' | 'ESCROW_HOLD' | 'ESCROW_RELEASE' | 'BID_DEPOSIT' | 'BID_REFUND' | 'ADMIN_ADJUSTMENT';
+  type: TransactionType;
   status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
   description: string;
   bankName?: string;

@@ -17,6 +17,7 @@ import { ActiveFilters } from '@/features/products/components/ActiveFilters';
 import { ProductSortAndPrice } from '@/features/products/components/ProductSortAndPrice';
 import { ProductPagination } from '@/features/products/components/ProductPagination';
 import { ProductEmptyState } from '@/features/products/components/ProductEmptyState';
+import { normalizePageResponse } from '@/lib/pagination';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -73,8 +74,9 @@ function ProductsContent() {
     size: 12
   });
 
-  const products = productsPage?.content || [];
-  const totalPages = productsPage?.totalPages || 1;
+  const normalizedProducts = normalizePageResponse(productsPage);
+  const products = normalizedProducts.content;
+  const totalPages = normalizedProducts.totalPages;
 
   return (
     <div className="min-h-screen bg-background">

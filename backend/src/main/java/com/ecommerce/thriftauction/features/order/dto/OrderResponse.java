@@ -1,6 +1,7 @@
 package com.ecommerce.thriftauction.features.order.dto;
 
 import com.ecommerce.thriftauction.features.order.entity.OrderStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +28,7 @@ public class OrderResponse {
     private String trackingCode;
     private String returnTrackingCode;
     private String disputeReason;
-    @com.fasterxml.jackson.annotation.JsonProperty("isReviewed")
+    @JsonProperty("isReviewed")
     private boolean isReviewed;
     private Integer reviewRating;
     private String reviewComment;

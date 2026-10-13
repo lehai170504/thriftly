@@ -4,6 +4,7 @@ import com.ecommerce.thriftauction.features.auth.entity.User;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import com.ecommerce.thriftauction.features.social.entity.BlockedUser;
 import com.ecommerce.thriftauction.features.social.repository.BlockedUserRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,7 +15,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/users/block")
 @RequiredArgsConstructor
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Block User")
+@Tag(name = "Block User")
 public class BlockController {
 
         private final BlockedUserRepository blockedUserRepository;

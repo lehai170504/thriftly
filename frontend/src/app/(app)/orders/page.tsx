@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useMyOrders, usePayOrder, useConfirmReceipt, useDisputeOrder, useReturnShipped, useHideOrder } from '@/features/orders/hooks/useOrders';
 import { Order } from '@/features/orders/api/orderApi';
-import { formatCurrency } from '@/lib/utils';
+import { extractError, formatCurrency } from '@/lib/utils';
 import { ReviewModal } from '@/features/reviews/components/ReviewModal';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,7 +17,7 @@ import { useChatStore } from '@/features/chat/store/useChatStore';
 
 export default function OrdersPage() {
   const { data: ordersData, isLoading } = useMyOrders();
-  const orders: Order[] = (ordersData as any)?.content || [];
+  const orders = useMemo<Order[]>(() => ordersData?.content || [], [ordersData]);
   const { mutate: payOrder, isPending: isPaying } = usePayOrder();
   const { mutate: confirmReceipt, isPending: isConfirming } = useConfirmReceipt();
   const { mutate: disputeOrder, isPending: isDisputing } = useDisputeOrder();
@@ -59,8 +59,8 @@ export default function OrdersPage() {
       onSuccess: () => {
         toast.success('Thanh toán bằng ví Escrow thành công! Tiền đã được tạm giữ.');
       },
-      onError: (err: any) => {
-        toast.error(err.response?.data || 'Thanh toán thất bại. Vui lòng nạp thêm tiền vào ví.');
+      onError: (error) => {
+        toast.error(extractError(error, 'Thanh toán thất bại. Vui lòng nạp thêm tiền vào ví.'));
       }
     });
   };
@@ -70,8 +70,8 @@ export default function OrdersPage() {
       onSuccess: () => {
         toast.success('Đã xác nhận nhận hàng! Tiền đã được chuyển cho người bán.');
       },
-      onError: () => {
-        toast.error('Có lỗi xảy ra khi xác nhận.');
+      onError: (error) => {
+        toast.error(extractError(error, 'Có lỗi xảy ra khi xác nhận.'));
       }
     });
   };
@@ -99,8 +99,8 @@ export default function OrdersPage() {
         toast.success('Đã cập nhật mã vận đơn trả hàng!');
         setReturnModalOpen(false);
       },
-      onError: (err: any) => {
-        toast.error(err.response?.data || 'Có lỗi xảy ra.');
+      onError: (error) => {
+        toast.error(extractError(error, 'Có lỗi xảy ra.'));
       }
     });
   };
@@ -116,8 +116,8 @@ export default function OrdersPage() {
         toast.success('Đã gửi khiếu nại thành công!');
         setDisputeModalOpen(false);
       },
-      onError: (err: any) => {
-        toast.error(err.response?.data || 'Có lỗi xảy ra khi khiếu nại.');
+      onError: (error) => {
+        toast.error(extractError(error, 'Có lỗi xảy ra khi khiếu nại.'));
       }
     });
   };
@@ -140,8 +140,8 @@ export default function OrdersPage() {
         setHideConfirmOpen(false);
         setOrderToHide(null);
       },
-      onError: () => {
-        toast.error('Có lỗi xảy ra khi xóa đơn.');
+      onError: (error) => {
+        toast.error(extractError(error, 'Có lỗi xảy ra khi xóa đơn.'));
       }
     });
   };

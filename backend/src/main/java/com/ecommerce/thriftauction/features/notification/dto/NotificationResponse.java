@@ -1,6 +1,7 @@
 package com.ecommerce.thriftauction.features.notification.dto;
 
 import com.ecommerce.thriftauction.features.notification.entity.NotificationType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,7 +15,7 @@ public class NotificationResponse {
     private String message;
     private NotificationType type;
     private String relatedEntityId;
-    @com.fasterxml.jackson.annotation.JsonProperty("isRead")
+    @JsonProperty("isRead")
     private boolean isRead;
     private LocalDateTime createdAt;
 }

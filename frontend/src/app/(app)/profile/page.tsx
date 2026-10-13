@@ -14,6 +14,8 @@ import { useFollow } from '@/features/users/hooks/useFollow';
 import { ProfileSidebar } from '@/features/users/components/ProfileSidebar';
 import { ChangePasswordForm } from '@/features/users/components/ChangePasswordForm';
 import { BankAccountManager } from '@/features/wallet/components/BankAccountManager';
+import { extractError } from '@/lib/utils';
+import { validateImageFile } from '@/features/media/validation/mediaValidation';
 
 export default function ProfilePage() {
   const { data: profile, isLoading } = useProfile();
@@ -40,8 +42,14 @@ export default function ProfilePage() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
+      try {
+        validateImageFile(file);
+        setAvatarFile(file);
+        setAvatarPreview(URL.createObjectURL(file));
+      } catch (error) {
+        toast.error(extractError(error, 'Ảnh đại diện không hợp lệ'));
+        e.target.value = '';
+      }
     }
   };
 
@@ -58,13 +66,13 @@ export default function ProfilePage() {
             toast.success('Lưu thông tin thành công!');
             setAvatarFile(null);
           },
-          onError: () => {
-            toast.error('Có lỗi xảy ra khi lưu thông tin');
+          onError: (error) => {
+            toast.error(extractError(error, 'Có lỗi xảy ra khi lưu thông tin'));
           }
         }
       );
     } catch (error) {
-      toast.error('Lỗi upload ảnh');
+      toast.error(extractError(error, 'Lỗi upload ảnh'));
     }
   };
 

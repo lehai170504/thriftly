@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/features/admin/api/adminApi';
 import { orderApi } from '@/features/orders/api/orderApi';
+import { normalizePageResponse } from '@/lib/pagination';
 
 export function useAdminDashboard() {
   const { data: usersData } = useQuery({
@@ -28,9 +29,9 @@ export function useAdminDashboard() {
     queryFn: adminApi.getChartData
   });
 
-  const totalUsers = usersData?.page?.totalElements || usersData?.totalElements || 0;
-  const totalOrders = ordersData?.page?.totalElements || ordersData?.totalElements || 0;
-  const totalWithdrawals = withdrawalsData?.page?.totalElements || withdrawalsData?.totalElements || 0;
+  const totalUsers = normalizePageResponse(usersData).totalElements;
+  const totalOrders = normalizePageResponse(ordersData).totalElements;
+  const totalWithdrawals = normalizePageResponse(withdrawalsData).totalElements;
   const totalEscrow = escrowData?.totalEscrow || 0;
   const chartData = chartDataResponse || [];
 

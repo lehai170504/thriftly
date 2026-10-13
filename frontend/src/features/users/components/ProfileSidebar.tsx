@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { IMAGE_ACCEPT } from '@/features/media/validation/mediaValidation';
 
 interface ProfileSidebarProps {
   profile: any;
@@ -59,7 +60,7 @@ export function ProfileSidebar({
           <Camera className="w-8 h-8 text-white" />
           <span className="sr-only">Đổi ảnh đại diện</span>
         </div>
-        <input type="file" ref={fileInputRef as React.RefObject<HTMLInputElement>} className="hidden" accept="image/*" onChange={handleAvatarChange} />
+        <input type="file" ref={fileInputRef as React.RefObject<HTMLInputElement>} className="hidden" accept={IMAGE_ACCEPT} onChange={handleAvatarChange} />
       </div>
 
       <h2 className="text-xl md:text-2xl font-bold text-foreground text-center line-clamp-1">{profile.fullName || profile.username}</h2>

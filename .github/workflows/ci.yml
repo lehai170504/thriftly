@@ -1,0 +1,147 @@
+name: Production CI Quality Gates
+
+on:
+  push:
+    branches: [ main, master, release/* ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  repository-security-gate:
+    name: Repository Secret and Misconfiguration Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan Repository
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
+  backend-gate:
+    name: Backend Build, Security, and Quality Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17 Temurin
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Backend Full Test Suite
+        working-directory: backend
+        run: ./mvnw clean test -B
+
+      - name: Build Immutable Production Artifact
+        working-directory: backend
+        run: ./mvnw package -DskipTests -B
+
+      - name: Archive Production JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: thriftly-backend-jar
+          path: backend/target/*.jar
+          retention-days: 7
+
+  frontend-gate:
+    name: Frontend Lint, Type-Check, and Build Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci --legacy-peer-deps
+
+      - name: Run Frontend Lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Run Frontend Type-Check
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Run Frontend Unit Tests
+        working-directory: frontend
+        run: npm run test:run
+
+      - name: Build Frontend Production Bundle
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://example.invalid/api/v1
+          NEXT_PUBLIC_WS_URL: wss://example.invalid/ws
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ci-google-client-id
+          NEXT_PUBLIC_AGORA_APP_ID: ci-agora-app-id
+
+  container-scan-gate:
+    name: Hardened Container Build Verification
+    needs: [repository-security-gate, backend-gate, frontend-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Non-Root Container Image
+        id: backend-image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          load: true
+          tags: thriftly/backend:ci-${{ github.sha }}
+
+      - name: Scan Backend Container Image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: thriftly/backend:ci-${{ github.sha }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Build Frontend Non-Root Container Image
+        id: frontend-image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          load: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://example.invalid/api/v1
+            NEXT_PUBLIC_WS_URL=wss://example.invalid/ws
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID=ci-google-client-id
+            NEXT_PUBLIC_AGORA_APP_ID=ci-agora-app-id
+          tags: thriftly/frontend:ci-${{ github.sha }}
+
+      - name: Scan Frontend Container Image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: thriftly/frontend:ci-${{ github.sha }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'

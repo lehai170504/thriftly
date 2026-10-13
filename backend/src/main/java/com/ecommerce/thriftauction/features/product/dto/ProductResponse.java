@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -30,7 +31,7 @@ public class ProductResponse {
     private Integer quantity;
     private ProductStatus status;
     private String imageUrl;
-    private java.util.List<String> images;
+    private List<String> images;
     private String videoUrl;
     private String location;
     private LocalDateTime createdAt;

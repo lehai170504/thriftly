@@ -70,6 +70,7 @@ export default function LiveFeedItem({ session, isActive }: LiveFeedItemProps) {
       ) : (
         <img
           src={session.productThumbnail || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?seed=${session.productId}`}
+          alt={session.productTitle || session.productName || 'Live stream thumbnail'}
           className="w-full h-full object-cover"
         />
       )}
@@ -132,6 +133,7 @@ export default function LiveFeedItem({ session, isActive }: LiveFeedItemProps) {
           <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-white/20">
             <img
               src={session.productThumbnail || `https://images.unsplash.com/photo-1523275335684-37898b6baf30?seed=${session.productId}`}
+              alt={session.productName || 'Product thumbnail'}
               className="w-full h-full object-cover"
             />
           </div>

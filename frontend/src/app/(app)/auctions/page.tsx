@@ -16,6 +16,7 @@ import { ActiveFilters } from '@/features/products/components/ActiveFilters';
 import { ProductSortAndPrice } from '@/features/products/components/ProductSortAndPrice';
 import { ProductPagination } from '@/features/products/components/ProductPagination';
 import { ProductEmptyState } from '@/features/products/components/ProductEmptyState';
+import { normalizePageResponse } from '@/lib/pagination';
 
 function AuctionsContent() {
   const searchParams = useSearchParams();
@@ -68,13 +69,16 @@ function AuctionsContent() {
 
   const { data: activeLiveSessions } = useActiveLiveAuctions();
 
+  const normalizedProducts = normalizePageResponse(productsPage);
+  const products = normalizedProducts.content;
+  const totalPages = normalizedProducts.totalPages;
+
   const productsWithLiveStatus = useMemo(() => {
-    if (!productsPage?.content) return [];
-    return productsPage.content.map((product: any) => ({
+    return products.map((product: any) => ({
       ...product,
       isLive: activeLiveSessions?.some((session: any) => session.productId === product.id) || false
     }));
-  }, [productsPage?.content, activeLiveSessions]);
+  }, [products, activeLiveSessions]);
 
   const sortedProducts = useMemo(() => {
     if (sort !== 'createdAt_desc') return productsWithLiveStatus;
@@ -84,8 +88,6 @@ function AuctionsContent() {
       return 0;
     });
   }, [productsWithLiveStatus, sort]);
-
-  const totalPages = productsPage?.totalPages || 1;
 
   return (
     <div className="min-h-screen bg-background pb-20">
