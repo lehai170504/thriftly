@@ -2,20 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
+import { stopStompReconnect, websocketUrl } from '@/lib/websocket';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface LiveBidsCounterProps {
   productId?: string;
 }
 
 export function LiveBidsCounter({ productId }: LiveBidsCounterProps) {
+  const { isAuthenticated } = useAuth();
   const [count, setCount] = useState<number>(0);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (!productId) return;
+    if (!productId || !isAuthenticated) return;
 
     const client = new Client({
-      brokerURL: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8081/ws'}/auction/websocket`,
+      brokerURL: websocketUrl(),
       debug: (str) => {
         console.log(str);
       },
@@ -36,7 +39,11 @@ export function LiveBidsCounter({ productId }: LiveBidsCounterProps) {
 
     client.onStompError = (frame) => {
       console.error('Broker reported error:', frame.headers?.message);
+      setIsConnected(false);
+      stopStompReconnect(client);
     };
+
+    client.onWebSocketClose = () => setIsConnected(false);
 
     client.activate();
     return () => {
@@ -44,9 +51,9 @@ export function LiveBidsCounter({ productId }: LiveBidsCounterProps) {
         client.deactivate();
       }
     };
-  }, [productId]);
+  }, [isAuthenticated, productId]);
 
-  if (!productId) return null;
+  if (!productId || !isAuthenticated) return null;
 
   return (
     <div className="flex items-center gap-2">

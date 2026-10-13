@@ -1,7 +1,11 @@
 package com.ecommerce.thriftauction.features.product.service.command;
 
+import com.ecommerce.thriftauction.features.auction.entity.AuctionSession;
+import com.ecommerce.thriftauction.features.auction.entity.AuctionStatus;
+import com.ecommerce.thriftauction.features.auction.repository.AuctionSessionRepository;
 import com.ecommerce.thriftauction.features.auth.entity.User;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
+import com.ecommerce.thriftauction.features.notification.entity.NotificationType;
 import com.ecommerce.thriftauction.features.notification.service.NotificationService;
 import com.ecommerce.thriftauction.features.product.dto.ProductRequest;
 import com.ecommerce.thriftauction.features.product.dto.ProductResponse;
@@ -9,14 +13,19 @@ import com.ecommerce.thriftauction.features.product.entity.Category;
 import com.ecommerce.thriftauction.features.product.entity.Product;
 import com.ecommerce.thriftauction.features.product.entity.ProductStatus;
 import com.ecommerce.thriftauction.features.product.entity.SellType;
+import com.ecommerce.thriftauction.features.product.mapper.ProductMapper;
 import com.ecommerce.thriftauction.features.product.repository.CategoryRepository;
 import com.ecommerce.thriftauction.features.product.repository.ProductRepository;
+import com.ecommerce.thriftauction.features.social.entity.Follow;
 import com.ecommerce.thriftauction.features.social.repository.FollowRepository;
-import com.ecommerce.thriftauction.features.auction.repository.AuctionSessionRepository;
-import com.ecommerce.thriftauction.features.product.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,33 +69,29 @@ public class ProductCommandService {
 
         if (request.getSellType() == SellType.AUCTION) {
             int durationDays = request.getAuctionDurationDays() != null ? request.getAuctionDurationDays() : 3;
-            com.ecommerce.thriftauction.features.auction.entity.AuctionSession session = com.ecommerce.thriftauction.features.auction.entity.AuctionSession
-                    .builder()
+            AuctionSession session = AuctionSession.builder()
                     .product(product)
-                    .startTime(java.time.LocalDateTime.now())
-                    .endTime(java.time.LocalDateTime.now().plusDays(durationDays))
+                    .startTime(LocalDateTime.now())
+                    .endTime(LocalDateTime.now().plusDays(durationDays))
                     .startingPrice(request.getPrice())
-                    .stepPrice(new java.math.BigDecimal("50000")) // Default step 50k
+                    .stepPrice(new BigDecimal("50000"))
                     .currentHighestPrice(request.getPrice())
-                    .status(com.ecommerce.thriftauction.features.auction.entity.AuctionStatus.ONGOING)
+                    .status(AuctionStatus.ONGOING)
                     .build();
             auctionSessionRepository.save(session);
         }
 
-        // Notify followers
         final Product savedProduct = product;
-        java.util.List<com.ecommerce.thriftauction.features.social.entity.Follow> followers = followRepository
-                .findAll()
-                .stream()
+        List<Follow> followers = followRepository.findAll().stream()
                 .filter(f -> f.getFollowing().getId().equals(seller.getId()))
                 .toList();
 
-        for (com.ecommerce.thriftauction.features.social.entity.Follow f : followers) {
+        for (Follow f : followers) {
             notificationService.createAndSendNotification(
                     f.getFollower(),
                     "Gian hàng bạn theo dõi",
                     seller.getFullName() + " vừa đăng bán sản phẩm: " + savedProduct.getTitle(),
-                    com.ecommerce.thriftauction.features.notification.entity.NotificationType.SYSTEM,
+                    NotificationType.SYSTEM,
                     savedProduct.getId());
         }
 
@@ -102,16 +107,14 @@ public class ProductCommandService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!product.getSeller().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("You are not authorized to update this product");
+            throw new AccessDeniedException("You are not authorized to update this product");
         }
 
         if (product.getSellType() == SellType.AUCTION) {
-            com.ecommerce.thriftauction.features.auction.entity.AuctionSession session = auctionSessionRepository
-                    .findByProductId(product.getId())
+            AuctionSession session = auctionSessionRepository.findByProductId(product.getId())
                     .orElse(null);
 
-            if (session != null
-                    && session.getCurrentHighestPrice().compareTo(session.getStartingPrice()) > 0) {
+            if (session != null && session.getCurrentHighestPrice().compareTo(session.getStartingPrice()) > 0) {
                 throw new RuntimeException("Cannot update auction because it already has bids");
             }
         }
@@ -135,18 +138,13 @@ public class ProductCommandService {
             product.setVideoUrl(request.getVideoUrl());
         }
 
-        // Only allow updating price if it's BUY_NOW or if AUCTION hasn't started with
-        // bids (handled above)
         product.setPrice(request.getPrice());
         product.setQuantity(request.getQuantity());
 
         product = productRepository.save(product);
 
-        // If it's an auction and we updated the price, we also need to update the
-        // starting price of the session
         if (product.getSellType() == SellType.AUCTION) {
-            com.ecommerce.thriftauction.features.auction.entity.AuctionSession session = auctionSessionRepository
-                    .findByProductId(product.getId())
+            AuctionSession session = auctionSessionRepository.findByProductId(product.getId())
                     .orElse(null);
             if (session != null) {
                 session.setStartingPrice(request.getPrice());
@@ -167,22 +165,19 @@ public class ProductCommandService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!product.getSeller().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("You are not authorized to delete this product");
+            throw new AccessDeniedException("You are not authorized to delete this product");
         }
 
         if (product.getSellType() == SellType.AUCTION) {
-            com.ecommerce.thriftauction.features.auction.entity.AuctionSession session = auctionSessionRepository
-                    .findByProductId(product.getId())
+            AuctionSession session = auctionSessionRepository.findByProductId(product.getId())
                     .orElse(null);
 
-            if (session != null
-                    && session.getCurrentHighestPrice().compareTo(session.getStartingPrice()) > 0) {
+            if (session != null && session.getCurrentHighestPrice().compareTo(session.getStartingPrice()) > 0) {
                 throw new RuntimeException("Cannot delete auction because it already has bids");
             }
 
             if (session != null) {
-                session.setStatus(
-                        com.ecommerce.thriftauction.features.auction.entity.AuctionStatus.CANCELED);
+                session.setStatus(AuctionStatus.CANCELED);
                 auctionSessionRepository.save(session);
             }
         }

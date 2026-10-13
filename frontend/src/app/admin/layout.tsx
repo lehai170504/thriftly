@@ -1,39 +1,26 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { AdminSidebar } from '@/components/layout/AdminSidebar';
 import { AdminHeader } from '@/components/layout/AdminHeader';
-import Cookies from 'js-cookie';
+import { canAccessAdminRoute, isAdminPortalRole } from '@/lib/admin-permissions';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, isAuthLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [isReady, setIsReady] = useState(false);
+  const canAccessRoute = !!user && canAccessAdminRoute(user.role, pathname);
 
   useEffect(() => {
-    // Basic protection (Client-side)
-    const storedUser = Cookies.get('user');
-    if (!storedUser) {
-      router.push('/portal-secure-entry');
-      return;
-    }
+    if (isAuthLoading) return;
+    if (!user) router.replace('/portal-secure-entry');
+    else if (!isAdminPortalRole(user.role)) router.replace('/');
+    else if (!canAccessRoute) router.replace('/admin');
+  }, [canAccessRoute, isAuthLoading, user, router]);
 
-    try {
-      const parsedUser = JSON.parse(storedUser);
-      if (parsedUser.role !== 'ADMIN' && parsedUser.role !== 'STAFF') {
-        router.push('/');
-        return;
-      }
-      setIsReady(true);
-    } catch {
-      router.push('/portal-secure-entry');
-    }
-  }, [router, pathname]);
-
-  if (!isReady || !user || (user.role !== 'ADMIN' && user.role !== 'STAFF')) {
+  if (isAuthLoading || !user || !isAdminPortalRole(user.role) || !canAccessRoute) {
     return <div className="min-h-screen flex items-center justify-center font-bold text-muted-foreground bg-background">Đang tải cấu hình Quản trị viên...</div>;
   }
 
@@ -43,9 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-background/50 relative">
         <AdminHeader />
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 md:p-8 custom-scrollbar">
-          <div className="max-w-[1600px] mx-auto w-full">
-            {children}
-          </div>
+          <div className="max-w-[1600px] mx-auto w-full">{children}</div>
         </main>
       </div>
     </div>

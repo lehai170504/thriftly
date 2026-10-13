@@ -4,12 +4,14 @@ import com.ecommerce.thriftauction.features.voucher.dto.VoucherResponse;
 import com.ecommerce.thriftauction.features.voucher.entity.Voucher;
 import com.ecommerce.thriftauction.features.voucher.repository.VoucherRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ecommerce.thriftauction.features.voucher.dto.CreateVoucherRequest;
 import com.ecommerce.thriftauction.features.auth.entity.User;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,7 +39,7 @@ public class VoucherService {
                 : List.of();
 
         return Stream.concat(platformVouchers.stream(), shopVouchers.stream())
-                .filter(v -> v.getExpiryDate().isAfter(java.time.LocalDateTime.now()))
+                .filter(v -> v.getExpiryDate().isAfter(LocalDateTime.now()))
                 .filter(v -> v.getQuantity() > 0)
                 .filter(v -> {
                     if (finalUser == null)
@@ -95,7 +97,7 @@ public class VoucherService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (voucher.getSeller() == null || !voucher.getSeller().getId().equals(seller.getId())) {
-            throw new RuntimeException("You do not have permission to modify this voucher");
+            throw new AccessDeniedException("You do not have permission to modify this voucher");
         }
 
         voucher.setActive(!voucher.isActive());
@@ -111,7 +113,7 @@ public class VoucherService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (voucher.getSeller() == null || !voucher.getSeller().getId().equals(seller.getId())) {
-            throw new RuntimeException("You do not have permission to view this voucher's history");
+            throw new AccessDeniedException("You do not have permission to view this voucher's history");
         }
 
         return voucherUsageRepository.findByVoucherIdOrderByUsedAtDesc(id).stream()

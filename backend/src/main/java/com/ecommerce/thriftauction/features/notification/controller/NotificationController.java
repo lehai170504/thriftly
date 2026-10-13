@@ -35,43 +35,27 @@ public class NotificationController {
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/{id}/read")
     public ResponseEntity<?> markAsRead(@PathVariable String id, Authentication authentication) {
-        try {
-            notificationService.markAsRead(id, authentication.getName());
-            return ResponseEntity.ok("Marked as read");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        notificationService.markAsRead(id, authentication.getName());
+        return ResponseEntity.ok("Marked as read");
     }
 
     @Operation(summary = "Đánh dấu tất cả đã đọc", description = "Cập nhật toàn bộ thông báo của người dùng hiện tại sang trạng thái đã đọc.")
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/read-all")
     public ResponseEntity<?> markAllAsRead(Authentication authentication) {
-        try {
-            notificationService.markAllAsRead(authentication.getName());
-            return ResponseEntity.ok("All marked as read");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        notificationService.markAllAsRead(authentication.getName());
+        return ResponseEntity.ok("All marked as read");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNotification(@PathVariable String id, Authentication authentication) {
-        try {
-            notificationService.deleteNotification(id, authentication.getName());
-            return ResponseEntity.ok("Deleted notification");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        notificationService.deleteNotification(id, authentication.getName());
+        return ResponseEntity.ok("Deleted notification");
     }
 
     @DeleteMapping
     public ResponseEntity<?> deleteAllNotifications(Authentication authentication) {
-        try {
-            notificationService.deleteAllNotifications(authentication.getName());
-            return ResponseEntity.ok("Deleted all notifications");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        notificationService.deleteAllNotifications(authentication.getName());
+        return ResponseEntity.ok("Deleted all notifications");
     }
 }

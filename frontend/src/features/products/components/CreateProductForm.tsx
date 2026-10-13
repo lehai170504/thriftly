@@ -14,6 +14,7 @@ import { formatCurrency } from '@/lib/utils';
 import { useCategories, useCreateProduct } from '../hooks/useProducts';
 import { useGenerateDescription, useSuggestPrice } from '@/features/ai/api/aiApi';
 import { useUploadImage, useUploadVideo } from '@/features/media/hooks/useMedia';
+import { IMAGE_ACCEPT, VIDEO_ACCEPT } from '@/features/media/validation/mediaValidation';
 import { useState } from 'react';
 import { CreateProductRequest } from '@/features/products/types/product';
 import { createProductSchema, CreateProductFormData } from '../schemas';
@@ -352,7 +353,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                     <input
                       type="file"
                       multiple
-                      accept="image/jpeg,image/png,image/webp"
+                      accept={IMAGE_ACCEPT}
                       className="hidden"
                       onChange={handleImageChange}
                     />
@@ -390,13 +391,13 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                     <span className="text-sm text-muted-foreground font-medium group-hover:text-primary">Tải video lên</span>
                     <input
                       type="file"
-                      accept="video/mp4,video/webm"
+                      accept={VIDEO_ACCEPT}
                       className="hidden"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          if (file.size > 30 * 1024 * 1024) {
-                            toast.error('Video phải nhỏ hơn 30MB');
+                          if (file.size > 50 * 1024 * 1024) {
+                            toast.error('Video phải nhỏ hơn 50MB');
                             return;
                           }
                           setVideoFile(file);
@@ -408,7 +409,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                 )}
                 <div className="text-sm text-muted-foreground flex flex-col gap-1.5">
                   <p>• Quay góc 360 độ hoặc chỗ có lỗi</p>
-                  <p>• Tối đa 30MB, MP4/WEBM</p>
+                  <p>• Tối đa 50MB, MP4/WEBM/MOV</p>
                   <p>• Giúp người mua tin tưởng hơn</p>
                 </div>
               </div>

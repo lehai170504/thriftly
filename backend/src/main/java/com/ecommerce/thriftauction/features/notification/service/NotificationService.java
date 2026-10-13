@@ -8,8 +8,12 @@ import com.ecommerce.thriftauction.features.notification.repository.Notification
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,12 +40,24 @@ public class NotificationService {
 
                 Notification saved = notificationRepository.save(notification);
 
-                // Map to response and send via WebSocket
                 NotificationResponse response = mapToResponse(saved);
-                messagingTemplate.convertAndSendToUser(
-                                user.getId(),
-                                "/queue/notifications",
-                                response);
+                String targetPrincipal = user.getEmail() != null ? user.getEmail() : user.getUsername();
+                if (TransactionSynchronizationManager.isActualTransactionActive()) {
+                        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                                @Override
+                                public void afterCommit() {
+                                        messagingTemplate.convertAndSendToUser(
+                                                        targetPrincipal,
+                                                        "/queue/notifications",
+                                                        response);
+                                }
+                        });
+                } else {
+                        messagingTemplate.convertAndSendToUser(
+                                        targetPrincipal,
+                                        "/queue/notifications",
+                                        response);
+                }
         }
 
         public List<NotificationResponse> getMyNotifications(String username) {
@@ -70,7 +86,7 @@ public class NotificationService {
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
                 if (!notification.getUser().getId().equals(user.getId())) {
-                        throw new RuntimeException("Not your notification");
+                        throw new AccessDeniedException("Not your notification");
                 }
 
                 notification.setRead(true);
@@ -100,7 +116,7 @@ public class NotificationService {
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
                 if (!notification.getUser().getId().equals(user.getId())) {
-                        throw new RuntimeException("Not your notification");
+                        throw new AccessDeniedException("Not your notification");
                 }
 
                 notificationRepository.delete(notification);

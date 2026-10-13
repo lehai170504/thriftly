@@ -9,11 +9,14 @@ import com.ecommerce.thriftauction.features.product.dto.ProductResponse;
 import com.ecommerce.thriftauction.features.product.entity.Product;
 import com.ecommerce.thriftauction.features.product.entity.ProductStatus;
 import com.ecommerce.thriftauction.features.product.entity.SellType;
-import com.ecommerce.thriftauction.features.product.repository.ProductRepository;
 import com.ecommerce.thriftauction.features.product.mapper.ProductMapper;
+import com.ecommerce.thriftauction.features.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +37,7 @@ public class ProductAuctionService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!product.getSeller().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("You are not authorized to modify this product");
+            throw new AccessDeniedException("You are not authorized to modify this product");
         }
 
         if (product.getSellType() != SellType.AUCTION) {
@@ -49,17 +52,15 @@ public class ProductAuctionService {
                 .findByProductId(product.getId())
                 .orElseThrow(() -> new RuntimeException("Auction session not found"));
 
-        // Reset session
         session.setStatus(AuctionStatus.ONGOING);
-        session.setStartTime(java.time.LocalDateTime.now());
-        session.setEndTime(java.time.LocalDateTime.now().plusDays(7));
-        session.setCurrentHighestPrice(session.getStartingPrice()); // Reset highest price to starting price
+        session.setStartTime(LocalDateTime.now());
+        session.setEndTime(LocalDateTime.now().plusDays(7));
+        session.setCurrentHighestPrice(session.getStartingPrice());
         auctionSessionRepository.save(session);
 
-        // Set product active
         product.setStatus(ProductStatus.ACTIVE);
-        product = productRepository.save(product);
+        Product saved = productRepository.save(product);
 
-        return productMapper.mapToResponse(product);
+        return productMapper.mapToResponse(saved);
     }
 }

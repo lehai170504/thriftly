@@ -1,6 +1,7 @@
 package com.ecommerce.thriftauction.features.media.controller;
 
 import com.ecommerce.thriftauction.features.media.service.CloudinaryService;
+import com.ecommerce.thriftauction.features.media.validator.MediaUploadValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,12 @@ import java.util.Map;
 public class MediaController {
 
     private final CloudinaryService cloudinaryService;
+    private final MediaUploadValidator mediaUploadValidator;
 
     @Operation(summary = "Tải lên hình ảnh", description = "Tải file hình ảnh lên Cloudinary và nhận URL truy cập.")
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+        mediaUploadValidator.validateImage(file);
         try {
             String url = cloudinaryService.uploadImage(file);
             Map<String, String> response = new HashMap<>();
@@ -36,6 +39,7 @@ public class MediaController {
     @Operation(summary = "Tải lên video", description = "Tải file video lên Cloudinary và nhận URL truy cập.")
     @PostMapping("/upload-video")
     public ResponseEntity<Map<String, String>> uploadVideo(@RequestParam("file") MultipartFile file) {
+        mediaUploadValidator.validateVideo(file);
         try {
             String url = cloudinaryService.uploadVideo(file);
             Map<String, String> response = new HashMap<>();

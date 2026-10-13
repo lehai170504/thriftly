@@ -7,8 +7,12 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { useAuth } from '@/contexts/AuthContext';
+import { extractError } from '@/lib/utils';
 
 export default function SystemSettingsPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
   const { config, isLoading, updateConfig } = useSystemConfig();
 
   const [formData, setFormData] = useState({
@@ -33,7 +37,7 @@ export default function SystemSettingsPage() {
       await updateConfig.mutateAsync(formData);
       toast.success('Cập nhật cấu hình hệ thống thành công!');
     } catch (err) {
-      toast.error('Có lỗi xảy ra khi cập nhật cấu hình.');
+      toast.error(extractError(err, 'Có lỗi xảy ra khi cập nhật cấu hình.'));
     }
   };
 
@@ -48,7 +52,7 @@ export default function SystemSettingsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Cấu Hình Hệ Thống</h1>
-            <p className="text-muted-foreground text-s  m">Điều chỉnh các thông số vận hành và phí của nền tảng</p>
+            <p className="text-muted-foreground text-sm">Điều chỉnh các thông số vận hành và phí của nền tảng</p>
           </div>
         </div>
       </div>
@@ -57,6 +61,11 @@ export default function SystemSettingsPage() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-primary"></div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          {!isAdmin && (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-300">
+              Tài khoản STAFF chỉ có quyền xem cấu hình. Chỉ ADMIN mới có thể lưu thay đổi.
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="glass p-6 rounded-2xl border border-primary/10 hover:border-primary/30 transition-all shadow-sm">
               <div className="flex items-start gap-4">
@@ -74,6 +83,7 @@ export default function SystemSettingsPage() {
                     min="0"
                     max="1"
                     required
+                    disabled={!isAdmin}
                     className="w-full font-mono text-lg h-12 bg-background/50 backdrop-blur-sm border-primary/20 focus-visible:ring-primary/30"
                     value={formData.platformFeePercent}
                     onChange={e => setFormData({ ...formData, platformFeePercent: parseFloat(e.target.value) })}
@@ -96,6 +106,7 @@ export default function SystemSettingsPage() {
                     type="number"
                     min="0"
                     required
+                    disabled={!isAdmin}
                     className="w-full font-mono text-lg h-12 bg-background/50 backdrop-blur-sm border-emerald-500/20 focus-visible:ring-emerald-500/30"
                     value={formData.minWithdrawalAmount}
                     onChange={e => setFormData({ ...formData, minWithdrawalAmount: parseFloat(e.target.value) })}
@@ -125,12 +136,13 @@ export default function SystemSettingsPage() {
               <Switch
                 checked={formData.isMaintenanceMode}
                 onCheckedChange={(checked) => setFormData({ ...formData, isMaintenanceMode: checked })}
+                disabled={!isAdmin}
                 className="data-[state=checked]:bg-red-500"
               />
             </div>
           </div>
 
-          <div className="flex justify-end pt-4">
+          {isAdmin && <div className="flex justify-end pt-4">
             <Button
               type="submit"
               disabled={updateConfig.isPending}
@@ -140,7 +152,7 @@ export default function SystemSettingsPage() {
               <Save className="w-5 h-5 mr-2" />
               {updateConfig.isPending ? 'Đang Lưu...' : 'Lưu Thay Đổi'}
             </Button>
-          </div>
+          </div>}
         </form>
       </div>
     </div>

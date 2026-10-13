@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public class ProductFavoriteController {
     @GetMapping("/favorites/ids")
     public ResponseEntity<List<String>> getUserFavoriteIds(Authentication authentication) {
         if (authentication == null) {
-            return ResponseEntity.ok(java.util.Collections.emptyList());
+            return ResponseEntity.ok(Collections.emptyList());
         }
         List<String> favoriteIds = favoriteService.getUserFavoriteProductIds(authentication.getName());
         return ResponseEntity.ok(favoriteIds);

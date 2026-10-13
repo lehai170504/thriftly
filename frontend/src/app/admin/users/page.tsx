@@ -13,9 +13,13 @@ import { Search, Wallet, TrendingUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { formatCurrency } from '@/lib/utils';
+import { extractError, formatCurrency } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { normalizePageResponse } from '@/lib/pagination';
 
 export default function AdminUsersPage() {
+  const { user: currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'ADMIN';
   const [page, setPage] = useState(0);
   const size = 10;
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,14 +37,14 @@ export default function AdminUsersPage() {
   const handleBan = (id: string, username: string) => {
     banMutation.mutate(id, {
       onSuccess: () => toast.success(`Đã khóa tài khoản ${username}`),
-      onError: () => toast.error('Không thể khóa tài khoản. Vui lòng thử lại.')
+      onError: (error) => toast.error(extractError(error, 'Không thể khóa tài khoản. Vui lòng thử lại.'))
     });
   };
 
   const handleUnban = (id: string, username: string) => {
     unbanMutation.mutate(id, {
       onSuccess: () => toast.success(`Đã kích hoạt tài khoản ${username}`),
-      onError: () => toast.error('Không thể kích hoạt tài khoản. Vui lòng thử lại.')
+      onError: (error) => toast.error(extractError(error, 'Không thể kích hoạt tài khoản. Vui lòng thử lại.'))
     });
   };
 
@@ -80,9 +84,9 @@ export default function AdminUsersPage() {
     setTierModalOpen(true);
   };
 
-  const users: UserResponse[] = usersData?.content || [];
-  const totalPages = usersData?.page?.totalPages || usersData?.totalPages || 1;
-  const totalElements = usersData?.page?.totalElements || usersData?.totalElements || users.length || 0;
+  const { content: users, totalPages, totalElements } = normalizePageResponse<UserResponse>(usersData);
+
+
 
   if (isLoading) return <div className="p-8 text-center text-neutral-500 font-medium">Đang tải danh sách người dùng...</div>;
 
@@ -230,25 +234,29 @@ export default function AdminUsersPage() {
                             <CheckCircle className="mr-2 h-4 w-4" /> Mở khóa tài khoản
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem
-                          className="cursor-pointer font-medium"
-                          onClick={() => handleOpenBalance(user)}
-                        >
-                          <Wallet className="mr-2 h-4 w-4" /> Nạp/Trừ tiền ví
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="cursor-pointer font-medium"
-                          onClick={() => handleOpenTier(user)}
-                        >
-                          <TrendingUp className="mr-2 h-4 w-4" /> Đổi hạng thành viên
-                        </DropdownMenuItem>
-                        {user.role !== 'ADMIN' && (
-                          <DropdownMenuItem
-                            className={`cursor-pointer font-medium ${user.role === 'STAFF' ? 'text-amber-600' : 'text-blue-600'}`}
-                            onClick={() => handleOpenRole(user)}
-                          >
-                            <Shield className="mr-2 h-4 w-4" /> {user.role === 'STAFF' ? 'Hạ cấp về User' : 'Cấp quyền Staff'}
-                          </DropdownMenuItem>
+                        {isAdmin && (
+                          <>
+                            <DropdownMenuItem
+                              className="cursor-pointer font-medium"
+                              onClick={() => handleOpenBalance(user)}
+                            >
+                              <Wallet className="mr-2 h-4 w-4" /> Nạp/Trừ tiền ví
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer font-medium"
+                              onClick={() => handleOpenTier(user)}
+                            >
+                              <TrendingUp className="mr-2 h-4 w-4" /> Đổi hạng thành viên
+                            </DropdownMenuItem>
+                            {user.role !== 'ADMIN' && (
+                              <DropdownMenuItem
+                                className={`cursor-pointer font-medium ${user.role === 'STAFF' ? 'text-amber-600' : 'text-blue-600'}`}
+                                onClick={() => handleOpenRole(user)}
+                              >
+                                <Shield className="mr-2 h-4 w-4" /> {user.role === 'STAFF' ? 'Hạ cấp về User' : 'Cấp quyền Staff'}
+                              </DropdownMenuItem>
+                            )}
+                          </>
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -388,8 +396,8 @@ export default function AdminUsersPage() {
                       toast.success(`Đã đổi vai trò thành ${selectedRole}`);
                       setRoleModalOpen(false);
                     },
-                    onError: (err: any) => {
-                      toast.error('Có lỗi xảy ra: ' + (err.response?.data || err.message));
+                    onError: (error) => {
+                      toast.error('Có lỗi xảy ra: ' + extractError(error));
                     }
                   }
                 );

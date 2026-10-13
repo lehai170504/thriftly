@@ -1,6 +1,11 @@
 package com.ecommerce.thriftauction.core.exception;
 
+import com.ecommerce.thriftauction.features.admin.service.AuditLogService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -8,6 +13,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,8 +28,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-@ControllerAdvice
+@ControllerAdvice(basePackages = "com.ecommerce.thriftauction")
 public class GlobalExceptionHandler {
+
+    @Autowired(required = false)
+    private AuditLogService auditLogService;
 
     private Map<String, Object> buildError(HttpStatus status, String message) {
         Map<String, Object> body = new HashMap<>();
@@ -59,7 +69,25 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex,
+            HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String actor = (authentication != null && authentication.isAuthenticated()) ? authentication.getName()
+                : "anonymous";
+        String role = (authentication != null && !authentication.getAuthorities().isEmpty())
+                ? authentication.getAuthorities().iterator().next().getAuthority()
+                : "ANONYMOUS";
+        String uri = (request != null) ? request.getRequestURI() : "UNKNOWN";
+        String ip = (request != null) ? request.getRemoteAddr() : null;
+
+        try {
+            if (auditLogService != null) {
+                auditLogService.log(actor, role, "SECURITY_ACCESS_DENIED", "URI", uri, "ACCESS_DENIED",
+                        ex.getMessage() != null ? ex.getMessage() : "Access denied", ip);
+            }
+        } catch (Exception ignored) {
+        }
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(buildError(HttpStatus.FORBIDDEN, "Bạn không có quyền thực hiện hành động này."));
     }
@@ -128,6 +156,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(buildError(HttpStatus.BAD_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler({ RedisConnectionFailureException.class, RedisSystemException.class })
+    public ResponseEntity<Map<String, Object>> handleRedisUnavailable(RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(buildError(HttpStatus.SERVICE_UNAVAILABLE,
+                        "Session service is temporarily unavailable"));
     }
 
     @ExceptionHandler(Exception.class)

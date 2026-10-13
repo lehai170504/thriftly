@@ -1,5 +1,6 @@
 package com.ecommerce.thriftauction.features.order.controller;
 
+import com.ecommerce.thriftauction.features.order.dto.ReviewReplyRequest;
 import com.ecommerce.thriftauction.features.order.dto.ReviewRequest;
 import com.ecommerce.thriftauction.features.order.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,42 +26,27 @@ public class ReviewController {
             @PathVariable String orderId,
             @RequestBody ReviewRequest request,
             Authentication authentication) {
-        try {
-            return ResponseEntity.ok(reviewService.createReview(orderId, authentication.getName(), request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(reviewService.createReview(orderId, authentication.getName(), request));
     }
 
     @Operation(summary = "Lấy danh sách đánh giá của người dùng", description = "Xem tất cả các đánh giá mà một người dùng/người bán đã nhận được.")
     @GetMapping("/user/{username}")
     public ResponseEntity<?> getReviewsByUser(@PathVariable String username, Authentication authentication) {
-        try {
-            String currentUsername = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : null;
-            return ResponseEntity.ok(reviewService.getReviewsByUsername(username, currentUsername));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        String currentUsername = (authentication != null && authentication.isAuthenticated()) ? authentication.getName()
+                : null;
+        return ResponseEntity.ok(reviewService.getReviewsByUsername(username, currentUsername));
     }
 
     @PostMapping("/{id}/like")
     public ResponseEntity<?> likeReview(@PathVariable String id, Authentication authentication) {
-        try {
-            return ResponseEntity.ok(reviewService.likeReview(id, authentication.getName()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(reviewService.likeReview(id, authentication.getName()));
     }
 
     @PostMapping("/{id}/reply")
     public ResponseEntity<?> replyReview(
-            @PathVariable String id, 
-            @RequestBody com.ecommerce.thriftauction.features.order.dto.ReviewReplyRequest request, 
+            @PathVariable String id,
+            @RequestBody ReviewReplyRequest request,
             Authentication authentication) {
-        try {
-            return ResponseEntity.ok(reviewService.replyReview(id, authentication.getName(), request.getReply()));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(reviewService.replyReview(id, authentication.getName(), request.getReply()));
     }
 }

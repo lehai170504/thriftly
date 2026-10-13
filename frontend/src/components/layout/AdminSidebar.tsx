@@ -5,6 +5,7 @@ import { ShieldAlert, Wallet, ShoppingBag, Users, LayoutDashboard, Package, Tags
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { canAccessAdminRoute } from '@/lib/admin-permissions';
 
 const menuGroups = [
   {
@@ -26,22 +27,22 @@ const menuGroups = [
     title: 'Tài Chính',
     items: [
       { name: 'Dòng tiền Sàn', icon: Activity, path: '/admin/revenue', roles: ['ADMIN'] },
-      { name: 'Yêu cầu rút tiền', icon: Wallet, path: '/admin/withdrawals', roles: ['ADMIN'] },
+      { name: 'Yêu cầu rút tiền', icon: Wallet, path: '/admin/withdrawals', roles: ['ADMIN', 'STAFF'] },
     ]
   },
   {
     title: 'Kiểm Duyệt & Hỗ Trợ',
     items: [
       { name: 'Khiếu nại (Disputes)', icon: ShieldAlert, path: '/admin/disputes', roles: ['ADMIN', 'STAFF'] },
-      { name: 'Trung tâm báo cáo', icon: FileText, path: '/admin/reports', roles: ['ADMIN', 'STAFF'] },
-      { name: 'Người dùng', icon: Users, path: '/admin/users', roles: ['ADMIN'] },
+      { name: 'Trung tâm báo cáo', icon: FileText, path: '/admin/reports', roles: ['ADMIN'] },
+      { name: 'Người dùng', icon: Users, path: '/admin/users', roles: ['ADMIN', 'STAFF'] },
     ]
   },
   {
     title: 'Hệ Thống',
     items: [
-      { name: 'Cấu hình chung', icon: Settings, path: '/admin/settings', roles: ['ADMIN'] },
-      { name: 'Nhật ký hệ thống', icon: Shield, path: '/admin/audit-logs', roles: ['ADMIN'] },
+      { name: 'Cấu hình chung', icon: Settings, path: '/admin/settings', roles: ['ADMIN', 'STAFF'] },
+      { name: 'Nhật ký hệ thống', icon: Shield, path: '/admin/audit-logs', roles: ['ADMIN', 'STAFF'] },
     ]
   }
 ];
@@ -82,7 +83,7 @@ export function AdminSidebar() {
 
       <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-6 space-y-6 mt-4 overflow-x-hidden">
         {menuGroups.map((group, idx) => {
-          const visibleItems = group.items.filter(item => !item.roles || item.roles.includes(user?.role || ''));
+          const visibleItems = group.items.filter(item => canAccessAdminRoute(user?.role, item.path));
 
           if (visibleItems.length === 0) return null;
 

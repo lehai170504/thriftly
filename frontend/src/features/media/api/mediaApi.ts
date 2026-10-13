@@ -1,6 +1,8 @@
 import api from '@/lib/axios';
+import { validateImageFile, validateVideoFile } from '@/features/media/validation/mediaValidation';
 
 export const uploadImage = async (file: File): Promise<string> => {
+  validateImageFile(file);
   const formData = new FormData();
   formData.append('file', file);
 
@@ -13,6 +15,7 @@ export const uploadImage = async (file: File): Promise<string> => {
   return response.data.url;
 };
 export const uploadVideo = async (file: File): Promise<string> => {
+  validateVideoFile(file);
   const formData = new FormData();
   formData.append('file', file);
 

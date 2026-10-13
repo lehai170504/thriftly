@@ -1,9 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
-import Cookies from 'js-cookie';
 import { LiveChatMessage } from '../types/live';
+import { stopStompReconnect, websocketUrl } from '@/lib/websocket';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useLiveSocket = (liveSessionId: string) => {
+  const { isAuthenticated } = useAuth();
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [messages, setMessages] = useState<LiveChatMessage[]>([]);
   const [viewerCount, setViewerCount] = useState<number>(0);
@@ -11,10 +13,10 @@ export const useLiveSocket = (liveSessionId: string) => {
   const [reactions, setReactions] = useState<{ id: string, emoji: string }[]>([]);
 
   useEffect(() => {
-    if (!liveSessionId) return;
+    if (!liveSessionId || !isAuthenticated) return;
 
     const client = new Client({
-      brokerURL: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8081/ws'}/auction/websocket`,
+      brokerURL: websocketUrl(),
       debug: (str) => {
         // console.log(str);
       },
@@ -47,32 +49,19 @@ export const useLiveSocket = (liveSessionId: string) => {
       });
 
       // Send JOIN message
-      let token = '';
-      const userStr = Cookies.get('user');
-      if (userStr) {
-        try {
-          const userObj = JSON.parse(userStr);
-          token = userObj.token;
-        } catch (e) { }
-      }
-
-      if (token) {
-        client.publish({
-          destination: `/app/live.chat/${liveSessionId}`,
-          body: JSON.stringify({ type: 'JOIN' }),
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      } else {
-        client.publish({
-          destination: `/app/live.chat/${liveSessionId}`,
-          body: JSON.stringify({ type: 'JOIN' }),
-        });
-      }
+      client.publish({
+        destination: `/app/live.chat/${liveSessionId}`,
+        body: JSON.stringify({ type: 'JOIN' }),
+      });
     };
 
     client.onStompError = (frame) => {
       console.error('Broker reported error: ' + frame.headers['message']);
+      setIsConnected(false);
+      stopStompReconnect(client);
     };
+
+    client.onWebSocketClose = () => setIsConnected(false);
 
     client.activate();
     setStompClient(client);
@@ -80,71 +69,35 @@ export const useLiveSocket = (liveSessionId: string) => {
     return () => {
       if (client.active) {
         // Send LEAVE message
-        let token = '';
-        const userStr = Cookies.get('user');
-        if (userStr) {
-          try {
-            const userObj = JSON.parse(userStr);
-            token = userObj.token;
-          } catch (e) { }
-        }
         if (client.connected) {
-          if (token) {
-            client.publish({
-              destination: `/app/live.chat/${liveSessionId}`,
-              body: JSON.stringify({ type: 'LEAVE' }),
-              headers: { Authorization: `Bearer ${token}` },
-            });
-          } else {
-            client.publish({
-              destination: `/app/live.chat/${liveSessionId}`,
-              body: JSON.stringify({ type: 'LEAVE' }),
-            });
-          }
+          client.publish({
+            destination: `/app/live.chat/${liveSessionId}`,
+            body: JSON.stringify({ type: 'LEAVE' }),
+          });
         }
         client.deactivate();
       }
     };
-  }, [liveSessionId]);
+  }, [isAuthenticated, liveSessionId]);
 
   const sendMessage = useCallback((content: string) => {
     if (stompClient && stompClient.connected && content.trim()) {
-      let token = '';
-      const userStr = Cookies.get('user');
-      if (userStr) {
-        try {
-          const userObj = JSON.parse(userStr);
-          token = userObj.token;
-        } catch (e) { }
-      }
-
       const chatMsg = { type: 'CHAT', content };
 
       stompClient.publish({
         destination: `/app/live.chat/${liveSessionId}`,
         body: JSON.stringify(chatMsg),
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
     }
   }, [stompClient, liveSessionId]);
 
   const sendReaction = useCallback((emoji: string) => {
     if (stompClient && stompClient.connected) {
-      let token = '';
-      const userStr = Cookies.get('user');
-      if (userStr) {
-        try {
-          const userObj = JSON.parse(userStr);
-          token = userObj.token;
-        } catch (e) { }
-      }
-
       const chatMsg = { type: 'REACTION', content: emoji };
 
       stompClient.publish({
         destination: `/app/live.chat/${liveSessionId}`,
         body: JSON.stringify(chatMsg),
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
     }
   }, [stompClient, liveSessionId]);

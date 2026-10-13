@@ -10,6 +10,7 @@ import com.ecommerce.thriftauction.features.order.repository.OrderRepository;
 import com.ecommerce.thriftauction.features.order.repository.ReviewRepository;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         if (!order.getBuyer().getEmail().equals(username) && !order.getBuyer().getUsername().equals(username)) {
-            throw new RuntimeException("Chỉ người mua mới có quyền đánh giá.");
+            throw new AccessDeniedException("Chỉ người mua mới có quyền đánh giá.");
         }
 
         if (order.getStatus() != OrderStatus.COMPLETED) {
@@ -86,7 +87,7 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!review.getReviewee().getId().equals(user.getId())) {
-            throw new RuntimeException("Chỉ người bán mới có quyền phản hồi đánh giá này.");
+            throw new AccessDeniedException("Chỉ người bán mới có quyền phản hồi đánh giá này.");
         }
 
         review.setSellerReply(reply);

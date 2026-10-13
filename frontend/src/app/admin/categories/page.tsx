@@ -11,8 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAdminCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/features/admin/hooks/useAdminCategories';
 import { CategoryIcon } from '@/components/ui/category-icon';
 import { useUploadImage } from '@/features/media/hooks/useMedia';
+import { IMAGE_ACCEPT } from '@/features/media/validation/mediaValidation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AdminCategoriesPage() {
+  const { user } = useAuth();
+  const canManage = user?.role === 'ADMIN';
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data: categories = [], isLoading } = useAdminCategories();
@@ -22,19 +26,20 @@ export default function AdminCategoriesPage() {
   const uploadImageMutation = useUploadImage();
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canManage) return;
     const file = e.target.files?.[0];
     if (file) {
       uploadImageMutation.mutate(file, {
         onSuccess: (url) => {
           setFormData(prev => ({ ...prev, icon: url }));
           toast.success('Tải ảnh lên thành công!');
-        },
-        onError: () => toast.error('Lỗi tải ảnh lên.')
+        }
       });
     }
   };
 
   const handleCreate = (data: any) => {
+    if (!canManage) return;
     const payload = { ...data, parentId: data.parentId === 'root' ? null : data.parentId };
     createMutation.mutate(payload, {
       onSuccess: () => {
@@ -47,6 +52,7 @@ export default function AdminCategoriesPage() {
   };
 
   const handleUpdate = (id: string, data: any) => {
+    if (!canManage) return;
     const payload = { ...data, parentId: data.parentId === 'root' ? null : data.parentId };
     updateMutation.mutate({ id, data: payload }, {
       onSuccess: () => {
@@ -59,7 +65,7 @@ export default function AdminCategoriesPage() {
   };
 
   const handleDelete = () => {
-    if (!selectedId) return;
+    if (!canManage || !selectedId) return;
     deleteMutation.mutate(selectedId, {
       onSuccess: () => {
         toast.success('Xóa danh mục thành công!');
@@ -127,10 +133,12 @@ export default function AdminCategoriesPage() {
               className="pl-9 w-full rounded-[24px] bg-background/50 border-border glass"
             />
           </div>
-          <Button onClick={() => { resetForm(); setCreateModalOpen(true); }} className="rounded-[24px] shrink-0">
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm mới
-          </Button>
+          {canManage && (
+            <Button onClick={() => { resetForm(); setCreateModalOpen(true); }} className="rounded-[24px] shrink-0">
+              <Plus className="w-4 h-4 mr-2" />
+              Thêm mới
+            </Button>
+          )}
         </div>
       </div>
 
@@ -177,14 +185,18 @@ export default function AdminCategoriesPage() {
                     </td>
                     <td className="px-5 py-4 text-muted-foreground">{cat.description || 'Không có mô tả'}</td>
                     <td className="px-5 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleOpenEdit(cat)} className="h-8 w-8 p-0 rounded-full border-blue-500/20 text-blue-400 hover:bg-blue-500/10">
-                          <Settings2 className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleOpenDelete(cat.id)} className="h-8 w-8 p-0 rounded-full border-red-500/20 text-red-400 hover:bg-red-500/10">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      {canManage ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleOpenEdit(cat)} className="h-8 w-8 p-0 rounded-full border-blue-500/20 text-blue-400 hover:bg-blue-500/10">
+                            <Settings2 className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleOpenDelete(cat.id)} className="h-8 w-8 p-0 rounded-full border-red-500/20 text-red-400 hover:bg-red-500/10">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground font-medium">Chỉ xem</span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -218,8 +230,8 @@ export default function AdminCategoriesPage() {
                   </div>
                 ) : null}
                 <Input value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} className="bg-muted border-border flex-1 h-10" placeholder="VD: Laptop hoặc URL ảnh..." />
-                <input type="file" id="icon-upload-create" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                <Button variant="outline" size="icon" onClick={() => document.getElementById('icon-upload-create')?.click()} disabled={uploadImageMutation.isPending} className="h-10 w-10 shrink-0">
+                <input type="file" id="icon-upload-create" className="hidden" accept={IMAGE_ACCEPT} onChange={handleImageUpload} />
+                <Button variant="outline" size="icon" onClick={() => document.getElementById('icon-upload-create')?.click()} disabled={!canManage || uploadImageMutation.isPending} className="h-10 w-10 shrink-0">
                   {uploadImageMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                 </Button>
               </div>
@@ -249,7 +261,7 @@ export default function AdminCategoriesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateModalOpen(false)}>Hủy</Button>
-            <Button disabled={!formData.name || createMutation.isPending} onClick={() => handleCreate(formData)}>Lưu</Button>
+            <Button disabled={!canManage || !formData.name || createMutation.isPending} onClick={() => handleCreate(formData)}>Lưu</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -278,8 +290,8 @@ export default function AdminCategoriesPage() {
                   </div>
                 ) : null}
                 <Input value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} className="bg-muted border-border flex-1 h-10" placeholder="VD: Laptop hoặc URL ảnh..." />
-                <input type="file" id="icon-upload-edit" className="hidden" accept="image/*" onChange={handleImageUpload} />
-                <Button variant="outline" size="icon" onClick={() => document.getElementById('icon-upload-edit')?.click()} disabled={uploadImageMutation.isPending} className="h-10 w-10 shrink-0">
+                <input type="file" id="icon-upload-edit" className="hidden" accept={IMAGE_ACCEPT} onChange={handleImageUpload} />
+                <Button variant="outline" size="icon" onClick={() => document.getElementById('icon-upload-edit')?.click()} disabled={!canManage || uploadImageMutation.isPending} className="h-10 w-10 shrink-0">
                   {uploadImageMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                 </Button>
               </div>
@@ -309,7 +321,7 @@ export default function AdminCategoriesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditModalOpen(false)}>Hủy</Button>
-            <Button disabled={!formData.name || updateMutation.isPending} onClick={() => handleUpdate(selectedId!, formData)}>Cập nhật</Button>
+            <Button disabled={!canManage || !formData.name || updateMutation.isPending} onClick={() => handleUpdate(selectedId!, formData)}>Cập nhật</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

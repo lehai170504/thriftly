@@ -1,15 +1,16 @@
 package com.ecommerce.thriftauction.core.config;
 
+import com.ecommerce.thriftauction.core.config.properties.BrowserSecurityProperties;
+import com.ecommerce.thriftauction.core.security.StompSecurityChannelInterceptor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-
-import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -17,7 +18,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final com.ecommerce.thriftauction.core.security.WebSocketChannelInterceptor channelInterceptor;
+    private final BrowserSecurityProperties browserSecurityProperties;
+    private final StompSecurityChannelInterceptor stompSecurityChannelInterceptor;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -28,12 +30,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws/auction").setAllowedOriginPatterns("*").withSockJS();
+        registry.addEndpoint("/ws/auction")
+                .setAllowedOrigins(browserSecurityProperties.getAllowedOrigins().toArray(String[]::new));
     }
 
     @Override
-    public void configureClientInboundChannel(
-            org.springframework.messaging.simp.config.ChannelRegistration registration) {
-        registration.interceptors(channelInterceptor);
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(stompSecurityChannelInterceptor);
     }
 }

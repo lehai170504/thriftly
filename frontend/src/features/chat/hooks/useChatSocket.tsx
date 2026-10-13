@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChatMessageDto } from '@/features/chat/types/chat';
-import Cookies from 'js-cookie';
 import { toast } from 'sonner';
 import { MessageCircle } from 'lucide-react';
+import { stopStompReconnect, websocketUrl } from '@/lib/websocket';
 
 export const useChatSocket = (
   isAuthenticated: boolean, 
@@ -19,18 +19,7 @@ export const useChatSocket = (
     if (!isAuthenticated || !currentUsername || disabled) return;
 
     const client = new Client({
-      brokerURL: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8081/ws'}/auction/websocket`,
-      beforeConnect: () => {
-        const userStr = Cookies.get('user');
-        if (userStr) {
-          try {
-            const userObj = JSON.parse(userStr);
-            if (userObj.token) {
-              client.connectHeaders = { Authorization: `Bearer ${userObj.token}` };
-            }
-          } catch (e) { }
-        }
-      },
+      brokerURL: websocketUrl(),
       debug: (str) => {
         // console.log(str);
       },
@@ -102,6 +91,7 @@ export const useChatSocket = (
       if (!errMsg.includes('ExecutorSubscribableChannel')) {
         console.error('Chat Broker reported error: ' + errMsg);
       }
+      stopStompReconnect(client);
     };
 
     client.activate();

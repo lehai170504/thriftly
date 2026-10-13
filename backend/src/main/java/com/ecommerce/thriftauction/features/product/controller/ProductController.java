@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import java.util.Collections;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -103,7 +104,7 @@ public class ProductController {
     @GetMapping("/recommendations")
     public ResponseEntity<List<ProductResponse>> getRecommendations(Authentication authentication) {
         if (authentication == null) {
-            return ResponseEntity.ok(java.util.Collections.emptyList());
+            return ResponseEntity.ok(Collections.emptyList());
         }
         return ResponseEntity.ok(productRecommendationService.getRecommendations(authentication.getName()));
     }
