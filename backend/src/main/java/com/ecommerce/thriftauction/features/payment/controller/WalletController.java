@@ -1,7 +1,6 @@
 package com.ecommerce.thriftauction.features.payment.controller;
 
 import com.ecommerce.thriftauction.features.payment.dto.WithdrawRequest;
-import com.ecommerce.thriftauction.features.payment.dto.DepositRequest;
 import com.ecommerce.thriftauction.features.payment.dto.WalletResponse;
 import com.ecommerce.thriftauction.features.payment.dto.BankAccountRequest;
 import com.ecommerce.thriftauction.features.payment.dto.BankAccountResponse;
@@ -30,13 +29,6 @@ public class WalletController {
     @GetMapping("/me")
     public ResponseEntity<WalletResponse> getMyWallet(Authentication authentication) {
         return ResponseEntity.ok(walletService.getMyWallet(authentication.getName()));
-    }
-
-    @Operation(summary = "Nạp tiền (Test/Manual)", description = "Nạp tiền thủ công vào ví (Thường dùng cho Dev/Test).")
-    @SecurityRequirement(name = "Bearer Authentication")
-    @PostMapping("/deposit")
-    public ResponseEntity<WalletResponse> deposit(@RequestBody DepositRequest request, Authentication authentication) {
-        return ResponseEntity.ok(walletService.deposit(authentication.getName(), request));
     }
 
     @Operation(summary = "Yêu cầu rút tiền", description = "Gửi yêu cầu rút tiền từ ví ra tài khoản ngân hàng. Tiền sẽ bị trừ tạm thời chờ Admin duyệt.")

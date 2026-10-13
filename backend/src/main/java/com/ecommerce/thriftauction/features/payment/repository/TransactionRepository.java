@@ -7,14 +7,21 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import java.util.Optional;
+import jakarta.persistence.LockModeType;
 import com.ecommerce.thriftauction.features.payment.entity.TransactionType;
 import com.ecommerce.thriftauction.features.payment.entity.TransactionStatus;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
         List<Transaction> findByWalletIdOrderByCreatedAtDesc(String walletId);
+
+        @Lock(LockModeType.PESSIMISTIC_WRITE)
+        @Query("SELECT t FROM Transaction t WHERE t.id = :id")
+        Optional<Transaction> findByIdForUpdate(@Param("id") String id);
 
         boolean existsByReferenceId(String referenceId);
 

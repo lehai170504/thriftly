@@ -1,15 +1,10 @@
 import api from '@/lib/axios';
-import { WalletResponse, TransactionResponse, WithdrawRequest, BankAccountResponse, BankAccountRequest } from '../types/wallet';
-export type { WalletResponse, TransactionResponse, WithdrawRequest, BankAccountResponse, BankAccountRequest };
+import { WalletResponse, TransactionResponse, WithdrawRequest, BankAccountResponse, BankAccountRequest, PaymentIntentStatusResponse } from '../types/wallet';
+export type { WalletResponse, TransactionResponse, WithdrawRequest, BankAccountResponse, BankAccountRequest, PaymentIntentStatusResponse };
 
 export const walletApi = {
   getMyWallet: async (): Promise<WalletResponse> => {
     const { data } = await api.get('/wallets/me');
-    return data;
-  },
-
-  deposit: async (amount: number): Promise<WalletResponse> => {
-    const { data } = await api.post('/wallets/deposit', { amount });
     return data;
   },
 
@@ -39,6 +34,11 @@ export const walletApi = {
 
   verifyPayOSPayment: async (query: string): Promise<{ success: boolean, message: string }> => {
     const { data } = await api.get(`/payment/payos/verify?${query}`);
+    return data;
+  },
+
+  getPaymentIntentStatus: async (orderCode: string): Promise<PaymentIntentStatusResponse> => {
+    const { data } = await api.get(`/payment/payos/intents/${encodeURIComponent(orderCode)}`);
     return data;
   },
 };

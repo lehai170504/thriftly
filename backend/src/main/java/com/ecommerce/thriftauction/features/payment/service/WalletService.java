@@ -14,7 +14,10 @@ import com.ecommerce.thriftauction.features.payment.repository.TransactionReposi
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
 import com.ecommerce.thriftauction.features.admin.service.SystemConfigService;
+import com.ecommerce.thriftauction.features.order.entity.Order;
 import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,10 @@ import com.ecommerce.thriftauction.features.payment.repository.BankAccountReposi
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.ecommerce.thriftauction.features.payment.entity.PaymentIntent;
+import com.ecommerce.thriftauction.features.payment.entity.PaymentIntentStatus;
+import com.ecommerce.thriftauction.features.payment.repository.PaymentIntentRepository;
+import vn.payos.model.webhooks.WebhookData;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +42,7 @@ public class WalletService {
         private final UserRepository userRepository;
         private final SystemConfigService systemConfigService;
         private final BankAccountRepository bankAccountRepository;
+        private final PaymentIntentRepository paymentIntentRepository;
 
         @Transactional(readOnly = true)
         public WalletResponse getMyWallet(String username) {
@@ -121,13 +129,48 @@ public class WalletService {
         }
 
         @Transactional
+        public void processPaymentIntentWebhook(WebhookData data) {
+                PaymentIntent intent = paymentIntentRepository.findByOrderCodeForUpdate(data.getOrderCode())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "PaymentIntent not found for orderCode: " + data.getOrderCode()));
+
+                if (intent.getStatus() == PaymentIntentStatus.SUCCESS) {
+                        return;
+                }
+
+                if (intent.getAmount().compareTo(BigDecimal.valueOf(data.getAmount())) != 0) {
+                        intent.setStatus(PaymentIntentStatus.FAILED);
+                        paymentIntentRepository.save(intent);
+                        throw new RuntimeException("Amount mismatch");
+                }
+
+                intent.setStatus(PaymentIntentStatus.SUCCESS);
+                intent.setProviderTransactionId(data.getReference());
+                paymentIntentRepository.save(intent);
+
+                Wallet wallet = walletRepository.findByUserIdForUpdate(intent.getUser().getId())
+                                .orElseGet(() -> {
+                                        Wallet newWallet = Wallet.builder()
+                                                        .user(intent.getUser())
+                                                        .balance(BigDecimal.ZERO)
+                                                        .heldBalance(BigDecimal.ZERO)
+                                                        .build();
+                                        return walletRepository.save(newWallet);
+                                });
+
+                executeCredit(wallet, intent.getAmount(), TransactionType.DEPOSIT,
+                                "Nạp tiền (PayOS - " + data.getOrderCode() + ")", String.valueOf(data.getOrderCode()),
+                                null);
+        }
+
+        @Transactional
         public WalletResponse requestWithdraw(String username,
                         WithdrawRequest request) {
                 User user = userRepository.findByEmail(username)
                                 .or(() -> userRepository.findByUsername(username))
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                Wallet wallet = walletRepository.findByUserId(user.getId())
+                Wallet wallet = walletRepository.findByUserIdForUpdate(user.getId())
                                 .orElseThrow(() -> new RuntimeException("Wallet not found"));
 
                 if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
@@ -147,15 +190,14 @@ public class WalletService {
                                         "Insufficient balance to cover amount and 5,000 VND withdrawal fee.");
                 }
 
-                // Deduct from balance
-                wallet.setBalance(wallet.getBalance().subtract(totalDeduction));
-                walletRepository.save(wallet);
-
                 String description = "";
                 if (request.getBankAccountId() != null) {
                         LinkedBankAccount bankAccount = bankAccountRepository
-                                        .findByIdAndUserId(request.getBankAccountId(), user.getId())
-                                        .orElseThrow(() -> new RuntimeException("Bank account not found"));
+                                        .findById(request.getBankAccountId())
+                                        .orElseThrow(() -> new EntityNotFoundException("Bank account not found"));
+                        if (!bankAccount.getUser().getId().equals(user.getId())) {
+                                throw new AccessDeniedException("Not your bank account");
+                        }
                         description = String.format("Ngân hàng: %s | STK: %s | Tên: %s",
                                         bankAccount.getBankName(), bankAccount.getAccountNumber(),
                                         bankAccount.getAccountName());
@@ -164,25 +206,12 @@ public class WalletService {
                                         request.getBankName(), request.getAccountNumber(), request.getAccountName());
                 }
 
-                // Record transaction
-                Transaction tx = Transaction.builder()
-                                .wallet(wallet)
-                                .amount(request.getAmount())
-                                .type(TransactionType.WITHDRAW)
-                                .status(TransactionStatus.PENDING)
-                                .description(description)
-                                .build();
-                transactionRepository.save(tx);
+                // Deduct from balance
+                executeDebit(wallet, request.getAmount(), TransactionType.WITHDRAW, TransactionStatus.PENDING,
+                                description, null, null);
 
                 // Record fee transaction for user
-                Transaction feeTx = Transaction.builder()
-                                .wallet(wallet)
-                                .amount(withdrawalFee)
-                                .type(TransactionType.WITHDRAWAL_FEE)
-                                .status(TransactionStatus.COMPLETED)
-                                .description("Phí rút tiền")
-                                .build();
-                transactionRepository.save(feeTx);
+                executeDebit(wallet, withdrawalFee, TransactionType.WITHDRAWAL_FEE, "Phí rút tiền", null, null);
 
                 // Transfer fee to admin wallet
                 userRepository.findByRole(Role.ADMIN).stream()
@@ -190,8 +219,9 @@ public class WalletService {
                                 .ifPresent(admin -> {
                                         Wallet adminWallet = walletRepository.findByUserId(admin.getId()).orElse(null);
                                         if (adminWallet != null) {
-                                                adminWallet.setBalance(adminWallet.getBalance().add(withdrawalFee));
-                                                walletRepository.save(adminWallet);
+                                                executeCredit(adminWallet, withdrawalFee,
+                                                                TransactionType.WITHDRAWAL_FEE, "Phí rút tiền user",
+                                                                null, null);
                                         }
                                 });
 
@@ -250,9 +280,117 @@ public class WalletService {
                                 .or(() -> userRepository.findByUsername(username))
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                LinkedBankAccount bankAccount = bankAccountRepository.findByIdAndUserId(bankAccountId, user.getId())
-                                .orElseThrow(() -> new RuntimeException("Bank account not found or access denied"));
+                LinkedBankAccount bankAccount = bankAccountRepository.findById(bankAccountId)
+                                .orElseThrow(() -> new EntityNotFoundException("Bank account not found"));
+
+                if (!bankAccount.getUser().getId().equals(user.getId())) {
+                        throw new AccessDeniedException("Not your bank account");
+                }
 
                 bankAccountRepository.delete(bankAccount);
+        }
+
+        @Transactional
+        public Transaction executeCredit(Wallet wallet, BigDecimal amount, TransactionType type, String description,
+                        String referenceId, Order order) {
+                requirePositiveAmount(amount);
+                wallet.setBalance(wallet.getBalance().add(amount));
+                walletRepository.save(wallet);
+
+                return transactionRepository.save(Transaction.builder()
+                                .wallet(wallet).amount(amount).type(type).status(TransactionStatus.COMPLETED)
+                                .description(description).referenceId(referenceId).order(order).build());
+        }
+
+        @Transactional
+        public Transaction executeDebit(Wallet wallet, BigDecimal amount, TransactionType type, String description,
+                        String referenceId, Order order) {
+                return executeDebit(wallet, amount, type, TransactionStatus.COMPLETED, description, referenceId,
+                                order);
+        }
+
+        private Transaction executeDebit(Wallet wallet, BigDecimal amount, TransactionType type,
+                        TransactionStatus status, String description, String referenceId,
+                        Order order) {
+                requirePositiveAmount(amount);
+                if (wallet.getBalance().compareTo(amount) < 0)
+                        throw new RuntimeException("Insufficient balance");
+                wallet.setBalance(wallet.getBalance().subtract(amount));
+                walletRepository.save(wallet);
+
+                return transactionRepository.save(Transaction.builder()
+                                .wallet(wallet).amount(amount).type(type).status(status)
+                                .description(description).referenceId(referenceId).order(order).build());
+        }
+
+        @Transactional
+        public void executeEscrowHold(Wallet wallet, BigDecimal amount, TransactionType type, String description,
+                        String referenceId, Order order) {
+                requirePositiveAmount(amount);
+                if (wallet.getBalance().compareTo(amount) < 0)
+                        throw new RuntimeException("Insufficient balance");
+                wallet.setBalance(wallet.getBalance().subtract(amount));
+                wallet.setHeldBalance(wallet.getHeldBalance() != null ? wallet.getHeldBalance().add(amount) : amount);
+                walletRepository.save(wallet);
+
+                transactionRepository.save(Transaction.builder()
+                                .wallet(wallet).amount(amount).type(type).status(TransactionStatus.COMPLETED)
+                                .description(description).referenceId(referenceId).order(order).build());
+        }
+
+        @Transactional
+        public void executeEscrowRefund(Wallet wallet, BigDecimal amount, TransactionType type, String description,
+                        String referenceId, Order order) {
+                requirePositiveAmount(amount);
+                if (wallet.getHeldBalance() == null || wallet.getHeldBalance().compareTo(amount) < 0)
+                        throw new RuntimeException("Insufficient held balance");
+                wallet.setHeldBalance(wallet.getHeldBalance().subtract(amount));
+                wallet.setBalance(wallet.getBalance().add(amount));
+                walletRepository.save(wallet);
+
+                transactionRepository.save(Transaction.builder()
+                                .wallet(wallet).amount(amount).type(type).status(TransactionStatus.COMPLETED)
+                                .description(description).referenceId(referenceId).order(order).build());
+        }
+
+        @Transactional
+        public void executeEscrowRelease(Wallet sourceWallet, Wallet targetWallet, BigDecimal amount, BigDecimal fee,
+                        Wallet feeWallet, String description, String referenceId,
+                        Order order) {
+                requirePositiveAmount(amount);
+                if (sourceWallet.getHeldBalance() == null || sourceWallet.getHeldBalance().compareTo(amount) < 0)
+                        throw new RuntimeException("Insufficient held balance");
+
+                sourceWallet.setHeldBalance(sourceWallet.getHeldBalance().subtract(amount));
+                walletRepository.save(sourceWallet);
+
+                BigDecimal transferAmount = amount.subtract(fee != null ? fee : BigDecimal.ZERO);
+                if (transferAmount.compareTo(BigDecimal.ZERO) > 0) {
+                        targetWallet.setBalance(targetWallet.getBalance().add(transferAmount));
+                        walletRepository.save(targetWallet);
+
+                        transactionRepository.save(Transaction.builder()
+                                        .wallet(targetWallet).amount(transferAmount)
+                                        .type(TransactionType.ESCROW_RELEASE).status(TransactionStatus.COMPLETED)
+                                        .description(description).referenceId(referenceId).order(order).build());
+                }
+
+                if (fee != null && fee.compareTo(BigDecimal.ZERO) > 0 && feeWallet != null) {
+                        feeWallet.setBalance(feeWallet.getBalance().add(fee));
+                        walletRepository.save(feeWallet);
+
+                        transactionRepository.save(Transaction.builder()
+                                        .wallet(feeWallet).amount(fee).type(TransactionType.ESCROW_RELEASE)
+                                        .status(TransactionStatus.COMPLETED)
+                                        .description("Fee: " + description)
+                                        .referenceId(referenceId != null ? referenceId + "-FEE" : null).order(order)
+                                        .build());
+                }
+        }
+
+        private void requirePositiveAmount(BigDecimal amount) {
+                if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+                        throw new IllegalArgumentException("Amount must be greater than zero");
+                }
         }
 }

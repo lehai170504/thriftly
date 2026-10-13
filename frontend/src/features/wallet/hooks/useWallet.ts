@@ -10,21 +10,6 @@ export const useWallet = () => {
   });
 };
 
-export const useDeposit = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: walletApi.deposit,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['wallet'] });
-      toast.success('Nạp tiền thành công!');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi nạp tiền');
-    },
-  });
-};
-
 export const useWithdraw = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -77,11 +62,6 @@ export const useDeleteBankAccount = () => {
 export const usePayOSPayment = () => {
   return useMutation({
     mutationFn: walletApi.createPayOSPayment,
-    onSuccess: (data) => {
-      if (data.paymentUrl) {
-        window.location.href = data.paymentUrl;
-      }
-    },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Không thể tạo link thanh toán');
     },
@@ -94,5 +74,14 @@ export const useVerifyPayOSPayment = (query: string) => {
     queryFn: () => walletApi.verifyPayOSPayment(query),
     enabled: !!query,
     retry: 0,
+  });
+};
+
+export const usePaymentIntentStatus = (orderCode: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['payos-intent', orderCode],
+    queryFn: () => walletApi.getPaymentIntentStatus(orderCode),
+    enabled: enabled && !!orderCode,
+    refetchInterval: (query) => query.state.data?.status === 'PENDING' ? 2000 : false,
   });
 };
