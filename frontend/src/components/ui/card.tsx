@@ -5,14 +5,19 @@ import { cn } from "@/lib/utils"
 function Card({
   className,
   size = "default",
+  variant = "static",
   ...props
-}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
+}: React.ComponentProps<"div"> & {
+  size?: "default" | "sm"
+  variant?: "static" | "interactive"
+}) {
   return (
     <div
       data-slot="card"
       data-size={size}
+      data-variant={variant}
       className={cn(
-        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-[24px] bg-card py-(--card-spacing) text-sm text-card-foreground shadow-lg border border-border backdrop-blur-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/30 [--card-spacing:--spacing(6)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-[24px] *:[img:last-child]:rounded-b-[24px]",
+        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-lg border border-border bg-card py-(--card-spacing) text-sm text-card-foreground shadow-surface [--card-spacing:--spacing(6)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-lg *:[img:last-child]:rounded-b-lg data-[variant=interactive]:transition-[border-color,box-shadow,transform] data-[variant=interactive]:duration-200 data-[variant=interactive]:hover:border-primary/30 data-[variant=interactive]:hover:shadow-elevated",
         className
       )}
       {...props}
