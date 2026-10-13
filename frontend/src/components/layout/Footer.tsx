@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandWordmark } from "@/components/layout/BrandWordmark";
 
 export default function Footer() {
   return (
@@ -7,14 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12 mb-16">
 
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-5 group w-fit">
-              <div className="w-10 h-10 bg-background rounded-full flex items-center justify-center overflow-hidden border border-border group-hover:scale-105 transition-transform duration-300">
-                <img src="/logo.png?v=5" alt="Thriftly Logo" className="w-[120%] h-[120%] object-contain" />
-              </div>
-              <span className="text-2xl font-serif font-semibold tracking-tight text-foreground">
-                Thriftly.
-              </span>
-            </Link>
+            <BrandWordmark className="mb-5" />
             <p className="text-muted-foreground mb-6 max-w-sm leading-relaxed text-sm font-medium">
               Sàn giao dịch thanh lý đồ cũ và đấu giá trực tuyến. Minh bạch, an toàn với cơ chế bảo đảm thanh toán trung gian.
             </p>

@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { canAccessAdminRoute } from '@/lib/admin-permissions';
+import { BrandWordmark } from '@/components/layout/BrandWordmark';
 
 const menuGroups = [
   {
@@ -68,14 +69,12 @@ export function AdminSidebar() {
       </Button>
 
       <div className={cn("p-6 pb-4 flex items-center", isCollapsed ? "justify-center px-0" : "gap-3")}>
-        <div className="flex items-center gap-3 text-2xl font-black tracking-tight shrink-0">
-          <div className="w-10 h-10 bg-background rounded-xl flex items-center justify-center overflow-hidden border border-border shadow-sm shrink-0">
-            <img src="/logo.png?v=2" alt="Thriftly Logo" className="w-[120%] h-[120%] object-contain" />
-          </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <BrandWordmark showName={false} href="/admin" />
           {!isCollapsed && (
-            <div className="text-foreground leading-none font-heading flex flex-col transition-opacity duration-300">
-              <span>Thriftly</span>
-              <span className="text-primary font-bold text-[10px] uppercase tracking-widest mt-1">Admin Portal</span>
+            <div className="text-foreground leading-none flex flex-col transition-opacity duration-200">
+              <span className="font-brand text-xl font-semibold">Thriftly.</span>
+              <span className="mt-1 text-xs font-semibold uppercase tracking-wider text-primary">Admin Portal</span>
             </div>
           )}
         </div>

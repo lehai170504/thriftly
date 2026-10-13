@@ -1,6 +1,5 @@
 import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
-import { GlobalChatWidget } from "@/features/chat/components/GlobalChatWidget";
 import { CategoryOnboardingModal } from "@/features/onboarding/CategoryOnboardingModal";
 import { Suspense } from "react";
 
@@ -18,7 +17,6 @@ export default function AppLayout({
         {children}
       </div>
       <Footer />
-      <GlobalChatWidget />
       <CategoryOnboardingModal />
     </>
   );

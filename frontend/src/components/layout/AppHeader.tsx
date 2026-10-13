@@ -16,6 +16,7 @@ import { useCategories } from '@/features/products/hooks/useProducts';
 import { useQueryClient } from '@tanstack/react-query';
 import { CategoryIcon } from '../ui/category-icon';
 import { GlobalSearchModal } from './GlobalSearchModal';
+import { BrandWordmark } from './BrandWordmark';
 
 export default function AppHeader() {
   const queryClient = useQueryClient();
@@ -63,14 +64,7 @@ export default function AppHeader() {
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[350px] border-r border-border glass p-0 flex flex-col">
                 <SheetHeader className="p-6 text-left border-b border-border">
-                  <SheetTitle className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-background rounded-full flex items-center justify-center overflow-hidden border border-border/50">
-                      <img src="/logo.png?v=5" alt="Thriftly Logo" className="w-[120%] h-[120%] object-contain" />
-                    </div>
-                    <span className="text-2xl font-serif font-semibold tracking-tight text-foreground">
-                      Thriftly.
-                    </span>
-                  </SheetTitle>
+                  <SheetTitle><BrandWordmark /></SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 overflow-y-auto py-6 flex flex-col gap-2 px-4">
                   <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 px-2">Khám phá</div>
@@ -111,14 +105,7 @@ export default function AppHeader() {
           </div>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0 group -ml-2 xl:ml-0">
-            <div className="w-10 h-10 bg-background rounded-full flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 border border-border/50">
-              <img src="/logo.png?v=5" alt="Thriftly Logo" className="w-[120%] h-[120%] object-contain" />
-            </div>
-            <span className="text-2xl font-serif font-semibold tracking-tight text-foreground">
-              Thriftly.
-            </span>
-          </Link>
+          <BrandWordmark className="-ml-2 xl:ml-0" />
 
           <nav className="hidden xl:flex items-center gap-1 xl:gap-2 ml-4">
             <div

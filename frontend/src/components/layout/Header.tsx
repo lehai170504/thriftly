@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CreateProductModal } from '@/features/products/components/CreateProductModal';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { GlobalSearchModal } from './GlobalSearchModal';
+import { BrandWordmark } from './BrandWordmark';
 
 export default function Header() {
   const router = useRouter();
@@ -42,14 +43,7 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full bg-background/90 backdrop-blur-md border-b border-border transition-all duration-300">
       <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-          <div className="w-10 h-10 bg-background rounded-full flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 border border-border shadow-sm">
-            <img src="/logo.png?v=5" alt="Thriftly Logo" className="w-[120%] h-[120%] object-contain" />
-          </div>
-          <span className="text-2xl font-serif font-semibold tracking-tight text-foreground">
-            Thriftly.
-          </span>
-        </Link>
+        <BrandWordmark />
 
         <div className="flex items-center gap-6 lg:gap-8">
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
