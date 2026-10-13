@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import com.ecommerce.thriftauction.features.product.dto.ProductResponse;
 import com.ecommerce.thriftauction.features.product.mapper.ProductMapper;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductFavoriteService {
 
         private final ProductFavoriteRepository favoriteRepository;
@@ -68,7 +70,11 @@ public class ProductFavoriteService {
                                 .or(() -> userRepository.findByUsername(username))
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                return favoriteRepository.findByUserId(user.getId(), pageable)
-                                .map(favorite -> productMapper.mapToResponse(favorite.getProduct()));
+                Page<ProductFavorite> favPage = favoriteRepository.findByUserId(user.getId(), pageable);
+                List<Product> products = favPage.getContent().stream()
+                                .map(ProductFavorite::getProduct)
+                                .collect(Collectors.toList());
+                List<ProductResponse> responses = productMapper.mapToResponses(products);
+                return new PageImpl<>(responses, pageable, favPage.getTotalElements());
         }
 }

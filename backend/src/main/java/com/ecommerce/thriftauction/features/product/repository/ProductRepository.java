@@ -7,6 +7,7 @@ import com.ecommerce.thriftauction.features.product.entity.SellType;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,6 +18,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
@@ -24,12 +26,14 @@ public interface ProductRepository extends JpaRepository<Product, String> {
        @Query("SELECT p FROM Product p WHERE p.id = :id")
        Optional<Product> findByIdForUpdate(@Param("id") String id);
 
+       @EntityGraph(attributePaths = {"seller", "category"})
        Page<Product> findByStatus(ProductStatus status, Pageable pageable);
 
        Page<Product> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 
        List<Product> findBySellerId(String sellerId);
 
+       @EntityGraph(attributePaths = {"seller", "category"})
        @Query("SELECT p FROM Product p " +
                      "LEFT JOIN AuctionSession a ON a.product.id = p.id " +
                      "WHERE p.status = com.ecommerce.thriftauction.features.product.entity.ProductStatus.ACTIVE " +
@@ -55,6 +59,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
                      @Param("location") String location,
                      Pageable pageable);
 
+       @EntityGraph(attributePaths = {"seller", "category"})
        @Query("SELECT p FROM Product p WHERE p.status = com.ecommerce.thriftauction.features.product.entity.ProductStatus.ACTIVE "
                      +
                      "AND p.category.id = :categoryId " +
@@ -62,6 +67,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
        List<Product> findRelatedProducts(@Param("categoryId") String categoryId, @Param("excludeId") String excludeId);
 
        List<Product> findByStatusAndUpdatedAtBefore(
-                     com.ecommerce.thriftauction.features.product.entity.ProductStatus status,
-                     java.time.LocalDateTime date);
+                     ProductStatus status,
+                     LocalDateTime date);
 }

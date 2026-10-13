@@ -6,8 +6,11 @@ import com.ecommerce.thriftauction.features.admin.repository.SystemConfigReposit
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.math.BigDecimal;
+import com.ecommerce.thriftauction.core.config.CacheConfig;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +20,10 @@ public class SystemConfigService {
 
     @Transactional
     public SystemConfig getConfig() {
-        return systemConfigRepository.findById(1L).orElseGet(() -> {
+        return systemConfigRepository.findFirstByOrderByIdAsc().orElseGet(() -> {
             SystemConfig defaultConfig = SystemConfig.builder()
-                    .platformFeePercent(new BigDecimal("0.05")) // 5% by default
-                    .minWithdrawalAmount(new BigDecimal("50000")) // 50k VND by default
+                    .platformFeePercent(new BigDecimal("0.05"))
+                    .minWithdrawalAmount(new BigDecimal("50000"))
                     .isMaintenanceMode(false)
                     .build();
             return systemConfigRepository.save(defaultConfig);
@@ -28,6 +31,7 @@ public class SystemConfigService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheConfig.CACHE_SYSTEM_CONFIG, allEntries = true)
     public SystemConfigDto updateConfig(SystemConfigDto dto) {
         SystemConfig config = getConfig();
         config.setPlatformFeePercent(dto.getPlatformFeePercent());
@@ -44,6 +48,7 @@ public class SystemConfigService {
     }
 
     @Transactional
+    @Cacheable(value = CacheConfig.CACHE_SYSTEM_CONFIG, key = "'config'")
     public SystemConfigDto getConfigDto() {
         SystemConfig config = getConfig();
         return SystemConfigDto.builder()

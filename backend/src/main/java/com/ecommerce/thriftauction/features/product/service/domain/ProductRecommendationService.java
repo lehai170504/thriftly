@@ -13,6 +13,7 @@ import com.ecommerce.thriftauction.features.product.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductRecommendationService {
 
         private final ProductRepository productRepository;
@@ -38,11 +40,11 @@ public class ProductRecommendationService {
                                 .stream().limit(10).collect(Collectors.toList());
 
                 if (history.isEmpty()) {
-                        return productRepository
+                        List<Product> defaultProducts = productRepository
                                         .findByStatus(ProductStatus.ACTIVE,
                                                         PageRequest.of(0, 8))
-                                        .stream()
-                                        .map(productMapper::mapToResponse).collect(Collectors.toList());
+                                        .getContent();
+                        return productMapper.mapToResponses(defaultProducts);
                 }
 
                 List<String> viewedProductIds = history.stream().map(h -> h.getProduct().getId())
@@ -53,7 +55,6 @@ public class ProductRecommendationService {
                                                 + ")")
                                 .collect(Collectors.toList());
 
-                // Fetch 30 random/recent active products that the user hasn't viewed yet
                 List<Product> availableProducts = productRepository
                                 .findByStatus(ProductStatus.ACTIVE,
                                                 PageRequest.of(0, 40))
@@ -84,16 +85,14 @@ public class ProductRecommendationService {
                                                 .collect(Collectors.toList());
 
                                 if (!recommendedProducts.isEmpty()) {
-                                        return recommendedProducts.stream().map(productMapper::mapToResponse)
-                                                        .collect(Collectors.toList());
+                                        return productMapper.mapToResponses(recommendedProducts);
                                 }
                         }
                 } catch (Exception e) {
                         System.err.println("Lỗi gọi AI Recommend: " + e.getMessage());
                 }
 
-                // Fallback to random/first 8 if AI fails or returns empty
-                return availableProducts.stream().limit(8).map(productMapper::mapToResponse)
-                                .collect(Collectors.toList());
+                List<Product> fallbackProducts = availableProducts.stream().limit(8).collect(Collectors.toList());
+                return productMapper.mapToResponses(fallbackProducts);
         }
 }
