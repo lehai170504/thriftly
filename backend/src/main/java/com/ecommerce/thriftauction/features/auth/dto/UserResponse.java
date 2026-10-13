@@ -1,11 +1,14 @@
 package com.ecommerce.thriftauction.features.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @Builder
@@ -19,11 +22,11 @@ public class UserResponse {
     private String phone;
     private String address;
     private String avatar;
-    private java.util.Set<String> interests;
+    private Set<String> interests;
     private String role;
-    @com.fasterxml.jackson.annotation.JsonProperty("isActive")
+    @JsonProperty("isActive")
     private boolean isActive;
-    private java.math.BigDecimal totalPoints;
+    private BigDecimal totalPoints;
     private String tier;
     private LocalDateTime createdAt;
 }

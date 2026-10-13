@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { extractError } from '@/lib/utils';
+import { isAdminPortalRole } from '@/lib/admin-permissions';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      if (user.role === 'ADMIN') {
+      if (isAdminPortalRole(user.role)) {
         router.replace('/admin');
       } else {
         router.replace('/products');
@@ -46,9 +47,13 @@ export default function LoginPage() {
     setIsLoading(true);
     loginMutation.mutate(data, {
       onSuccess: (responseData) => {
+        if (responseData.requires2FA) {
+          toast.info('Tài khoản yêu cầu xác thực 2 bước (2FA). Đang chuyển hướng...');
+          router.push(`/portal-secure-entry#email=${encodeURIComponent(responseData.email)}`);
+          return;
+        }
         toast.success('Đăng nhập thành công!');
         login(responseData);
-        router.push('/products');
       },
       onError: (error: any) => {
         toast.error('Đăng nhập thất bại: ' + extractError(error));
@@ -61,9 +66,13 @@ export default function LoginPage() {
     if (credentialResponse.credential) {
       googleLoginMutation.mutate(credentialResponse.credential, {
         onSuccess: (responseData) => {
+          if (responseData.requires2FA) {
+            toast.info('Tài khoản yêu cầu xác thực 2 bước (2FA). Đang chuyển hướng...');
+            router.push(`/portal-secure-entry#email=${encodeURIComponent(responseData.email)}`);
+            return;
+          }
           toast.success('Đăng nhập Google thành công!');
           login(responseData);
-          router.push('/products');
         },
         onError: (error: any) => {
           toast.error('Đăng nhập Google thất bại: ' + extractError(error));
@@ -71,8 +80,6 @@ export default function LoginPage() {
       });
     }
   };
-
-
 
   const onGoogleLoginError = () => {
     toast.error('Không thể kết nối với Google.');
@@ -82,9 +89,13 @@ export default function LoginPage() {
     if (response.accessToken) {
       facebookLoginMutation.mutate(response.accessToken, {
         onSuccess: (responseData) => {
+          if (responseData.requires2FA) {
+            toast.info('Tài khoản yêu cầu xác thực 2 bước (2FA). Đang chuyển hướng...');
+            router.push(`/portal-secure-entry#email=${encodeURIComponent(responseData.email)}`);
+            return;
+          }
           toast.success('Đăng nhập Facebook thành công!');
           login(responseData);
-          router.push('/products');
         },
         onError: (error: any) => {
           toast.error('Đăng nhập Facebook thất bại: ' + extractError(error));

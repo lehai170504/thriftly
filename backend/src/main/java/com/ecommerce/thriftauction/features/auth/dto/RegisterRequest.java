@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -16,5 +18,5 @@ public class RegisterRequest {
     private String fullName;
     private String phone;
     private String address;
-    private java.util.Set<String> interests;
+    private Set<String> interests;
 }

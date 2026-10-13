@@ -6,43 +6,59 @@ import com.ecommerce.thriftauction.features.auth.dto.AuthRequest;
 import com.ecommerce.thriftauction.features.auth.dto.AuthResponse;
 import com.ecommerce.thriftauction.features.auth.dto.RegisterRequest;
 import com.ecommerce.thriftauction.features.auth.dto.ResetPasswordRequest;
+import com.ecommerce.thriftauction.features.auth.entity.OtpPurpose;
 import com.ecommerce.thriftauction.features.auth.entity.OtpToken;
-import com.ecommerce.thriftauction.features.auth.entity.RefreshToken;
 import com.ecommerce.thriftauction.features.auth.entity.Role;
 import com.ecommerce.thriftauction.features.auth.entity.User;
 import com.ecommerce.thriftauction.features.payment.entity.Wallet;
 import com.ecommerce.thriftauction.features.auth.repository.OtpTokenRepository;
-import com.ecommerce.thriftauction.features.auth.repository.RefreshTokenRepository;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
-import com.ecommerce.thriftauction.core.security.JwtService;
-import com.ecommerce.thriftauction.core.security.UserDetailsImpl;
+import com.ecommerce.thriftauction.core.security.SessionRevocationService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Random;
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
+        private static final SecureRandom OTP_RANDOM = new SecureRandom();
+
         private final UserRepository userRepository;
         private final WalletRepository walletRepository;
-        private final RefreshTokenRepository refreshTokenRepository;
         private final OtpTokenRepository otpTokenRepository;
         private final PasswordEncoder passwordEncoder;
-        private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
         private final EmailService emailService;
+        private final SessionRevocationService sessionRevocationService;
 
-        @org.springframework.beans.factory.annotation.Value("${google.client.id}")
+        @Value("${google.client.id}")
         private String googleClientId;
 
         @Transactional
@@ -77,6 +93,7 @@ public class AuthService {
                 return buildAuthResponse(savedUser);
         }
 
+        @Transactional
         public AuthResponse authenticate(AuthRequest request) {
                 authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(
@@ -86,23 +103,7 @@ public class AuthService {
                                 .or(() -> userRepository.findByUsername(request.getEmail()))
                                 .orElseThrow(() -> new IllegalArgumentException("Invalid username or email"));
 
-                if (user.getRole() == Role.ADMIN || user.getRole() == Role.STAFF) {
-                        String otp = String.format("%06d", new Random().nextInt(999999));
-                        OtpToken otpToken = OtpToken.builder()
-                                        .user(user)
-                                        .otp(otp)
-                                        .expiryDate(LocalDateTime.now().plusMinutes(15))
-                                        .build();
-                        otpTokenRepository.save(otpToken);
-                        emailService.sendOtpEmail(user.getEmail(), otp);
-
-                        return AuthResponse.builder()
-                                        .email(user.getEmail())
-                                        .requires2FA(true)
-                                        .build();
-                }
-
-                return buildAuthResponse(user);
+                return buildLoginResponse(user);
         }
 
         @Transactional
@@ -110,7 +111,12 @@ public class AuthService {
                 User user = userRepository.findByEmail(email)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                OtpToken otpToken = otpTokenRepository.findByOtpAndUser(otp, user)
+                if (!isPrivileged(user)) {
+                        throw new RuntimeException("Two-factor verification is not available for this account");
+                }
+
+                OtpToken otpToken = otpTokenRepository
+                                .findTopByOtpAndUserAndPurposeOrderByExpiryDateDesc(otp, user, OtpPurpose.LOGIN_2FA)
                                 .orElseThrow(() -> new RuntimeException("Invalid OTP"));
 
                 if (otpToken.isUsed()) {
@@ -130,18 +136,18 @@ public class AuthService {
         @Transactional
         public AuthResponse googleLogin(String credential) {
                 try {
-                        com.google.api.client.http.HttpTransport transport = new com.google.api.client.http.javanet.NetHttpTransport();
-                        com.google.api.client.json.JsonFactory jsonFactory = new com.google.api.client.json.gson.GsonFactory();
+                        HttpTransport transport = new NetHttpTransport();
+                        JsonFactory jsonFactory = new GsonFactory();
 
-                        com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier verifier = new com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier.Builder(
+                        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
                                         transport, jsonFactory)
-                                        .setAudience(java.util.Collections.singletonList(googleClientId))
+                                        .setAudience(Collections.singletonList(googleClientId))
                                         .build();
 
-                        com.google.api.client.googleapis.auth.oauth2.GoogleIdToken idToken = verifier
+                        GoogleIdToken idToken = verifier
                                         .verify(credential);
                         if (idToken != null) {
-                                com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload payload = idToken
+                                GoogleIdToken.Payload payload = idToken
                                                 .getPayload();
                                 String email = payload.getEmail();
                                 String name = (String) payload.get("name");
@@ -150,11 +156,11 @@ public class AuthService {
                                 User user = userRepository.findByEmail(email).orElseGet(() -> {
                                         User newUser = User.builder()
                                                         .username(email.split("@")[0] + "_"
-                                                                        + java.util.UUID.randomUUID().toString()
+                                                                        + UUID.randomUUID().toString()
                                                                                         .substring(0, 5))
                                                         .email(email)
                                                         .password(passwordEncoder
-                                                                        .encode(java.util.UUID.randomUUID().toString()))
+                                                                        .encode(UUID.randomUUID().toString()))
                                                         .fullName(name)
                                                         .avatar(pictureUrl)
                                                         .role(Role.USER)
@@ -169,7 +175,7 @@ public class AuthService {
                                         return saved;
                                 });
 
-                                return buildAuthResponse(user);
+                                return buildLoginResponse(user);
                         } else {
                                 throw new RuntimeException("Invalid ID token.");
                         }
@@ -181,10 +187,17 @@ public class AuthService {
         @Transactional
         public AuthResponse facebookLogin(String accessToken) {
                 try {
-                        String url = "https://graph.facebook.com/me?fields=id,name,email,picture.type(large)&access_token="
-                                        + accessToken;
-                        org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
-                        java.util.Map<String, Object> response = restTemplate.getForObject(url, java.util.Map.class);
+                        String url = "https://graph.facebook.com/me?fields=id,name,email,picture.type(large)";
+                        RestTemplate restTemplate = new RestTemplate();
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setBearerAuth(accessToken);
+                        ResponseEntity<Map<String, Object>> graphResponse = restTemplate.exchange(
+                                        url,
+                                        HttpMethod.GET,
+                                        new HttpEntity<>(headers),
+                                        new ParameterizedTypeReference<>() {
+                                        });
+                        Map<String, Object> response = graphResponse.getBody();
 
                         if (response == null || !response.containsKey("id")) {
                                 throw new RuntimeException("Invalid Facebook access token.");
@@ -196,10 +209,10 @@ public class AuthService {
 
                         String pictureUrl = null;
                         if (response.containsKey("picture")) {
-                                java.util.Map<String, Object> picture = (java.util.Map<String, Object>) response
+                                Map<String, Object> picture = (Map<String, Object>) response
                                                 .get("picture");
                                 if (picture.containsKey("data")) {
-                                        java.util.Map<String, Object> data = (java.util.Map<String, Object>) picture
+                                        Map<String, Object> data = (Map<String, Object>) picture
                                                         .get("data");
                                         pictureUrl = (String) data.get("url");
                                 }
@@ -215,11 +228,11 @@ public class AuthService {
                         User user = userRepository.findByEmail(finalEmail).orElseGet(() -> {
                                 User newUser = User.builder()
                                                 .username(finalEmail.split("@")[0] + "_"
-                                                                + java.util.UUID.randomUUID().toString().substring(0,
+                                                                + UUID.randomUUID().toString().substring(0,
                                                                                 5))
                                                 .email(finalEmail)
                                                 .password(passwordEncoder
-                                                                .encode(java.util.UUID.randomUUID().toString()))
+                                                                .encode(UUID.randomUUID().toString()))
                                                 .fullName(name)
                                                 .avatar(finalPictureUrl)
                                                 .role(Role.USER)
@@ -234,39 +247,29 @@ public class AuthService {
                                 return saved;
                         });
 
-                        return buildAuthResponse(user);
+                        return buildLoginResponse(user);
                 } catch (Exception e) {
                         throw new RuntimeException("Facebook Login failed: " + e.getMessage());
                 }
         }
 
         @Transactional
-        public AuthResponse refreshToken(String token) {
-                RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
-                                .orElseThrow(() -> new RuntimeException("Refresh Token is not found!"));
-
-                if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-                        refreshTokenRepository.delete(refreshToken);
-                        throw new RuntimeException("Refresh token was expired. Please make a new signin request");
-                }
-
-                User user = refreshToken.getUser();
-                String accessToken = jwtService.generateToken(new UserDetailsImpl(user));
-
-                return buildAuthResponseWithExistingRefreshToken(user, accessToken, refreshToken.getToken());
-        }
-
-        @Transactional
         public void forgotPassword(String email) {
-                User user = userRepository.findByEmail(email)
-                                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                Optional<User> userResult = userRepository.findByEmail(email);
+                if (userResult.isEmpty()) {
+                        return;
+                }
+                User user = userResult.get();
 
                 // Generate 6-digit OTP
-                String otp = String.format("%06d", new Random().nextInt(999999));
+                String otp = generateOtp();
+
+                otpTokenRepository.invalidateUnused(user, OtpPurpose.PASSWORD_RESET);
 
                 OtpToken otpToken = OtpToken.builder()
                                 .user(user)
                                 .otp(otp)
+                                .purpose(OtpPurpose.PASSWORD_RESET)
                                 .expiryDate(LocalDateTime.now().plusMinutes(15))
                                 .build();
 
@@ -280,7 +283,9 @@ public class AuthService {
                 User user = userRepository.findByEmail(request.getEmail())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-                OtpToken otpToken = otpTokenRepository.findByOtpAndUser(request.getOtp(), user)
+                OtpToken otpToken = otpTokenRepository
+                                .findTopByOtpAndUserAndPurposeOrderByExpiryDateDesc(
+                                                request.getOtp(), user, OtpPurpose.PASSWORD_RESET)
                                 .orElseThrow(() -> new RuntimeException("Invalid OTP"));
 
                 if (otpToken.isUsed()) {
@@ -304,45 +309,43 @@ public class AuthService {
                 otpToken.setUsed(true);
                 otpTokenRepository.save(otpToken);
 
-                // Optional: delete all refresh tokens to force re-login on all devices
-                refreshTokenRepository.deleteByUser(user);
+                sessionRevocationService.revokeAll(user.getEmail());
         }
 
-        private RefreshToken createRefreshToken(User user) {
-                RefreshToken refreshToken = RefreshToken.builder()
+        private AuthResponse buildLoginResponse(User user) {
+                if (!user.isActive()) {
+                        throw new DisabledException("Account is disabled");
+                }
+                if (!isPrivileged(user)) {
+                        return buildAuthResponse(user);
+                }
+
+                String otp = generateOtp();
+                otpTokenRepository.invalidateUnused(user, OtpPurpose.LOGIN_2FA);
+                otpTokenRepository.save(OtpToken.builder()
                                 .user(user)
-                                .token(UUID.randomUUID().toString())
-                                .expiryDate(LocalDateTime.now().plusDays(7))
+                                .otp(otp)
+                                .purpose(OtpPurpose.LOGIN_2FA)
+                                .expiryDate(LocalDateTime.now().plusMinutes(15))
+                                .build());
+                emailService.sendOtpEmail(user.getEmail(), otp);
+
+                return AuthResponse.builder()
+                                .email(user.getEmail())
+                                .requires2FA(true)
                                 .build();
-                return refreshTokenRepository.save(refreshToken);
+        }
+
+        private boolean isPrivileged(User user) {
+                return user.getRole() == Role.ADMIN || user.getRole() == Role.STAFF;
+        }
+
+        private String generateOtp() {
+                return String.format("%06d", OTP_RANDOM.nextInt(1_000_000));
         }
 
         private AuthResponse buildAuthResponse(User user) {
-                var jwtToken = jwtService.generateToken(new UserDetailsImpl(user));
-                var refreshToken = createRefreshToken(user);
-
                 return AuthResponse.builder()
-                                .token(jwtToken)
-                                .refreshToken(refreshToken.getToken())
-                                .id(user.getId())
-                                .username(user.getUsername())
-                                .email(user.getEmail())
-                                .role(user.getRole().name())
-                                .fullName(user.getFullName())
-                                .avatar(user.getAvatar())
-                                .phone(user.getPhone())
-                                .address(user.getAddress())
-                                .interests(user.getInterests())
-                                .totalPoints(user.getTotalPoints())
-                                .tier(user.getTier() != null ? user.getTier().name() : "BRONZE")
-                                .build();
-        }
-
-        private AuthResponse buildAuthResponseWithExistingRefreshToken(User user, String accessToken,
-                        String refreshTokenStr) {
-                return AuthResponse.builder()
-                                .token(accessToken)
-                                .refreshToken(refreshTokenStr)
                                 .id(user.getId())
                                 .username(user.getUsername())
                                 .email(user.getEmail())

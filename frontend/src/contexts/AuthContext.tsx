@@ -1,17 +1,19 @@
-/* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-unused-vars */
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/features/auth/api/authApi';
 import { AuthResponse } from '@/features/auth/types/auth';
-import Cookies from 'js-cookie';
+import { isAdminPortalRole } from '@/lib/admin-permissions';
 
 interface AuthContextType {
   user: AuthResponse | null;
   login: (data: AuthResponse) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
+  isAuthLoading: boolean;
   isLoginModalOpen: boolean;
   isRegisterModalOpen: boolean;
   openLoginModal: () => void;
@@ -20,74 +22,76 @@ interface AuthContextType {
   closeRegisterModal: () => void;
 }
 
-import { GoogleOAuthProvider } from '@react-oauth/google';
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthResponse | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-
-  const openLoginModal = () => {
-    router.push('/login');
-  };
-  const closeLoginModal = () => setIsLoginModalOpen(false);
-
-  const openRegisterModal = () => {
-    router.push('/register');
-  };
-  const closeRegisterModal = () => setIsRegisterModalOpen(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Check cookies for existing session on load
-    const storedUser = Cookies.get('user');
-
-    if (storedUser) {
+    let active = true;
+    const restoreSession = async () => {
       try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        Cookies.remove('user');
+        await authApi.prepareCsrf();
+        const currentUser = await authApi.me();
+        if (active) setUser(currentUser);
+      } catch {
+        if (active) setUser(null);
+      } finally {
+        if (active) setIsAuthLoading(false);
       }
-    }
-  }, [router]);
+    };
+    restoreSession();
 
-  // Prevent Admin from accessing normal pages
+    const expire = () => {
+      queryClient.clear();
+      setUser(null);
+    };
+    window.addEventListener('thriftly:session-expired', expire);
+    return () => {
+      active = false;
+      window.removeEventListener('thriftly:session-expired', expire);
+    };
+  }, [queryClient]);
+
   useEffect(() => {
-    if (user?.role === 'ADMIN' && !pathname.startsWith('/admin')) {
+    if (!isAuthLoading && isAdminPortalRole(user?.role) && !pathname.startsWith('/admin')) {
       router.push('/admin');
     }
-  }, [user, pathname, router]);
+  }, [isAuthLoading, user, pathname, router]);
 
   const login = (data: AuthResponse) => {
+    if (data.requires2FA) return;
     setUser(data);
-    Cookies.set('user', JSON.stringify(data), { expires: 7 }); // expires in 7 days
-    if (data.role === 'ADMIN') {
-      router.push('/admin');
-    } else {
-      router.push('/products'); // Redirect to products after login
-    }
+    router.push(isAdminPortalRole(data.role) ? '/admin' : '/products');
   };
 
   const logout = async () => {
-    setUser(null);
-    Cookies.remove('user');
     try {
       await authApi.logout();
-    } catch (e) { }
-    router.push('/');
+    } finally {
+      queryClient.clear();
+      setUser(null);
+      await authApi.prepareCsrf().catch(() => undefined);
+      router.push('/');
+    }
   };
 
   return (
     <AuthContext.Provider value={{
-      user, login, logout, isAuthenticated: !!user,
+      user, login, logout, isAuthenticated: !!user, isAuthLoading,
       isLoginModalOpen, isRegisterModalOpen,
-      openLoginModal, closeLoginModal,
-      openRegisterModal, closeRegisterModal
+      openLoginModal: () => router.push('/login'),
+      closeLoginModal: () => setIsLoginModalOpen(false),
+      openRegisterModal: () => router.push('/register'),
+      closeRegisterModal: () => setIsRegisterModalOpen(false),
     }}>
-      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
         {children}
       </GoogleOAuthProvider>
     </AuthContext.Provider>
@@ -96,8 +100,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };

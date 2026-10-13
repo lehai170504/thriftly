@@ -5,12 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.util.Set;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResponse {
-    private String token;
     private String id;
     private String username;
     private String email;
@@ -19,9 +21,8 @@ public class AuthResponse {
     private String avatar;
     private String phone;
     private String address;
-    private java.util.Set<String> interests;
-    private String refreshToken;
-    private java.math.BigDecimal totalPoints;
+    private Set<String> interests;
+    private BigDecimal totalPoints;
     private String tier;
     private boolean requires2FA;
 }

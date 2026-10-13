@@ -34,9 +34,9 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     Page<User> findByRoleNot(Role role, Pageable pageable);
 
-    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.role != :role AND (:search IS NULL OR :search = '' OR LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<User> findByRoleNotAndSearch(@org.springframework.data.repository.query.Param("role") Role role,
-            @org.springframework.data.repository.query.Param("search") String search, Pageable pageable);
+    @Query("SELECT u FROM User u WHERE u.role != :role AND (:search IS NULL OR :search = '' OR LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<User> findByRoleNotAndSearch(@Param("role") Role role,
+            @Param("search") String search, Pageable pageable);
 
     List<User> findTop5ByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(String username, String email);
 }

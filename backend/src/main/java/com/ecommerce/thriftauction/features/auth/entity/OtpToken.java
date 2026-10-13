@@ -23,6 +23,10 @@ public class OtpToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 32)
+    private OtpPurpose purpose;
+
     @Column(nullable = false)
     private LocalDateTime expiryDate;
 

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRegister, useGoogleLogin, useLogin, useFacebookLogin } from '@/features/auth/hooks/useAuthMutations';
+import { useRegister, useGoogleLogin, useFacebookLogin } from '@/features/auth/hooks/useAuthMutations';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import FacebookLogin from '@greatsumini/react-facebook-login';
 import { registerSchema, RegisterFormData } from '@/features/auth/schemas';
@@ -40,7 +40,6 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema)
   });
 
-  const loginMutation = useLogin();
   const registerMutation = useRegister();
   const googleLoginMutation = useGoogleLogin();
   const facebookLoginMutation = useFacebookLogin();
@@ -48,14 +47,9 @@ export default function RegisterPage() {
   const onRegister = (data: RegisterFormData) => {
     setIsLoading(true);
     registerMutation.mutate(data, {
-      onSuccess: (_, variables) => {
+      onSuccess: (responseData) => {
         toast.success('Đăng ký thành công! Đang tự động đăng nhập...');
-        loginMutation.mutate({ email: variables.email, password: variables.password }, {
-          onSuccess: (responseData) => {
-            login(responseData);
-            router.push('/products');
-          }
-        });
+        login(responseData);
       },
       onError: (error: any) => {
         toast.error('Đăng ký thất bại: ' + extractError(error));

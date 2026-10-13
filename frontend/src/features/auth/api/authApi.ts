@@ -2,48 +2,30 @@
 import api from '@/lib/axios';
 import { AuthResponse } from '../types/auth';
 
+let csrfRequest: Promise<void> | null = null;
+
+const prepareCsrf = (): Promise<void> => {
+  if (!csrfRequest) {
+    csrfRequest = api.get('/auth/csrf').then(() => undefined).finally(() => { csrfRequest = null; });
+  }
+  return csrfRequest;
+};
+
+const post = async <T>(url: string, data?: unknown): Promise<T> => {
+  await prepareCsrf();
+  return (await api.post<T>(url, data)).data;
+};
+
 export const authApi = {
-  login: async (data: any): Promise<AuthResponse> => {
-    const response = await api.post('/auth/login', data);
-    return response.data;
-  },
-
-  verify2Fa: async (data: { email: string; otp: string }): Promise<AuthResponse> => {
-    const response = await api.post('/auth/verify-2fa', data);
-    return response.data;
-  },
-
-  googleLogin: async (credential: string): Promise<AuthResponse> => {
-    const response = await api.post('/auth/google-login', { credential });
-    return response.data;
-  },
-
-  facebookLogin: async (accessToken: string): Promise<AuthResponse> => {
-    const response = await api.post('/auth/facebook-login', { accessToken });
-    return response.data;
-  },
-
-  register: async (data: any): Promise<any> => {
-    const response = await api.post('/auth/register', data);
-    return response.data;
-  },
-
-  logout: async (): Promise<void> => {
-    await api.post('/auth/logout');
-  },
-
-  refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
-    const response = await api.post('/auth/refresh-token', { refreshToken });
-    return response.data;
-  },
-
-  forgotPassword: async (email: string): Promise<any> => {
-    const response = await api.post('/auth/forgot-password', { email });
-    return response.data;
-  },
-
-  resetPassword: async (data: any): Promise<any> => {
-    const response = await api.post('/auth/reset-password', data);
-    return response.data;
-  },
+  prepareCsrf,
+  me: async (): Promise<AuthResponse> => (await api.get<AuthResponse>('/users/me')).data,
+  login: (data: any) => post<AuthResponse>('/auth/login', data),
+  verify2Fa: (data: { email: string; otp: string }) => post<AuthResponse>('/auth/verify-2fa', data),
+  googleLogin: (credential: string) => post<AuthResponse>('/auth/google-login', { credential }),
+  facebookLogin: (accessToken: string) => post<AuthResponse>('/auth/facebook-login', { accessToken }),
+  register: (data: any) => post<AuthResponse>('/auth/register', data),
+  logout: () => post<void>('/auth/logout'),
+  logoutAll: () => post<void>('/auth/logout-all'),
+  forgotPassword: (email: string) => post<any>('/auth/forgot-password', { email }),
+  resetPassword: (data: any) => post<any>('/auth/reset-password', data),
 };

@@ -2,7 +2,9 @@ package com.ecommerce.thriftauction.features.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -35,14 +37,14 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_interests", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "category_id")
-    private java.util.Set<String> interests;
+    private Set<String> interests;
 
     @Builder.Default
     private boolean isActive = true;
 
     @Column(columnDefinition = "numeric(38,2) default 0")
     @Builder.Default
-    private java.math.BigDecimal totalPoints = java.math.BigDecimal.ZERO;
+    private BigDecimal totalPoints = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default

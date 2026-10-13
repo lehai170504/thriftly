@@ -1,176 +1,141 @@
 package com.ecommerce.thriftauction.features.auth.controller;
 
-import com.ecommerce.thriftauction.features.auth.dto.AuthRequest;
-import com.ecommerce.thriftauction.features.auth.dto.AuthResponse;
-import com.ecommerce.thriftauction.features.auth.dto.RegisterRequest;
+import com.ecommerce.thriftauction.core.security.SessionAuthenticationService;
+import com.ecommerce.thriftauction.core.security.SessionRevocationService;
+import com.ecommerce.thriftauction.features.auth.dto.*;
 import com.ecommerce.thriftauction.features.auth.service.AuthService;
-import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication", description = "Endpoints cho đăng ký, đăng nhập và quản lý phiên làm việc")
 public class AuthController {
 
     private final AuthService authService;
+    private final SessionAuthenticationService sessionAuthenticationService;
+    private final SessionRevocationService sessionRevocationService;
 
-    @Operation(summary = "Đăng ký tài khoản", description = "Tạo một tài khoản người dùng mới.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Đăng ký thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Dữ liệu không hợp lệ")
-    })
+    @GetMapping("/csrf")
+    public Map<String, String> csrf(CsrfToken token) {
+        return Map.of("headerName", token.getHeaderName(), "parameterName", token.getParameterName(),
+                "token", token.getToken());
+    }
+
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request, HttpServletResponse response) {
-        AuthResponse res = authService.register(request);
-        setTokenCookie(response, res.getToken());
-        return ResponseEntity.ok(res);
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest body,
+            HttpServletRequest request, HttpServletResponse response) {
+        AuthResponse result = authService.register(body);
+        if (!result.isRequires2FA()) {
+            establish(result, request, response);
+        }
+        return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "Đăng nhập", description = "Xác thực người dùng và trả về JWT token.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Đăng nhập thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Sai email hoặc mật khẩu"),
-            @ApiResponse(responseCode = "403", description = "Tài khoản bị khóa")
-    })
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> authenticate(@RequestBody AuthRequest body,
+            HttpServletRequest request, HttpServletResponse response) {
+        AuthResponse result;
         try {
-            AuthResponse res = authService.authenticate(request);
-            setTokenCookie(response, res.getToken());
-            return ResponseEntity.ok(res);
-        } catch (DisabledException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Email hoặc mật khẩu không đúng.");
+            result = authService.authenticate(body);
+        } catch (DisabledException exception) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Account is disabled");
+        } catch (Exception exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
         }
+        if (!result.isRequires2FA()) {
+            establish(result, request, response);
+        }
+        return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "Đăng nhập bằng Google", description = "Xác thực người dùng qua Google OAuth2.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Đăng nhập thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Xác thực Google thất bại")
-    })
     @PostMapping("/google-login")
-    public ResponseEntity<?> googleLogin(
-            @RequestBody com.ecommerce.thriftauction.features.auth.dto.GoogleLoginRequest request,
-            HttpServletResponse response) {
+    public ResponseEntity<?> googleLogin(@RequestBody GoogleLoginRequest body,
+            HttpServletRequest request, HttpServletResponse response) {
+        AuthResponse result;
         try {
-            AuthResponse res = authService.googleLogin(request.getCredential());
-            setTokenCookie(response, res.getToken());
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(e.getMessage());
+            result = authService.googleLogin(body.getCredential());
+        } catch (Exception exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Google login failed");
         }
+        if (!result.isRequires2FA()) {
+            establish(result, request, response);
+        }
+        return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "Đăng nhập bằng Facebook", description = "Xác thực người dùng qua Facebook OAuth2.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Đăng nhập thành công", content = @Content(schema = @Schema(implementation = AuthResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Xác thực Facebook thất bại")
-    })
     @PostMapping("/facebook-login")
-    public ResponseEntity<?> facebookLogin(
-            @RequestBody com.ecommerce.thriftauction.features.auth.dto.FacebookLoginRequest request,
-            HttpServletResponse response) {
+    public ResponseEntity<?> facebookLogin(@RequestBody FacebookLoginRequest body,
+            HttpServletRequest request, HttpServletResponse response) {
+        AuthResponse result;
         try {
-            AuthResponse res = authService.facebookLogin(request.getAccessToken());
-            setTokenCookie(response, res.getToken());
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(e.getMessage());
+            result = authService.facebookLogin(body.getAccessToken());
+        } catch (Exception exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Facebook login failed");
         }
-    }
-
-    @Operation(summary = "Đăng xuất", description = "Xóa cookie JWT token.")
-    @ApiResponse(responseCode = "200", description = "Đăng xuất thành công")
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-        return ResponseEntity.ok().build();
-    }
-
-    private void setTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60);
-        response.addCookie(cookie);
-    }
-
-    @Operation(summary = "Lấy token mới", description = "Sử dụng refresh token để cấp lại access token mới.")
-    @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshToken(
-            @RequestBody com.ecommerce.thriftauction.features.auth.dto.RefreshTokenRequest request,
-            HttpServletResponse response) {
-        try {
-            AuthResponse res = authService.refreshToken(request.getRefreshToken());
-            setTokenCookie(response, res.getToken());
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        if (!result.isRequires2FA()) {
+            establish(result, request, response);
         }
+        return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "Quên mật khẩu", description = "Gửi OTP qua email để khôi phục mật khẩu.")
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(
-            @RequestBody com.ecommerce.thriftauction.features.auth.dto.ForgotPasswordRequest request) {
-        try {
-            authService.forgotPassword(request.getEmail());
-            return ResponseEntity.ok("OTP sent to email");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
-    @Operation(summary = "Đặt lại mật khẩu", description = "Sử dụng OTP để đặt lại mật khẩu.")
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(
-            @RequestBody com.ecommerce.thriftauction.features.auth.dto.ResetPasswordRequest request) {
-        try {
-            authService.resetPassword(request);
-            return ResponseEntity.ok("Password has been reset successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
-
-    @Operation(summary = "Xác thực OTP 2FA", description = "Sử dụng OTP để lấy JWT Token sau bước đăng nhập 1.")
     @PostMapping("/verify-2fa")
-    public ResponseEntity<?> verify2Fa(@RequestBody java.util.Map<String, String> request,
-            HttpServletResponse response) {
+    public ResponseEntity<?> verify2Fa(@RequestBody Map<String, String> body,
+            HttpServletRequest request, HttpServletResponse response) {
+        AuthResponse result;
         try {
-            AuthResponse res = authService.verify2Fa(request.get("email"), request.get("otp"));
-            setTokenCookie(response, res.getToken());
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            result = authService.verify2Fa(body.get("email"), body.get("otp"));
+        } catch (Exception exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired verification code");
         }
+        establish(result, request, response);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) {
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logout-all")
+    public ResponseEntity<Void> logoutAll(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) {
+        if (authentication != null) {
+            sessionRevocationService.revokeAll(authentication.getName());
+        }
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest body) {
+        try {
+            authService.forgotPassword(body.getEmail());
+            return ResponseEntity.ok("OTP sent to email");
+        } catch (Exception exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest body) {
+        authService.resetPassword(body);
+        return ResponseEntity.ok("Password has been reset successfully");
+    }
+
+    private void establish(AuthResponse result, HttpServletRequest request, HttpServletResponse response) {
+        sessionAuthenticationService.establish(result.getEmail(), request, response);
     }
 }

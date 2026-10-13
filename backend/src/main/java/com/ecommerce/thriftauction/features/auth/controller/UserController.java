@@ -1,9 +1,12 @@
 package com.ecommerce.thriftauction.features.auth.controller;
 
+import com.ecommerce.thriftauction.features.auth.dto.ChangePasswordRequest;
 import com.ecommerce.thriftauction.features.auth.dto.UserResponse;
 import com.ecommerce.thriftauction.features.auth.entity.User;
+import com.ecommerce.thriftauction.features.auth.entity.UserTier;
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import com.ecommerce.thriftauction.features.auth.entity.Role;
+import com.ecommerce.thriftauction.core.security.SessionRevocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -35,6 +38,7 @@ public class UserController {
 
         private final UserRepository userRepository;
         private final PasswordEncoder passwordEncoder;
+        private final SessionRevocationService sessionRevocationService;
 
         @Operation(summary = "Lấy thông tin cá nhân", description = "Lấy thông tin của người dùng đang đăng nhập.")
         @SecurityRequirement(name = "Bearer Authentication")
@@ -95,7 +99,7 @@ public class UserController {
         @SecurityRequirement(name = "Bearer Authentication")
         @PutMapping("/me/password")
         public ResponseEntity<?> changePassword(
-                        @Valid @RequestBody com.ecommerce.thriftauction.features.auth.dto.ChangePasswordRequest request,
+                        @Valid @RequestBody ChangePasswordRequest request,
                         Authentication authentication) {
                 User user = userRepository.findByEmail(authentication.getName())
                                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -110,6 +114,7 @@ public class UserController {
 
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 userRepository.save(user);
+                sessionRevocationService.revokeAll(user.getEmail());
                 return ResponseEntity.ok("Đổi mật khẩu thành công.");
         }
 
@@ -122,6 +127,7 @@ public class UserController {
                                 .orElseThrow(() -> new RuntimeException("User not found"));
                 user.setActive(false);
                 userRepository.save(user);
+                sessionRevocationService.revokeAll(user.getEmail());
                 return ResponseEntity.ok(mapToResponse(user));
         }
 
@@ -145,7 +151,7 @@ public class UserController {
                 User user = userRepository.findById(id)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
                 try {
-                        com.ecommerce.thriftauction.features.auth.entity.UserTier newTier = com.ecommerce.thriftauction.features.auth.entity.UserTier
+                        UserTier newTier = UserTier
                                         .valueOf(tier.toUpperCase());
                         user.setTier(newTier);
                         userRepository.save(user);
@@ -175,6 +181,7 @@ public class UserController {
                         }
                         user.setRole(newRole);
                         userRepository.save(user);
+                        sessionRevocationService.revokeAll(user.getEmail());
                         return ResponseEntity.ok(mapToResponse(user));
                 } catch (IllegalArgumentException e) {
                         return ResponseEntity.badRequest().body("Role không hợp lệ. Chỉ chấp nhận USER hoặc STAFF.");

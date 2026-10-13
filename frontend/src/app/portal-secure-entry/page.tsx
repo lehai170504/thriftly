@@ -24,6 +24,15 @@ export default function AdminLoginPage() {
   const [otp, setOtp] = useState('');
 
   useEffect(() => {
+    const pendingFromHash = new URLSearchParams(window.location.hash.slice(1)).get('email');
+    if (pendingFromHash) {
+      setPendingEmail(pendingFromHash);
+      setStep('OTP');
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
     if (user) {
       if (user.role === 'ADMIN' || user.role === 'STAFF') {
         router.replace('/admin');
