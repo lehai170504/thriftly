@@ -25,6 +25,11 @@ import {
 import Link from 'next/link';
 
 import { DashboardSkeleton, DashboardInnerSkeleton } from '@/components/ui/loading-skeletons';
+import { PageHeader } from '@/components/patterns/page-header';
+import { MetricCard } from '@/components/patterns/metric-card';
+import { ErrorState } from '@/components/patterns/state-panel';
+import { Money, NumberText } from '@/components/ui/typography';
+import { formatMoney } from '@/lib/formatters';
 
 export default function SellerDashboardPage() {
   const [data, setData] = useState<any>(null);
@@ -57,16 +62,8 @@ export default function SellerDashboardPage() {
   }
 
   if (error) {
-    return (
-      <div className="text-center text-red-500 py-8">
-        <p>{error}</p>
-      </div>
-    );
+    return <ErrorState title="Không thể tải tổng quan gian hàng" description={error} />;
   }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-  };
 
   const pieData = [
     { name: 'Hoàn thành', value: data?.completedOrders || 0, color: '#10b981' },
@@ -75,50 +72,39 @@ export default function SellerDashboardPage() {
   ].filter(item => item.value > 0);
 
   return (
-    <div className="container px-4 sm:px-6 py-8 max-w-7xl mx-auto space-y-8 min-h-[60vh] animate-in fade-in zoom-in duration-500">
+    <div className="page-container min-h-[60vh] space-y-8 py-8 animate-in fade-in zoom-in duration-500">
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-heading font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
-            Tổng quan gian hàng
-          </h1>
-          <p className="text-muted-foreground mt-2 flex items-center">
-            <CalendarDays className="w-4 h-4 mr-2" />
-            {currentDate}
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        title="Tổng quan gian hàng"
+        description={<span className="flex items-center"><CalendarDays className="mr-2 size-4" />{currentDate}</span>}
+        actions={<div className="flex flex-wrap gap-2">
           <Button
-            variant={filterDays === 1 ? "default" : "outline"}
-            className={filterDays === 1 ? "bg-primary shadow-lg" : "glass"}
+            variant={filterDays === 1 ? "primary" : "outline"}
             onClick={() => setFilterDays(1)}
           >
             Hôm nay
           </Button>
           <Button
-            variant={filterDays === 7 ? "default" : "outline"}
-            className={filterDays === 7 ? "bg-primary shadow-lg" : "glass"}
+            variant={filterDays === 7 ? "primary" : "outline"}
             onClick={() => setFilterDays(7)}
           >
             7 ngày qua
           </Button>
           <Button
-            variant={filterDays === 30 ? "default" : "outline"}
-            className={filterDays === 30 ? "bg-primary shadow-lg" : "glass"}
+            variant={filterDays === 30 ? "primary" : "outline"}
             onClick={() => setFilterDays(30)}
           >
             30 ngày qua
           </Button>
           <Button
-            variant={filterDays === 0 ? "default" : "outline"}
-            className={filterDays === 0 ? "bg-primary shadow-lg" : "glass"}
+            variant={filterDays === 0 ? "primary" : "outline"}
             onClick={() => setFilterDays(0)}
           >
             Tất cả
           </Button>
-        </div>
-      </div>
+        </div>}
+      />
 
       <div className="relative">
         {loading && (
@@ -164,74 +150,10 @@ export default function SellerDashboardPage() {
 
           {/* Main Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="glass border-primary/10 hover:border-primary/30 transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Tổng Doanh Thu</CardTitle>
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <DollarSign className="h-4 w-4 text-emerald-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">{formatCurrency(data?.totalRevenue || 0)}</div>
-                <p className="text-xs text-emerald-500 mt-2 flex items-center font-medium">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  Tăng 12% so với kỳ trước
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass border-primary/10 hover:border-primary/30 transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Tổng Đơn Hàng</CardTitle>
-                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Package className="h-4 w-4 text-blue-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">{data?.totalOrders || 0}</div>
-                <p className="text-xs text-emerald-500 mt-2 flex items-center font-medium">
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  Tăng 5% so với kỳ trước
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass border-primary/10 hover:border-primary/30 transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Sản Phẩm Đang Bán</CardTitle>
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                  <ShoppingBag className="h-4 w-4 text-purple-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">{data?.activeProducts || 0}</div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Sản phẩm đang hiển thị
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="glass border-primary/10 hover:border-primary/30 transition-all duration-300">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Đánh Giá Trung Bình</CardTitle>
-                <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <Star className="h-4 w-4 text-amber-500" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-end gap-2">
-                  <div className="text-2xl font-bold text-foreground">{data?.averageRating ? data.averageRating.toFixed(1) : '0.0'}</div>
-                  <div className="flex mb-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} className={`w-4 h-4 ${star <= (data?.averageRating || 0) ? 'fill-amber-400 text-amber-400' : 'text-muted'}`} />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Dựa trên các đánh giá nhận được
-                </p>
-              </CardContent>
-            </Card>
+            <MetricCard label="Tổng doanh thu" value={<Money value={data?.totalRevenue || 0} />} icon={<DollarSign className="size-5" />} detail="Doanh thu trong kỳ đã chọn" />
+            <MetricCard label="Tổng đơn hàng" value={<NumberText value={data?.totalOrders || 0} />} icon={<Package className="size-5" />} detail="Đơn hàng trong kỳ đã chọn" />
+            <MetricCard label="Sản phẩm đang bán" value={<NumberText value={data?.activeProducts || 0} />} icon={<ShoppingBag className="size-5" />} detail="Sản phẩm đang hiển thị" />
+            <MetricCard label="Đánh giá trung bình" value={<NumberText value={data?.averageRating ? data.averageRating.toFixed(1) : '0.0'} />} icon={<Star className="size-5" />} detail="Dựa trên các đánh giá nhận được" />
           </div>
 
           {/* Charts & Layout */}
@@ -270,7 +192,7 @@ export default function SellerDashboardPage() {
                         contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                         itemStyle={{ color: '#e2e8f0', fontWeight: 'bold' }}
                         labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
-                        formatter={(value: any) => [formatCurrency(value as number), 'Doanh thu']}
+                        formatter={(value: any) => [formatMoney(value as number), 'Doanh thu']}
                         labelFormatter={(label) => `Ngày: ${label}`}
                       />
                       <Line

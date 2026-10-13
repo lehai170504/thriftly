@@ -2,7 +2,6 @@
 
 import { useMyVouchers, useToggleVoucherStatus } from '@/features/orders/hooks/useVouchers';
 import { CreateVoucherModal } from '@/features/orders/components/CreateVoucherModal';
-import { formatCurrency } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +9,9 @@ import { Ticket, CalendarDays, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { VoucherUsageModal } from '@/features/orders/components/VoucherUsageModal';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/patterns/page-header';
+import { DateTime, Money, NumberText } from '@/components/ui/typography';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 export default function SellerVouchersPage() {
   const { data: vouchers, isLoading } = useMyVouchers();
@@ -28,22 +30,9 @@ export default function SellerVouchersPage() {
   };
 
   return (
-    <div className="container px-4 sm:px-6 mx-auto py-8 max-w-6xl">
+    <div className="page-container py-8">
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl border border-primary/20 flex items-center justify-center flex-shrink-0">
-              <Ticket className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Quản lý mã giảm giá
-              </h1>
-              <p className="text-muted-foreground text-sm mt-0.5">Tạo và quản lý các mã khuyến mãi dành riêng cho khách hàng của bạn.</p>
-            </div>
-          </div>
-          <CreateVoucherModal />
-        </div>
+        <PageHeader title="Quản lý mã giảm giá" description="Tạo và quản lý các mã khuyến mãi dành riêng cho khách hàng của bạn." actions={<CreateVoucherModal />} />
 
         <div className="bg-card rounded-2xl shadow-xs border border-border/80 overflow-hidden">
           <div className="overflow-x-auto">
@@ -87,37 +76,35 @@ export default function SellerVouchersPage() {
                     return (
                       <tr key={voucher.id} className="hover:bg-muted/40 transition-colors">
                         <td className="py-3.5 px-5 font-bold text-foreground">
-                          <Badge variant="outline" className="font-mono text-xs px-2.5 py-0.5 rounded-md font-semibold border-primary/20 text-primary bg-primary/10">
+                          <Badge tone="brand" className="font-mono">
                             {voucher.code}
                           </Badge>
                         </td>
                         <td className="py-3.5 px-5 text-muted-foreground text-xs font-medium">
                           {voucher.type === 'FIXED_AMOUNT' ? 'Cố định' : 'Phần trăm'}
                         </td>
-                        <td className="py-3.5 px-5 text-right font-semibold text-xs text-emerald-600 dark:text-emerald-400">
+                        <td className="py-3.5 px-5 text-right text-xs font-semibold text-success">
                           {voucher.type === 'FIXED_AMOUNT'
-                            ? formatCurrency(voucher.discountValue)
+                            ? <Money value={voucher.discountValue} />
                             : `${voucher.discountValue}%`}
                         </td>
                         <td className="py-3.5 px-5 text-right text-xs text-muted-foreground">
-                          {voucher.minOrderValue ? formatCurrency(voucher.minOrderValue) : 'Không có'}
+                          {voucher.minOrderValue ? <Money value={voucher.minOrderValue} /> : 'Không có'}
                         </td>
                         <td className="py-3.5 px-5 text-center">
-                          <span className={`text-xs font-semibold ${voucher.quantity > 0 ? 'text-foreground' : 'text-red-500'}`}>
-                            {voucher.quantity}
+                          <span className={`text-xs font-semibold ${voucher.quantity > 0 ? 'text-foreground' : 'text-destructive'}`}>
+                            <NumberText value={voucher.quantity} />
                           </span>
                         </td>
                         <td className="py-3.5 px-5 text-center">
                           <span className="text-xs font-semibold text-foreground">
-                            {voucher.usageLimitPerUser || 1}
+                            <NumberText value={voucher.usageLimitPerUser || 1} />
                           </span>
                         </td>
                         <td className="py-3.5 px-5">
                           <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
                             <CalendarDays className="w-3.5 h-3.5" />
-                            <span className={isExpired ? 'text-red-500 font-medium' : ''}>
-                              {new Date(voucher.expiryDate).toLocaleString('vi-VN')}
-                            </span>
+                            <DateTime value={voucher.expiryDate} className={isExpired ? 'font-medium text-destructive' : undefined} />
                           </div>
                         </td>
                         <td className="py-3.5 px-5 text-center">
@@ -136,9 +123,7 @@ export default function SellerVouchersPage() {
                         </td>
                         <td className="py-3.5 px-5 text-right">
                           <div className="flex items-center justify-end gap-2.5">
-                            <span className={`text-[11px] font-medium ${isAvailable ? 'text-emerald-600 dark:text-emerald-400' : isExpired ? 'text-red-500' : 'text-muted-foreground'}`}>
-                              {isAvailable ? 'Đang chạy' : isExpired ? 'Hết hạn' : 'Đã tắt'}
-                            </span>
+                            <StatusBadge domain="voucher" status={isAvailable ? 'ACTIVE' : isExpired ? 'EXPIRED' : 'INACTIVE'} />
                             <Switch
                               checked={voucher.isActive}
                               onCheckedChange={() => handleToggle(voucher.id)}

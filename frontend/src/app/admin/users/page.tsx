@@ -2,7 +2,7 @@
 
 import { useAdminUsers, useBanUser, useUnbanUser, useAdjustUserBalance, useUpdateUserTier, useUpdateUserRole } from '@/features/admin/hooks/useAdminUsers';
 import { UserResponse } from '@/features/admin/types/admin';
-import { Users, User, Shield, Mail, Phone, MoreHorizontal, Lock, CheckCircle, Ban } from 'lucide-react';
+import { User, Shield, Mail, Phone, MoreHorizontal, Lock, CheckCircle, Ban } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
@@ -16,6 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { extractError, formatCurrency } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { normalizePageResponse } from '@/lib/pagination';
+import { PageHeader } from '@/components/patterns/page-header';
+import { NumberText } from '@/components/ui/typography';
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
@@ -92,27 +94,16 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary/10 rounded-[24px] glass border border-primary/20">
-            <Users className="w-7 h-7 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-heading font-bold text-foreground">Quản lý người dùng</h1>
-            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{totalElements}</span> tài khoản</p>
-          </div>
-        </div>
-
-        <div className="relative">
+      <PageHeader title="Quản lý người dùng" description={<>Tổng cộng <NumberText value={totalElements} /> tài khoản</>} actions={<div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Lọc username hoặc email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 w-full md:w-64 rounded-[24px] bg-background/50 border-border glass"
+            className="w-full pl-9 md:w-64"
+            aria-label="Lọc người dùng"
           />
-        </div>
-      </div>
+        </div>} />
 
       <div className="bg-background/50 rounded-[24px] border border-border shadow-lg glass backdrop-blur-xl overflow-hidden">
         <div className="overflow-x-auto">

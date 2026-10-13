@@ -6,12 +6,14 @@ import { Order } from '@/features/orders/types/order';
 import { extractError, formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { ShieldAlert, Check, X, Scale, Search } from 'lucide-react';
+import { ShieldAlert, Check, X, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { normalizePageResponse } from '@/lib/pagination';
 
 import { OrderListSkeleton } from '@/components/ui/loading-skeletons';
+import { PageHeader } from '@/components/patterns/page-header';
+import { NumberText } from '@/components/ui/typography';
 
 export default function AdminDisputesPage() {
   const [page, setPage] = useState(0);
@@ -62,27 +64,16 @@ export default function AdminDisputesPage() {
 
   return (
     <div className="space-y-6 min-h-[60vh]">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-red-500/10 rounded-[24px] glass border border-red-500/20">
-            <Scale className="w-8 h-8 text-red-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-heading font-bold text-foreground">Giải quyết Khiếu nại</h1>
-            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{totalElements}</span> khiếu nại</p>
-          </div>
-        </div>
-
-        <div className="relative">
+      <PageHeader title="Giải quyết khiếu nại" description={<>Tổng cộng <NumberText value={totalElements} /> khiếu nại</>} actions={<div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Lọc mã đơn, người dùng, lý do..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 w-full md:w-64 rounded-[24px] bg-background/50 border-border glass"
+            className="w-full pl-9 md:w-64"
+            aria-label="Lọc khiếu nại"
           />
-        </div>
-      </div>
+        </div>} />
 
       {orders.length === 0 ? (
         <div className="text-center p-12 bg-background/50 rounded-[24px] border border-border glass">

@@ -2,11 +2,15 @@
 
 import { useState } from 'react';
 import { useAdminRevenueStats, useAdminRevenueTransactions } from '@/features/admin/hooks/useAdminRevenue';
-import { LineChart, DollarSign, ArrowUpRight, Activity } from 'lucide-react';
-import { formatCurrency, downloadCSV } from '@/lib/utils';
+import { DollarSign, ArrowUpRight, Activity } from 'lucide-react';
+import { downloadCSV } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { normalizePageResponse } from '@/lib/pagination';
+import { PageHeader } from '@/components/patterns/page-header';
+import { MetricCard } from '@/components/patterns/metric-card';
+import { LoadingState } from '@/components/patterns/state-panel';
+import { DateTime, EntityId, Money } from '@/components/ui/typography';
 
 export default function AdminRevenuePage() {
   const [page, setPage] = useState(0);
@@ -17,52 +21,16 @@ export default function AdminRevenuePage() {
 
   const { content: transactions, totalPages } = normalizePageResponse(transactionsData);
 
-  if (isStatsLoading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Đang tải dữ liệu doanh thu...</div>;
+  if (isStatsLoading) return <LoadingState title="Đang tải dữ liệu doanh thu…" />;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center gap-3">
-        <div className="p-3 bg-primary/10 rounded-[24px] glass border border-primary/20">
-          <LineChart className="w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-heading font-bold text-foreground tracking-tight">Doanh thu sàn</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Thống kê hoa hồng từ đơn hàng và phí rút tiền
-          </p>
-        </div>
-      </div>
+      <PageHeader title="Doanh thu sàn" description="Thống kê hoa hồng từ đơn hàng và phí rút tiền" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass p-6 rounded-[24px] border border-border shadow-lg bg-gradient-to-br from-primary/10 via-background to-background relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-20">
-            <DollarSign className="w-24 h-24" />
-          </div>
-          <p className="text-muted-foreground font-medium mb-2 relative z-10">Tổng doanh thu</p>
-          <h2 className="text-4xl font-black text-primary relative z-10">
-            {formatCurrency(stats?.totalRevenue || 0)}
-          </h2>
-        </div>
-
-        <div className="glass p-6 rounded-[24px] border border-border shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-muted-foreground font-medium">Hoa hồng đơn hàng</p>
-            <ArrowUpRight className="w-5 h-5 text-emerald-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground">
-            {formatCurrency(stats?.totalCommission || 0)}
-          </h2>
-        </div>
-
-        <div className="glass p-6 rounded-[24px] border border-border shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-muted-foreground font-medium">Phí rút tiền</p>
-            <Activity className="w-5 h-5 text-blue-500" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground">
-            {formatCurrency(stats?.totalWithdrawalFees || 0)}
-          </h2>
-        </div>
+        <MetricCard label="Tổng doanh thu" value={<Money value={stats?.totalRevenue || 0} />} icon={<DollarSign className="size-5" />} />
+        <MetricCard label="Hoa hồng đơn hàng" value={<Money value={stats?.totalCommission || 0} />} icon={<ArrowUpRight className="size-5" />} />
+        <MetricCard label="Phí rút tiền" value={<Money value={stats?.totalWithdrawalFees || 0} />} icon={<Activity className="size-5" />} />
       </div>
 
       <div className="bg-background/50 rounded-[24px] border border-border shadow-lg glass backdrop-blur-xl overflow-hidden mt-8">
@@ -111,17 +79,17 @@ export default function AdminRevenuePage() {
                 transactions.map((tx: any) => (
                   <tr key={tx.id} className="hover:bg-accent transition-colors">
                     <td className="px-5 py-4 font-mono text-xs text-muted-foreground">
-                      #{tx.id.substring(0, 8).toUpperCase()}
+                      <EntityId value={tx.id} />
                     </td>
                     <td className="px-5 py-4 text-foreground/80">
-                      {new Date(tx.createdAt).toLocaleString('vi-VN')}
+                      <DateTime value={tx.createdAt} />
                     </td>
                     <td className="px-5 py-4">
-                      {tx.type === 'COMMISSION' && <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Hoa hồng đơn hàng</Badge>}
-                      {tx.type === 'WITHDRAWAL_FEE' && <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20">Phí rút tiền</Badge>}
+                      {tx.type === 'COMMISSION' && <Badge tone="success">Hoa hồng đơn hàng</Badge>}
+                      {tx.type === 'WITHDRAWAL_FEE' && <Badge tone="info">Phí rút tiền</Badge>}
                     </td>
-                    <td className="px-5 py-4 font-bold text-primary">
-                      +{formatCurrency(tx.amount)}
+                    <td className="px-5 py-4 text-right">
+                      <Money value={tx.amount} className="font-bold text-primary" />
                     </td>
                     <td className="px-5 py-4 text-foreground/80 max-w-[300px] truncate">
                       {tx.description}

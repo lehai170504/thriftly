@@ -6,10 +6,16 @@ import { Plus, Power, PowerOff, Trash2, Tag, Percent } from 'lucide-react';
 import { toast } from 'sonner';
 import { VoucherFormModal } from '@/features/admin/components/VoucherFormModal';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/patterns/page-header';
+import { EmptyState, LoadingState } from '@/components/patterns/state-panel';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { DateTime, Money, NumberText } from '@/components/ui/typography';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function AdminVouchersPage() {
   const { vouchers, isLoading, toggleStatus, deleteVoucher } = useAdminVouchers();
   const [isCreating, setIsCreating] = useState(false);
+  const [voucherToDelete, setVoucherToDelete] = useState<string | null>(null);
 
   const handleToggle = async (id: string) => {
     try {
@@ -20,38 +26,27 @@ export default function AdminVouchersPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc muốn xóa mã này?')) return;
+  const handleDelete = async () => {
+    if (!voucherToDelete) return;
     try {
-      await deleteVoucher.mutateAsync(id);
+      await deleteVoucher.mutateAsync(voucherToDelete);
       toast.success('Xóa mã giảm giá thành công');
+      setVoucherToDelete(null);
     } catch {
       toast.error('Có lỗi xảy ra');
     }
   };
 
-  if (isLoading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Đang tải danh sách...</div>;
+  if (isLoading) return <LoadingState title="Đang tải danh sách mã giảm giá…" />;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight flex items-center gap-3">
-            <Tag className="w-8 h-8 text-primary" />
-            Mã Giảm Giá Sàn
-          </h1>
-          <p className="text-muted-foreground mt-2 text-sm font-medium">
-            Quản lý các chiến dịch khuyến mãi toàn hệ thống
-          </p>
-        </div>
-        <Button
+    <div className="page-container space-y-8 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <PageHeader title="Mã giảm giá sàn" description="Quản lý các chiến dịch khuyến mãi toàn hệ thống" actions={<Button
           onClick={() => setIsCreating(true)}
-          className="rounded-full shadow-lg hover:shadow-primary/20 transition-all font-bold"
         >
           <Plus className="w-4 h-4 mr-2" />
           Tạo Mã Mới
-        </Button>
-      </div>
+        </Button>} />
 
       <VoucherFormModal isOpen={isCreating} onClose={() => setIsCreating(false)} />
 
@@ -65,9 +60,7 @@ export default function AdminVouchersPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg tracking-tight uppercase">{voucher.code}</h3>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${voucher.active ? 'bg-green-500/20 text-green-600' : 'bg-red-500/20 text-red-600'}`}>
-                    {voucher.active ? 'Đang bật' : 'Đã tắt'}
-                  </span>
+                  <StatusBadge domain="voucher" status={voucher.active ? 'ACTIVE' : 'INACTIVE'} />
                 </div>
               </div>
               <div className="flex gap-2">
@@ -76,16 +69,19 @@ export default function AdminVouchersPage() {
                   size="icon"
                   onClick={() => handleToggle(voucher.id)}
                   title={voucher.active ? 'Tắt mã này' : 'Bật mã này'}
-                  className={`h-8 w-8 rounded-full ${voucher.active ? 'text-orange-500 hover:text-orange-600 hover:bg-orange-50 border-orange-200' : 'text-green-500 hover:text-green-600 hover:bg-green-50 border-green-200'}`}
+                  shape="pill"
+                  aria-label={voucher.active ? `Tắt mã ${voucher.code}` : `Bật mã ${voucher.code}`}
                 >
                   {voucher.active ? <PowerOff className="w-3.5 h-3.5" /> : <Power className="w-3.5 h-3.5" />}
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => handleDelete(voucher.id)}
+                  onClick={() => setVoucherToDelete(voucher.id)}
                   title="Xóa mã"
-                  className="h-8 w-8 rounded-full text-red-500 hover:text-red-600 hover:bg-red-50 border-red-200"
+                  shape="pill"
+                  className="text-destructive"
+                  aria-label={`Xóa mã ${voucher.code}`}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </Button>
@@ -97,33 +93,40 @@ export default function AdminVouchersPage() {
                 <span className="text-muted-foreground">Mức giảm:</span>
                 <span className="font-bold text-primary">
                   {voucher.type === 'PERCENTAGE'
-                    ? `${voucher.discountValue}% (Tối đa ${voucher.maxDiscount?.toLocaleString()}đ)`
-                    : `${voucher.discountValue.toLocaleString()}đ`}
+                    ? <>{voucher.discountValue}% (Tối đa <Money value={voucher.maxDiscount} />)</>
+                    : <Money value={voucher.discountValue} />}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Đơn tối thiểu:</span>
-                <span className="font-medium">{voucher.minOrderValue.toLocaleString()}đ</span>
+                <Money value={voucher.minOrderValue} className="font-medium" />
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Số lượng còn lại:</span>
-                <span className="font-medium">{voucher.quantity} lượt</span>
+                <span className="font-medium"><NumberText value={voucher.quantity} /> lượt</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Hết hạn:</span>
-                <span className="font-medium text-destructive">{new Date(voucher.expiryDate).toLocaleString('vi-VN')}</span>
+                <DateTime value={voucher.expiryDate} className="font-medium text-destructive" />
               </div>
             </div>
           </div>
         ))}
 
         {vouchers.length === 0 && (
-          <div className="col-span-full text-center py-12 text-muted-foreground">
-            <Tag className="w-12 h-12 mx-auto mb-3 opacity-20" />
-            <p>Chưa có mã giảm giá nào. Hãy tạo mã đầu tiên!</p>
-          </div>
+          <div className="col-span-full"><EmptyState title="Chưa có mã giảm giá nào" description="Hãy tạo mã đầu tiên để bắt đầu chiến dịch." icon={<Tag className="size-8" />} /></div>
         )}
       </div>
+      <ConfirmDialog
+        isOpen={Boolean(voucherToDelete)}
+        onOpenChange={(open) => { if (!open) setVoucherToDelete(null); }}
+        title="Xóa mã giảm giá"
+        description="Mã giảm giá sẽ bị xóa khỏi hệ thống. Hành động này không thể hoàn tác."
+        confirmText="Xóa mã"
+        onConfirm={handleDelete}
+        isLoading={deleteVoucher.isPending}
+        variant="destructive"
+      />
     </div>
   );
 }

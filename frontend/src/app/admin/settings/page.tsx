@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useSystemConfig } from '@/features/admin/hooks/useSystemConfig';
-import { Settings, Save, AlertTriangle, ShieldCheck, Banknote, Power } from 'lucide-react';
+import { Save, AlertTriangle, ShieldCheck, Banknote, Power } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
+import { PageHeader } from '@/components/patterns/page-header';
 import { extractError } from '@/lib/utils';
 
 export default function SystemSettingsPage() {
@@ -45,17 +46,7 @@ export default function SystemSettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary/10 rounded-[24px] glass border border-primary/20">
-            <Settings className="w-7 h-7 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-heading font-bold text-foreground">Cấu Hình Hệ Thống</h1>
-            <p className="text-muted-foreground text-sm">Điều chỉnh các thông số vận hành và phí của nền tảng</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader title="Cấu hình hệ thống" description="Điều chỉnh các thông số vận hành và phí của nền tảng" />
 
       <div className="bg-background/50 rounded-[24px] border border-border shadow-lg glass backdrop-blur-xl overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-primary"></div>

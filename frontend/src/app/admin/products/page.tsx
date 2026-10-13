@@ -1,16 +1,18 @@
 'use client';
 
 import { useAdminProducts, useDeleteAdminProduct, useForceCancelAdminProduct } from '@/features/admin/hooks/useAdminProducts';
-import { Package, Search, MoreHorizontal, Trash2, Eye, PowerOff } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Package, Search, MoreHorizontal, Trash2, PowerOff } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
-import { formatCurrency } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { normalizePageResponse } from '@/lib/pagination';
+import { PageHeader } from '@/components/patterns/page-header';
+import { LoadingState } from '@/components/patterns/state-panel';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { EntityId, Money, NumberText } from '@/components/ui/typography';
 
 export default function AdminProductsPage() {
   const [page, setPage] = useState(0);
@@ -60,33 +62,24 @@ export default function AdminProductsPage() {
   const totalPages = normalized.totalPages;
   const totalElements = normalized.totalElements;
 
-  if (isLoading) return <div className="p-8 text-center text-neutral-500 font-medium">Đang tải danh sách sản phẩm...</div>;
+  if (isLoading) return <LoadingState title="Đang tải danh sách sản phẩm…" />;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary/10 rounded-[24px] glass border border-primary/20">
-            <Package className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-heading font-bold text-foreground tracking-tight">Sản phẩm đăng bán</h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Tìm thấy <span className="font-bold text-foreground">{totalElements}</span> sản phẩm trong hệ thống
-            </p>
-          </div>
-        </div>
-
-        <div className="relative w-full md:w-80">
+      <PageHeader
+        title="Sản phẩm đăng bán"
+        description={<>Tìm thấy <NumberText value={totalElements} /> sản phẩm trong hệ thống</>}
+        actions={<div className="relative w-full md:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Tìm theo tên sản phẩm..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 h-10 w-full bg-background/50 border-border rounded-[24px] glass"
+            className="w-full pl-9"
+            aria-label="Tìm sản phẩm"
           />
-        </div>
-      </div>
+        </div>}
+      />
 
       <div className="bg-background/50 rounded-[24px] border border-border shadow-lg glass backdrop-blur-xl overflow-hidden">
         <div className="overflow-x-auto">
@@ -125,28 +118,26 @@ export default function AdminProductsPage() {
                         </div>
                         <div>
                           <div className="font-bold text-foreground max-w-[250px] truncate">{product.title}</div>
-                          <div className="text-xs text-muted-foreground font-mono mt-0.5">#{product.id.substring(0, 8).toUpperCase()}</div>
+                          <EntityId value={product.id} className="mt-0.5 block text-xs text-muted-foreground" />
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-4 font-medium text-foreground/80">
                       {product.categoryName || 'Không xác định'}
                     </td>
-                    <td className="px-5 py-4 font-bold text-primary">
-                      {formatCurrency(product.price)}
+                    <td className="px-5 py-4 text-right">
+                      <Money value={product.price} className="font-bold text-primary" />
                     </td>
                     <td className="px-5 py-4">
-                      {product.status === 'ACTIVE' && <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Đang bán</Badge>}
-                      {product.status === 'SOLD' && <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20">Đã bán</Badge>}
-                      {product.status === 'HIDDEN' && <Badge className="bg-red-500/10 text-red-400 border-red-500/20">Đã ẩn/Khóa</Badge>}
+                      <StatusBadge domain="product" status={product.status} />
                     </td>
                     <td className="px-5 py-4">
                       <div className="font-bold text-foreground">@{product.sellerName}</div>
-                      <div className="text-xs text-muted-foreground font-mono mt-0.5">ID: {product.sellerId?.substring(0, 8).toUpperCase()}</div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">ID: <EntityId value={product.sellerId} /></div>
                     </td>
                     <td className="px-5 py-4 text-center">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center hover:bg-accent hover:text-accent-foreground rounded-full transition-colors mx-auto outline-none">
+                      <DropdownMenuTrigger aria-label={`Thao tác với ${product.title}`} className="mx-auto flex size-10 items-center justify-center rounded-full outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
                           <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 bg-background border-border text-foreground glass">

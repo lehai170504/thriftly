@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { useAdminReports, useUpdateReportStatus } from '@/features/admin/hooks/useAdminReports';
-import { AlertCircle, CheckCircle, Clock, Ban, Check, Info } from 'lucide-react';
+import { Clock, Ban, Check, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { normalizePageResponse } from '@/lib/pagination';
+import { PageHeader } from '@/components/patterns/page-header';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { DateTime, EntityId, NumberText } from '@/components/ui/typography';
 
 export default function AdminReportsPage() {
   const [page, setPage] = useState(0);
@@ -29,32 +31,9 @@ export default function AdminReportsPage() {
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20"><Clock className="w-3 h-3 mr-1" /> Chờ xử lý</Badge>;
-      case 'RESOLVED':
-        return <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20"><CheckCircle className="w-3 h-3 mr-1" /> Đã giải quyết</Badge>;
-      case 'REJECTED':
-        return <Badge className="bg-red-500/10 text-red-500 border-red-500/20"><Ban className="w-3 h-3 mr-1" /> Bị từ chối</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-red-500/10 rounded-[24px] glass border border-red-500/20">
-            <AlertCircle className="w-7 h-7 text-red-500" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-heading font-bold text-foreground">Trung tâm Báo cáo</h1>
-            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{totalElements}</span> báo cáo</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader title="Trung tâm báo cáo" description={<>Tổng cộng <NumberText value={totalElements} /> báo cáo</>} />
 
       <div className="bg-background/50 rounded-[24px] border border-border shadow-lg glass backdrop-blur-xl overflow-hidden">
         <div className="overflow-x-auto">
@@ -82,7 +61,7 @@ export default function AdminReportsPage() {
                         {report.description}
                       </div>
                       <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1 opacity-50">
-                        <Clock className="w-3 h-3" /> {new Date(report.createdAt).toLocaleString('vi-VN')}
+                        <Clock className="w-3 h-3" /> <DateTime value={report.createdAt} />
                       </div>
                     </td>
                     <td className="px-5 py-4">
@@ -92,27 +71,27 @@ export default function AdminReportsPage() {
                       {report.reportedProductTitle ? (
                         <div>
                           <span className="text-xs text-muted-foreground block">Sản phẩm:</span>
-                          <span className="font-medium text-orange-400 truncate max-w-[200px] inline-block" title={report.reportedProductTitle}>
+                          <span className="font-medium text-warning truncate max-w-[200px] inline-block" title={report.reportedProductTitle}>
                             {report.reportedProductTitle}
                           </span>
-                          <span className="text-[10px] text-muted-foreground ml-1">#{report.reportedProductId?.substring(0, 8).toUpperCase()}</span>
+                          {report.reportedProductId && <EntityId value={report.reportedProductId} className="ml-1 text-xs text-muted-foreground" />}
                         </div>
                       ) : report.targetUserName ? (
                         <div>
                           <span className="text-xs text-muted-foreground block">Người dùng:</span>
-                          <span className="font-medium text-red-400">{report.targetUserName}</span>
+                          <span className="font-medium text-destructive">{report.targetUserName}</span>
                         </div>
                       ) : report.targetProductId ? (
                         <div>
                           <span className="text-xs text-muted-foreground block">Sản phẩm:</span>
-                          <span className="font-medium text-orange-400">#{report.targetProductId.substring(0, 8).toUpperCase()}</span>
+                          <EntityId value={report.targetProductId} className="font-medium text-warning" />
                         </div>
                       ) : (
                         <span className="text-muted-foreground italic">Không rõ</span>
                       )}
                     </td>
                     <td className="px-5 py-4 text-center">
-                      {getStatusBadge(report.status)}
+                      <StatusBadge domain="report" status={report.status} />
                     </td>
                     <td className="px-5 py-4 text-center">
                       {report.status === 'PENDING' ? (

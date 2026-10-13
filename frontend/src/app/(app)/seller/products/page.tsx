@@ -2,9 +2,8 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useSellerProducts, useDeleteProduct, useBoostProduct, useRestartAuction } from '@/features/products/hooks/useProducts';
-import { Package, Plus, Search, Trash2, ArrowUpCircle, RefreshCcw, MoreHorizontal } from 'lucide-react';
+import { Package, Search, Trash2, ArrowUpCircle, RefreshCcw, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
-import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
@@ -13,6 +12,10 @@ import { Product } from '@/features/products/types/product';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { CreateProductModal } from '@/features/products/components/CreateProductModal';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { PageHeader } from '@/components/patterns/page-header';
+import { EmptyState, LoadingState } from '@/components/patterns/state-panel';
+import { Badge } from '@/components/ui/badge';
+import { Money, NumberText } from '@/components/ui/typography';
 
 export default function SellerProductsPage() {
   const { user } = useAuth();
@@ -85,32 +88,15 @@ export default function SellerProductsPage() {
   );
 
   if (isLoading) {
-    return (
-      <div className="container py-8 max-w-5xl mx-auto space-y-6 min-h-[60vh]">
-        <div className="h-10 w-48 bg-muted/80 animate-pulse rounded-[24px] mb-6 glass"></div>
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-muted animate-pulse rounded-[24px] glass border border-border"></div>
-          ))}
-        </div>
-      </div>
-    );
+    return <LoadingState title="Đang tải sản phẩm của bạn…" />;
   }
 
   return (
-    <div className="container px-4 sm:px-6 py-8 max-w-5xl mx-auto space-y-6 min-h-[60vh]">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl border border-primary/20 flex items-center justify-center">
-            <Package className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Sản phẩm của tôi</h1>
-            <p className="text-muted-foreground text-sm mt-0.5">Quản lý kho hàng và các sản phẩm bạn đang bán</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
+    <div className="page-container min-h-[60vh] space-y-6 py-8">
+      <PageHeader
+        title="Sản phẩm của tôi"
+        description="Quản lý kho hàng và các sản phẩm bạn đang bán"
+        actions={<div className="flex items-center gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -120,26 +106,16 @@ export default function SellerProductsPage() {
               className="pl-9 w-full sm:w-64 rounded-xl"
             />
           </div>
-        </div>
-      </div>
+        </div>}
+      />
 
       {!filteredProducts || filteredProducts.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl border border-dashed border-border bg-muted/20">
-          <div className="w-16 h-16 bg-muted/60 rounded-full flex items-center justify-center mx-auto mb-4 border border-border/50">
-            <Package className="w-8 h-8 text-muted-foreground/60" />
-          </div>
-          <h2 className="text-base font-semibold text-foreground mb-1">Chưa có sản phẩm nào</h2>
-          <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-            {searchQuery
-              ? 'Không tìm thấy sản phẩm nào phù hợp với từ khóa của bạn.'
-              : 'Bạn chưa đăng bán sản phẩm nào trên hệ thống. Hãy bắt đầu ngay!'}
-          </p>
-          {!searchQuery && (
-            <div className="flex justify-center">
-              <CreateProductModal />
-            </div>
-          )}
-        </div>
+        <EmptyState
+          title="Chưa có sản phẩm nào"
+          description={searchQuery ? 'Không tìm thấy sản phẩm nào phù hợp với từ khóa của bạn.' : 'Bạn chưa đăng bán sản phẩm nào trên hệ thống. Hãy bắt đầu ngay!'}
+          icon={<Package className="size-8" />}
+          action={!searchQuery ? <CreateProductModal /> : undefined}
+        />
       ) : (
         <div className="bg-card rounded-2xl shadow-xs border border-border/80 overflow-hidden">
           <div className="overflow-x-auto">
@@ -169,31 +145,28 @@ export default function SellerProductsPage() {
                             {product.title}
                           </Link>
                           <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
-                            <span className="bg-muted px-2 py-0.5 rounded-md text-[11px] font-medium">{product.categoryName}</span>
+                            <Badge tone="neutral">{product.categoryName}</Badge>
                             {product.sellType === 'BUY_NOW' && (
-                              <span className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md text-[11px] font-medium">Kho: {product.quantity || 1}</span>
+                              <Badge tone="warning">Kho: <NumberText value={product.quantity || 1} /></Badge>
                             )}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="py-4 px-5">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.sellType === 'AUCTION'
-                        ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20'
-                        : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                        }`}>
+                      <Badge tone={product.sellType === 'AUCTION' ? 'brand' : 'success'}>
                         {product.sellType === 'AUCTION' ? 'Đấu giá' : 'Mua ngay'}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="py-4 px-5 text-right">
                       <div className="font-semibold text-sm text-foreground">
                         {product.sellType === 'AUCTION' && product.currentHighestBid && product.currentHighestBid > product.price ? (
                           <div className="flex flex-col items-end">
-                            <span>{formatCurrency(product.currentHighestBid)}</span>
-                            <span className="text-[11px] text-primary font-medium">Giá hiện tại</span>
+                            <Money value={product.currentHighestBid} />
+                            <span className="text-xs font-medium text-primary">Giá hiện tại</span>
                           </div>
                         ) : (
-                          formatCurrency(product.price)
+                          <Money value={product.price} />
                         )}
                       </div>
                     </td>
@@ -202,7 +175,7 @@ export default function SellerProductsPage() {
                         <EditProductModal product={product} />
 
                         <DropdownMenu>
-                          <DropdownMenuTrigger className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted inline-flex items-center justify-center transition-colors cursor-pointer outline-none border border-border/50">
+                          <DropdownMenuTrigger aria-label={`Thao tác với ${product.title}`} className="inline-flex size-10 cursor-pointer items-center justify-center rounded-md border border-border/50 text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground">
                             <MoreHorizontal className="w-4 h-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48 rounded-xl bg-card border-border shadow-md p-1">

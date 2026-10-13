@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Tags, Plus, Trash2, Settings2, Search, Upload, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Settings2, Search, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,8 @@ import { CategoryIcon } from '@/components/ui/category-icon';
 import { useUploadImage } from '@/features/media/hooks/useMedia';
 import { IMAGE_ACCEPT } from '@/features/media/validation/mediaValidation';
 import { useAuth } from '@/contexts/AuthContext';
+import { PageHeader } from '@/components/patterns/page-header';
+import { NumberText } from '@/components/ui/typography';
 
 export default function AdminCategoriesPage() {
   const { user } = useAuth();
@@ -112,35 +114,24 @@ export default function AdminCategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-fuchsia-500/10 rounded-[24px] glass border border-fuchsia-500/20">
-            <Tags className="w-7 h-7 text-fuchsia-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-heading font-bold text-foreground">Quản lý Danh Mục</h1>
-            <p className="text-muted-foreground text-sm">Tổng cộng <span className="font-bold text-foreground">{flattenedCategories.length}</span> danh mục</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto">
+      <PageHeader title="Quản lý danh mục" description={<>Tổng cộng <NumberText value={flattenedCategories.length} /> danh mục</>} actions={<div className="flex w-full items-center gap-3 md:w-auto">
           <div className="relative w-full md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Tìm danh mục..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 w-full rounded-[24px] bg-background/50 border-border glass"
+              className="w-full pl-9"
+              aria-label="Tìm danh mục"
             />
           </div>
           {canManage && (
-            <Button onClick={() => { resetForm(); setCreateModalOpen(true); }} className="rounded-[24px] shrink-0">
+            <Button onClick={() => { resetForm(); setCreateModalOpen(true); }} className="shrink-0">
               <Plus className="w-4 h-4 mr-2" />
               Thêm mới
             </Button>
           )}
-        </div>
-      </div>
+        </div>} />
 
       <div className="bg-background/50 rounded-[24px] border border-border shadow-lg glass backdrop-blur-xl overflow-hidden">
         <div className="overflow-x-auto">

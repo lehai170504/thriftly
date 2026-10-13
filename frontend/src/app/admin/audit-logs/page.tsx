@@ -12,6 +12,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { PageHeader } from '@/components/patterns/page-header';
+import { NumberText } from '@/components/ui/typography';
 
 const ACTION_CONFIG: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   DELETE_PRODUCT: { color: 'bg-red-100 text-red-700 border-red-200', icon: Trash2, label: 'Xóa sản phẩm' },
@@ -77,21 +79,7 @@ export default function AuditLogsPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-sm">
-          <Shield className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-heading font-bold text-foreground leading-tight">Audit Log Hệ Thống</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Lịch sử hành động Admin &amp; người dùng
-            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
-              {totalElements} bản ghi
-            </span>
-          </p>
-        </div>
-      </div>
+      <PageHeader title="Audit log hệ thống" description={<>Lịch sử hành động quản trị viên và người dùng · <NumberText value={totalElements} /> bản ghi</>} />
 
       {/* Role Tab Filter */}
       <div className="flex gap-1 p-1 bg-muted/60 rounded-xl w-fit border border-border shadow-inner">
