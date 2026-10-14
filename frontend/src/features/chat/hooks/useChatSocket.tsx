@@ -7,8 +7,8 @@ import { MessageCircle } from 'lucide-react';
 import { stopStompReconnect, websocketUrl } from '@/lib/websocket';
 
 export const useChatSocket = (
-  isAuthenticated: boolean, 
-  currentUsername?: string, 
+  isAuthenticated: boolean,
+  currentUsername?: string,
   disabled: boolean = false,
   onTyping?: (username: string) => void
 ) => {
@@ -69,7 +69,7 @@ export const useChatSocket = (
         if (chatMsg.senderUsername !== currentUsername) {
           toast.info(`Tin nhắn mới từ ${chatMsg.senderUsername}`, {
             description: (
-              <span className="text-neutral-900 text-[15px] font-medium block mt-1">
+              <span className="text-foreground text-sm font-medium block mt-1">
                 {chatMsg.imageUrl ? '[Hình ảnh]' : (chatMsg.content.length > 50 ? chatMsg.content.substring(0, 50) + '...' : chatMsg.content)}
               </span>
             ),

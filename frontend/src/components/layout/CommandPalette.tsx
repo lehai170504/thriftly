@@ -57,7 +57,7 @@ export function CommandPalette({ onSelect }: CommandPaletteProps) {
           <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <span className="text-sm font-medium text-foreground whitespace-nowrap truncate">Hồ sơ cá nhân</span>
         </div>
-        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-[8px] border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground flex-shrink-0 ml-2">⌘P</kbd>
+        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded-[8px] border border-border bg-muted px-1.5 font-mono text-xs font-medium text-muted-foreground flex-shrink-0 ml-2">⌘P</kbd>
       </div>
       <div
         className="flex items-center gap-3 px-4 py-2.5 hover:bg-accent cursor-pointer transition-colors"

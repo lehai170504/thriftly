@@ -41,8 +41,8 @@ export function ChatSidebar({
   };
 
   return (
-    <div className="w-full md:w-80 lg:w-96 flex flex-col border-r border-border glass">
-      <div className="p-4 border-b border-border bg-background/50">
+    <div className="w-full md:w-80 lg:w-96 flex flex-col border-r border-border bg-card">
+      <div className="p-4 border-b border-border bg-muted/30">
         <h1 className="text-xl font-heading font-bold text-foreground mb-4 flex items-center gap-2">
           <MessageCircle className="w-6 h-6 text-primary" /> Tin nhắn
         </h1>
@@ -52,7 +52,7 @@ export function ChatSidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm cuộc trò chuyện..."
-            className="pl-10 bg-background/50 border-border rounded-[24px] h-11 text-foreground"
+            className="pl-10 bg-background/50 border-border rounded-full h-11 text-foreground"
           />
         </div>
       </div>
@@ -71,7 +71,7 @@ export function ChatSidebar({
             <div
               key={c.id}
               onClick={() => onConversationClick(c)}
-              className={`group relative flex items-center gap-4 p-4 rounded-[24px] cursor-pointer transition-all mb-1 ${activeUser?.id === c.id ? 'bg-primary/20 border-border' : 'hover:bg-accent hover:shadow-sm border border-transparent'
+              className={`group relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all mb-1 ${activeUser?.id === c.id ? 'bg-primary/20 border-border' : 'hover:bg-accent hover:shadow-sm border border-transparent'
                 }`}
             >
               <div className="relative">

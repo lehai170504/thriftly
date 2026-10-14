@@ -52,43 +52,40 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 1.5rem;
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
   --radius-3xl: 1.5rem;
   --radius-4xl: 1.5rem;
-  --shadow-surface: 0 1px 2px oklch(0.15 0.02 160 / 6%), 0 1px 3px oklch(0.15 0.02 160 / 8%);
-  --shadow-elevated: 0 12px 32px oklch(0.15 0.02 160 / 12%);
-  --shadow-overlay: 0 24px 64px oklch(0.1 0.02 160 / 22%);
+  --shadow-surface: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-elevated: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-overlay: 0 16px 36px -10px rgb(0 0 0 / 0.16);
 }
 
 :root {
-  /* Nền hơi ngả màu ngọc/kem cực nhẹ, tạo cảm giác sang trọng, bớt chói hơn trắng tinh */
-  --background: oklch(0.99 0.005 160);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.985 0.002 160);
+  --foreground: oklch(0.18 0.01 250);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.18 0.01 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.18 0.01 250);
 
-  /* Brand Color: Premium Emerald (Xanh ngọc lục bảo) */
-  --primary: oklch(0.55 0.15 160);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.44 0.12 165);
+  --primary-foreground: oklch(0.99 0 0);
 
-  /* Secondary: Xanh nhạt làm nền cho các nút phụ */
-  --secondary: oklch(0.96 0.02 160);
-  --secondary-foreground: oklch(0.35 0.1 160);
+  --secondary: oklch(0.96 0.01 160);
+  --secondary-foreground: oklch(0.3 0.08 165);
 
-  --muted: oklch(0.96 0.01 250);
-  --muted-foreground: oklch(0.55 0 0);
+  --muted: oklch(0.96 0.005 250);
+  --muted-foreground: oklch(0.5 0.01 250);
 
-  --accent: oklch(0.96 0.02 160);
-  --accent-foreground: oklch(0.35 0.1 160);
+  --accent: oklch(0.96 0.01 160);
+  --accent-foreground: oklch(0.3 0.08 165);
 
-  /* Destructive: Giữ màu Đỏ/Rose để cảnh báo/hủy đơn */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.56 0.15 150);
@@ -100,52 +97,48 @@
   --live: oklch(0.59 0.24 25);
   --live-foreground: oklch(0.985 0 0);
 
-  --border: oklch(0.92 0.01 250);
-  --input: oklch(0.92 0.01 250);
+  --border: oklch(0.91 0.005 250);
+  --input: oklch(0.91 0.005 250);
 
-  /* Ring màu ngọc để khi focus input viền sẽ sáng màu brand */
-  --ring: oklch(0.55 0.15 160);
+  --ring: oklch(0.44 0.12 165);
 
-  --chart-1: oklch(0.55 0.15 160);
+  --chart-1: oklch(0.44 0.12 165);
   --chart-2: oklch(0.439 0 0);
   --chart-3: oklch(0.371 0 0);
   --chart-4: oklch(0.269 0 0);
   --chart-5: oklch(0.87 0 0);
 
-  /* Tăng độ bo góc lên 16px (1rem) cho hiện đại giống app mobile */
-  --radius: 1rem;
+  --radius: 0.75rem;
 
   --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.55 0.15 160);
+  --sidebar-foreground: oklch(0.18 0.01 250);
+  --sidebar-primary: oklch(0.44 0.12 165);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.96 0.02 160);
-  --sidebar-accent-foreground: oklch(0.35 0.1 160);
-  --sidebar-border: oklch(0.92 0.01 250);
-  --sidebar-ring: oklch(0.55 0.15 160);
+  --sidebar-accent: oklch(0.96 0.01 160);
+  --sidebar-accent-foreground: oklch(0.3 0.08 165);
+  --sidebar-border: oklch(0.91 0.005 250);
+  --sidebar-ring: oklch(0.44 0.12 165);
 }
 
 .dark {
-  /* Nền tối có ám một chút sắc xanh ngọc cực tối, không dùng đen xám xịt */
-  --background: oklch(0.15 0.015 160);
+  --background: oklch(0.16 0.01 250);
   --foreground: oklch(0.98 0 0);
 
-  --card: oklch(0.18 0.015 160);
+  --card: oklch(0.20 0.01 250);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.18 0.015 160);
+  --popover: oklch(0.20 0.01 250);
   --popover-foreground: oklch(0.98 0 0);
 
-  /* Brand Color (Dark mode): Xanh ngọc sáng hơn để nổi bật trên nền đen */
-  --primary: oklch(0.65 0.18 160);
+  --primary: oklch(0.60 0.14 165);
   --primary-foreground: oklch(0.15 0.015 160);
 
-  --secondary: oklch(0.22 0.02 160);
+  --secondary: oklch(0.24 0.02 160);
   --secondary-foreground: oklch(0.98 0 0);
 
-  --muted: oklch(0.22 0.01 250);
-  --muted-foreground: oklch(0.7 0.01 250);
+  --muted: oklch(0.23 0.01 250);
+  --muted-foreground: oklch(0.68 0.01 250);
 
-  --accent: oklch(0.25 0.03 160);
+  --accent: oklch(0.25 0.02 160);
   --accent-foreground: oklch(0.98 0 0);
 
   --destructive: oklch(0.62 0.22 25);
@@ -159,29 +152,29 @@
   --live: oklch(0.68 0.22 25);
   --live-foreground: oklch(0.985 0 0);
 
-  --border: oklch(0.25 0.01 250);
-  --input: oklch(0.25 0.01 250);
-  --ring: oklch(0.65 0.18 160 / 30%);
+  --border: oklch(0.27 0.01 250);
+  --input: oklch(0.27 0.01 250);
+  --ring: oklch(0.60 0.14 165 / 40%);
 
-  --chart-1: oklch(0.65 0.18 160);
+  --chart-1: oklch(0.60 0.14 165);
   --chart-2: oklch(0.70 0.18 70);
   --chart-3: oklch(0.65 0.20 310);
   --chart-4: oklch(0.62 0.22 25);
   --chart-5: oklch(0.98 0 0);
 
-  --sidebar: oklch(0.15 0.015 160);
+  --sidebar: oklch(0.16 0.01 250);
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.65 0.18 160);
+  --sidebar-primary: oklch(0.60 0.14 165);
   --sidebar-primary-foreground: oklch(0.15 0.015 160);
-  --sidebar-accent: oklch(0.22 0.02 160);
+  --sidebar-accent: oklch(0.24 0.02 160);
   --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.25 0.01 250);
-  --sidebar-ring: oklch(0.65 0.18 160 / 40%);
+  --sidebar-border: oklch(0.27 0.01 250);
+  --sidebar-ring: oklch(0.60 0.14 165 / 40%);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
   }
 
   html {
@@ -192,6 +185,7 @@
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
     overflow-y: scroll;
+    overflow-x: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
@@ -208,6 +202,12 @@
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
   }
 
   h1,
@@ -228,14 +228,14 @@
 }
 
 @utility glass {
-  background: color-mix(in oklab, var(--card) 70%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--card);
+  box-shadow: var(--shadow-surface);
   border: 1px solid var(--border);
 }
 
-@utility neon-glow {
-  box-shadow: 0 0 15px color-mix(in oklab, var(--live) 40%, transparent), 0 0 5px color-mix(in oklab, var(--live) 20%, transparent);
+@utility transform-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -273,7 +273,6 @@
 }
 
 @keyframes gradient {
-
   0%,
   100% {
     background-position: 0% 50%;
@@ -289,42 +288,51 @@
   animation: gradient 3s ease infinite;
 }
 
-@layer utilities {
-  .font-brand {
-    font-family: var(--font-playfair), ui-serif, Georgia, serif;
-  }
+@utility font-brand {
+  font-family: var(--font-playfair), ui-serif, Georgia, serif;
+}
 
-  .font-ui {
-    font-family: var(--font-be-vietnam), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  }
+@utility font-ui {
+  font-family: var(--font-be-vietnam), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
 
-  .font-numeric {
-    font-family: var(--font-inter), var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
-    font-variant-numeric: tabular-nums lining-nums;
-  }
+@utility font-numeric {
+  font-family: var(--font-inter), var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+}
 
-  .shadow-surface {
-    box-shadow: var(--shadow-surface);
-  }
+@utility shadow-surface {
+  box-shadow: var(--shadow-surface);
+}
 
-  .shadow-elevated {
-    box-shadow: var(--shadow-elevated);
-  }
+@utility shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
 
-  .shadow-overlay {
-    box-shadow: var(--shadow-overlay);
-  }
+@utility shadow-overlay {
+  box-shadow: var(--shadow-overlay);
+}
 
+@utility page-container {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+}
+
+.page-container {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
   .page-container {
-    width: 100%;
-    max-width: 80rem;
-    margin-inline: auto;
-    padding-inline: 1rem;
-  }
-
-  @media (min-width: 640px) {
-    .page-container {
-      padding-inline: 1.5rem;
-    }
+    padding-inline: 1.5rem;
   }
 }

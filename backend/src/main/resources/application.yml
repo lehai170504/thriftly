@@ -66,8 +66,8 @@ app:
       absolute-timeout: ${SESSION_ABSOLUTE_TIMEOUT:12h}
 
 payos:
-  return-url: ${FRONTEND_URL}/payment/payos-return
-  cancel-url: ${FRONTEND_URL}/payment/payos-return?cancel=true
+  return-url: ${FRONTEND_URL:http://localhost:3000}/payment/payos-return
+  cancel-url: ${FRONTEND_URL:http://localhost:3000}/payment/payos-return?cancel=true
 
 management:
   endpoints:

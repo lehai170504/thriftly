@@ -55,7 +55,7 @@ export function AdminSidebar() {
 
   return (
     <aside className={cn(
-      "glass border-r border-border flex flex-col flex-shrink-0 z-20 shadow-sm h-screen transition-all duration-300 relative",
+      "bg-card border-r border-border flex flex-col flex-shrink-0 z-20 shadow-surface h-screen transition-all duration-300 relative",
       isCollapsed ? "w-20" : "w-72"
     )}>
       {/* Toggle Button */}
@@ -135,7 +135,7 @@ export function AdminSidebar() {
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <div className="text-sm font-bold truncate text-foreground">{user?.username || 'Admin'}</div>
-              <div className="text-[10px] text-muted-foreground truncate uppercase font-medium tracking-wider">{user?.role || 'Administrator'}</div>
+              <div className="text-xs text-muted-foreground truncate uppercase font-medium tracking-wider">{user?.role || 'Administrator'}</div>
             </div>
           )}
         </div>

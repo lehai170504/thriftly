@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { extractError } from '@/lib/utils';
+import { NativeSelect } from '@/components/ui/native-select';
 
 interface VoucherFormModalProps {
   isOpen: boolean;
@@ -41,7 +42,7 @@ export function VoucherFormModal({ isOpen, onClose }: VoucherFormModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[700px] glass">
+      <DialogContent className="sm:max-w-[700px] bg-card border-border rounded-2xl shadow-xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Tạo Mã Giảm Giá Mới</DialogTitle>
         </DialogHeader>
@@ -61,14 +62,14 @@ export function VoucherFormModal({ isOpen, onClose }: VoucherFormModalProps) {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold">Loại giảm giá</label>
-              <select
+              <NativeSelect
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={formData.type}
                 onChange={e => setFormData({ ...formData, type: e.target.value as 'PERCENTAGE' | 'FIXED_AMOUNT' })}
               >
                 <option value="PERCENTAGE">Phần trăm (%)</option>
                 <option value="FIXED_AMOUNT">Tiền mặt (VNĐ)</option>
-              </select>
+              </NativeSelect>
             </div>
 
             <div className="space-y-2">

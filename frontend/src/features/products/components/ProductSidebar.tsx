@@ -65,13 +65,13 @@ export function ProductSidebar({
                   <button
                     key={interestId}
                     onClick={() => { setCategoryIds(prev => [...prev, interestId]); resetPage(); }}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-sm transition-all text-xs font-medium glass border-border text-primary hover:bg-primary/10"
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-2xs transition-colors text-xs font-medium bg-card border-border text-primary hover:bg-muted"
                   >
                     <CategoryIcon name={cat.icon} className="w-3 h-3" /> {cat.name}
                   </button>
                 );
               })}
-            </div>
+            </div>  
           </div>
         )}
 

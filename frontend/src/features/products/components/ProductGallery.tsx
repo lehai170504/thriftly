@@ -120,7 +120,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
             )}
           >
             <PlayCircle className={cn("w-8 h-8", showingVideo ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-[10px] font-medium mt-1 text-muted-foreground">Video</span>
+            <span className="text-xs font-medium mt-1 text-muted-foreground">Video</span>
           </button>
         )}
       </div>

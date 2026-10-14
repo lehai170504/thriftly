@@ -8,6 +8,8 @@ import { authApi } from '@/features/auth/api/authApi';
 import { AuthResponse } from '@/features/auth/types/auth';
 import { isAdminPortalRole } from '@/lib/admin-permissions';
 
+import { AuthPromptModal, AuthPromptOptions } from '@/components/auth/AuthPromptModal';
+
 interface AuthContextType {
   user: AuthResponse | null;
   login: (data: AuthResponse) => void;
@@ -20,6 +22,9 @@ interface AuthContextType {
   closeLoginModal: () => void;
   openRegisterModal: () => void;
   closeRegisterModal: () => void;
+  openAuthPrompt: (options?: AuthPromptOptions) => void;
+  closeAuthPrompt: () => void;
+  requireAuth: (action: () => void, options?: AuthPromptOptions) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [authPrompt, setAuthPrompt] = useState<{ isOpen: boolean; options?: AuthPromptOptions }>({ isOpen: false });
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -82,17 +88,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const openAuthPrompt = (options?: AuthPromptOptions) => {
+    setAuthPrompt({ isOpen: true, options });
+  };
+
+  const closeAuthPrompt = () => {
+    setAuthPrompt(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const requireAuth = (action: () => void, options?: AuthPromptOptions): boolean => {
+    if (user) {
+      action();
+      return true;
+    }
+    openAuthPrompt(options);
+    return false;
+  };
+
   return (
     <AuthContext.Provider value={{
       user, login, logout, isAuthenticated: !!user, isAuthLoading,
       isLoginModalOpen, isRegisterModalOpen,
-      openLoginModal: () => router.push('/login'),
+      openLoginModal: () => openAuthPrompt(),
       closeLoginModal: () => setIsLoginModalOpen(false),
       openRegisterModal: () => router.push('/register'),
       closeRegisterModal: () => setIsRegisterModalOpen(false),
+      openAuthPrompt,
+      closeAuthPrompt,
+      requireAuth
     }}>
       <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
         {children}
+        <AuthPromptModal
+          isOpen={authPrompt.isOpen}
+          onClose={closeAuthPrompt}
+          options={authPrompt.options}
+        />
       </GoogleOAuthProvider>
     </AuthContext.Provider>
   );

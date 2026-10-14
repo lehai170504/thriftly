@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ProductReviewsProps {
   sellerName: string;
@@ -191,29 +192,35 @@ function ReviewActions({ review, sellerName }: { review: any, sellerName: string
   return (
     <div className="mt-4">
       <div className="flex items-center gap-6">
-        <button
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           onClick={handleLike}
           className={`flex items-center gap-1.5 text-xs transition-colors ${review.isLikedByCurrentUser ? 'text-blue-600 font-bold' : 'text-muted-foreground hover:text-blue-600'}`}
           disabled={likeMutation.isPending}
         >
           <ThumbsUp className={`w-4 h-4 ${review.isLikedByCurrentUser ? 'fill-current' : ''}`} />
           <span>Hữu ích? ({review.likesCount || 0})</span>
-        </button>
+        </Button>
 
         {isSeller && !review.sellerReply && (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setIsReplying(!isReplying)}
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Phản hồi</span>
-          </button>
+          </Button>
         )}
       </div>
 
       {isReplying && (
         <div className="mt-3 flex gap-2">
-          <textarea
+          <Textarea
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             placeholder="Viết phản hồi của bạn..."

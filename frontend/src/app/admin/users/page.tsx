@@ -178,26 +178,26 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-5 py-4 text-center">
                     {user.role === 'ADMIN' ? (
-                      <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px]">
+                      <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-xs">
                         <Shield className="w-2.5 h-2.5 mr-1" /> Admin
                       </Badge>
                     ) : user.role === 'STAFF' ? (
-                      <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[10px]">
+                      <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-xs">
                         <Shield className="w-2.5 h-2.5 mr-1" /> Staff
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">
                         <User className="w-2.5 h-2.5 mr-1" /> User
                       </Badge>
                     )}
                   </td>
                   <td className="px-5 py-4 text-center">
                     {user.isActive ? (
-                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">
                         <CheckCircle className="w-2.5 h-2.5 mr-1" /> Hoạt động
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/20 text-[10px]">
+                      <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/20 text-xs">
                         <Ban className="w-2.5 h-2.5 mr-1" /> Đã khóa
                       </Badge>
                     )}

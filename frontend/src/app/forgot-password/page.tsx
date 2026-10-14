@@ -8,11 +8,12 @@ import { forgotPasswordSchema, ForgotPasswordFormData } from '@/features/auth/sc
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { ShoppingBag, ArrowRight, Lock } from 'lucide-react';
+import { ArrowRight, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { extractError } from '@/lib/utils';
+import { BrandWordmark } from '@/components/layout/BrandWordmark';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -40,91 +41,69 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Left Column - Image Banner */}
-      <div className="dark hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden">
-        {/* Background Image */}
+      <div className="dark hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-muted/40">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&q=80&w=1200")' }}
         />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent mix-blend-multiply" />
-        <div className="absolute inset-0 bg-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-black/70 to-black/85" />
 
-        {/* Content */}
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-foreground hover:opacity-90 transition-opacity">
-            <div className="w-10 h-10 bg-secondary backdrop-blur-md rounded-xl flex items-center justify-center border border-border">
-              <ShoppingBag className="h-5 w-5 text-foreground" />
-            </div>
-            <span className="text-2xl font-black tracking-tight text-foreground drop-shadow-sm">
-              Thriftly
-            </span>
-          </Link>
+          <BrandWordmark className="hover:opacity-90" />
         </div>
 
         <div className="relative z-10 mb-10">
-          <div className="bg-background/20 backdrop-blur-xl border border-border p-8 rounded-[2rem] shadow-2xl max-w-md">
-            <Lock className="text-primary w-10 h-10 mb-4" />
-            <p className="text-2xl font-medium text-foreground leading-snug mb-6 drop-shadow-sm">
+          <div className="bg-card/90 border border-border p-8 rounded-2xl shadow-xl max-w-md">
+            <Lock className="text-primary w-8 h-8 mb-4" />
+            <p className="text-xl font-medium text-foreground leading-snug mb-2">
               "Đừng lo lắng, chúng tôi sẽ giúp bạn lấy lại quyền truy cập tài khoản một cách an toàn và nhanh chóng."
             </p>
           </div>
         </div>
       </div>
 
-      {/* Right Column - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
-        {/* Mobile Background Elements (hidden on desktop) */}
-        <div className="lg:hidden absolute top-0 right-0 -z-10 w-[600px] h-[600px] opacity-20 blur-[120px] rounded-full bg-gradient-to-tr from-primary to-blue-600 translate-x-1/3 -translate-y-1/4 pointer-events-none"></div>
-        <div className="lg:hidden absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] opacity-20 blur-[120px] rounded-full bg-gradient-to-tr from-blue-600 to-transparent -translate-x-1/2 translate-y-1/3 pointer-events-none"></div>
-
-        <div className="w-full max-w-[420px] relative z-10">
-          <div className="lg:hidden flex items-center justify-center gap-2 mb-10">
-            <Link href="/" className="w-12 h-12 glass bg-background/50 rounded-[24px] flex items-center justify-center shadow-sm border border-border">
-              <ShoppingBag className="h-6 w-6 text-primary" />
-            </Link>
-            <span className="text-2xl font-black tracking-tight text-foreground">
-              Thriftly
-            </span>
+        <div className="w-full max-w-[400px] relative z-10">
+          <div className="mb-8 flex justify-center lg:hidden">
+            <BrandWordmark />
           </div>
 
-          <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-heading font-bold tracking-tight text-foreground mb-2">
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-foreground mb-1">
               Quên mật khẩu?
             </h1>
-            <p className="text-muted-foreground text-lg">Nhập email của bạn để nhận mã khôi phục</p>
+            <p className="text-muted-foreground text-sm">Nhập email đăng ký để nhận mã OTP khôi phục</p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div className="space-y-2 group">
-              <Label className="text-foreground font-semibold group-focus-within:text-primary transition-colors">Địa chỉ Email</Label>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground">Địa chỉ Email</Label>
               <Input
                 type="email"
-                placeholder="Nhập email đăng ký tài khoản"
+                placeholder="email@example.com"
                 {...register('email')}
-                className={`h-14 bg-background/50 border-border focus:bg-background text-base rounded-[24px] glass transition-all duration-300 ${errors.email ? 'border-red-500 ring-1 ring-red-500/20' : 'hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10'}`}
+                className={`h-11 bg-background text-sm rounded-xl ${errors.email ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
               />
-              {errors.email && <p className="text-red-500 text-sm font-medium animate-in slide-in-from-top-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-destructive text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-[24px] shadow-[0_0_20px_rgba(var(--primary),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] text-lg font-bold transition-all hover:-translate-y-0.5 mt-6"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-semibold shadow-xs transition-all mt-4"
             >
               {isLoading ? (
-                <div className="w-6 h-6 border-3 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <>Gửi mã OTP <ArrowRight size={20} className="ml-2" /></>
+                <>Gửi mã OTP <ArrowRight size={16} className="ml-1.5" /></>
               )}
             </Button>
           </form>
 
-          <div className="text-center mt-10">
-            <p className="text-muted-foreground font-medium text-base">
+          <div className="text-center mt-8">
+            <p className="text-muted-foreground text-sm">
               Nhớ mật khẩu rồi?{' '}
-              <Link href="/login" className="text-primary font-bold hover:underline underline-offset-4">
+              <Link href="/login" className="text-primary font-semibold hover:underline">
                 Đăng nhập
               </Link>
             </p>

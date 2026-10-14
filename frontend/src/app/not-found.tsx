@@ -5,18 +5,18 @@ import { ShoppingBag, ArrowLeft } from 'lucide-react';
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-background/50 glass p-8 rounded-[24px] shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)] border border-border text-center">
-        <div className="w-20 h-20 bg-primary/20 rounded-[24px] border border-primary/30 flex items-center justify-center mx-auto mb-6 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-          <ShoppingBag className="w-10 h-10 text-primary" />
+      <div className="max-w-md w-full bg-card p-8 rounded-2xl shadow-xl border border-border text-center">
+        <div className="w-16 h-16 bg-primary/10 rounded-2xl border border-primary/20 flex items-center justify-center mx-auto mb-5">
+          <ShoppingBag className="w-8 h-8 text-primary" />
         </div>
-        <h1 className="text-6xl font-serif font-black text-foreground mb-4">404</h1>
-        <h2 className="text-2xl font-bold text-foreground mb-2">Oops! Không tìm thấy trang</h2>
-        <p className="text-muted-foreground mb-8">
-          Có vẻ như trang bạn đang tìm kiếm không tồn tại, đã bị xóa hoặc tên đường dẫn bị sai.
+        <h1 className="text-5xl font-heading font-black text-foreground mb-2 tracking-tight">404</h1>
+        <h2 className="text-xl font-bold text-foreground mb-2">Không tìm thấy trang</h2>
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+          Trang bạn đang tìm kiếm có thể đã bị xóa hoặc đường dẫn không chính xác.
         </p>
         <Link href="/">
-          <Button className="w-full h-12 text-lg font-bold rounded-[24px] shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:-translate-y-0.5 transition-all">
-            <ArrowLeft className="w-5 h-5 mr-2" />
+          <Button className="w-full h-11 text-sm font-semibold rounded-xl shadow-xs">
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Về trang chủ
           </Button>
         </Link>

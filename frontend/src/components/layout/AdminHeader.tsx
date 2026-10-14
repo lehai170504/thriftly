@@ -67,12 +67,12 @@ export function AdminHeader() {
             }}
             onFocus={() => { if (searchQuery.trim()) setIsSearchOpen(true); }}
             placeholder="Tìm mã đơn hàng (VD: #123) hoặc username..."
-            className="pl-10 h-10 bg-background/50 border-border focus-visible:bg-background focus-visible:ring-primary rounded-full text-sm w-full text-foreground"
+            className="pl-10 h-10 bg-background border-border focus-visible:bg-background focus-visible:ring-primary rounded-xl text-sm w-full text-foreground"
           />
 
           {/* Search Dropdown */}
           {isSearchOpen && debouncedQuery.trim().length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 glass rounded-[24px] shadow-2xl border-border overflow-hidden max-h-[70vh] overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-xl shadow-xl border border-border overflow-hidden max-h-[70vh] overflow-y-auto">
               {isSearching ? (
                 <div className="p-4 text-center text-muted-foreground text-sm">Đang tìm kiếm...</div>
               ) : searchResults ? (
@@ -145,13 +145,13 @@ export function AdminHeader() {
             <div className="relative inline-flex">
               <Bell className="w-5 h-5" />
               {totalNotifications > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-background animate-in zoom-in">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-xs font-bold text-white flex items-center justify-center rounded-full border-2 border-background animate-in zoom-in">
                   {totalNotifications > 9 ? '9+' : totalNotifications}
                 </span>
               )}
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 rounded-[24px] p-2 border-border glass shadow-2xl">
+          <DropdownMenuContent align="end" className="w-80 rounded-2xl p-2 border-border bg-card shadow-xl">
             <div className="px-2 py-1.5 font-heading font-bold text-foreground text-sm">Thông báo chờ xử lý</div>
             <DropdownMenuSeparator className="bg-muted/80" />
 
@@ -202,7 +202,7 @@ export function AdminHeader() {
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-bold text-foreground leading-none mb-1">{user?.username}</p>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-primary leading-none">Super Admin</p>
+            <p className="text-xs uppercase tracking-widest font-bold text-primary leading-none">Super Admin</p>
           </div>
           <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-bold text-primary border border-primary/20">
             {user?.username?.charAt(0).toUpperCase() || 'A'}

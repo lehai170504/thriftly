@@ -43,9 +43,8 @@ export function ActiveFilters({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-sm font-semibold text-muted-foreground mr-2">Đang lọc theo:</span>
+      <span className="text-xs font-semibold text-muted-foreground mr-1">Đang lọc theo:</span>
 
-      {/* Category Chips */}
       {categoryIds.map(id => {
         let catName = 'Danh mục';
         for (const c of categories || []) {
@@ -56,51 +55,47 @@ export function ActiveFilters({
           }
         }
         return (
-          <Badge key={id} variant="secondary" className="pl-3 pr-1 py-1 rounded-full gap-1 border-border glass text-foreground font-medium">
+          <Badge key={id} variant="secondary" className="pl-2.5 pr-1 py-1 rounded-full gap-1 border-border bg-card text-foreground font-medium text-xs shadow-2xs">
             {catName}
-            <button onClick={() => { setCategoryIds(prev => prev.filter(c => c !== id)); resetPage(); }} className="hover:bg-secondary rounded-full p-0.5 transition-colors ml-1">
-              <X className="w-3.5 h-3.5" />
+            <button onClick={() => { setCategoryIds(prev => prev.filter(c => c !== id)); resetPage(); }} className="hover:bg-muted rounded-full p-0.5 transition-colors ml-0.5">
+              <X className="w-3 h-3" />
             </button>
           </Badge>
         );
       })}
 
-      {/* Location Chip */}
       {location && (
-        <Badge variant="secondary" className="pl-3 pr-1 py-1 rounded-full gap-1 border-border glass text-foreground">
+        <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-full gap-1 border-border bg-card text-foreground text-xs shadow-2xs">
           Khu vực: {location.split(',').pop()?.trim()}
-          <button onClick={() => { setLocation(''); resetPage(); }} className="hover:bg-secondary rounded-full p-0.5 transition-colors">
-            <X className="w-3.5 h-3.5" />
+          <button onClick={() => { setLocation(''); resetPage(); }} className="hover:bg-muted rounded-full p-0.5 transition-colors">
+            <X className="w-3 h-3" />
           </button>
         </Badge>
       )}
 
-      {/* SellType Chip */}
       {sellType !== 'all' && (
-        <Badge variant="secondary" className="pl-3 pr-1 py-1 rounded-full gap-1 border-border glass text-foreground">
+        <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-full gap-1 border-border bg-card text-foreground text-xs shadow-2xs">
           {sellType === 'BUY_NOW' ? 'Mua ngay' : 'Đấu giá'}
-          <button onClick={() => { setSellType('all'); resetPage(); }} className="hover:bg-secondary rounded-full p-0.5 transition-colors">
-            <X className="w-3.5 h-3.5" />
+          <button onClick={() => { setSellType('all'); resetPage(); }} className="hover:bg-muted rounded-full p-0.5 transition-colors">
+            <X className="w-3 h-3" />
           </button>
         </Badge>
       )}
 
-      {/* Condition Chip */}
       {condition !== 'all' && (
-        <Badge variant="secondary" className="pl-3 pr-1 py-1 rounded-full gap-1 border-border glass text-foreground">
+        <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-full gap-1 border-border bg-card text-foreground text-xs shadow-2xs">
           {condition === 'NEW' ? 'Mới 100%' : condition === 'LIKE_NEW' ? 'Như mới' : condition === 'GOOD' ? 'Tốt' : 'Khá'}
-          <button onClick={() => { setCondition('all'); resetPage(); }} className="hover:bg-secondary rounded-full p-0.5 transition-colors">
-            <X className="w-3.5 h-3.5" />
+          <button onClick={() => { setCondition('all'); resetPage(); }} className="hover:bg-muted rounded-full p-0.5 transition-colors">
+            <X className="w-3 h-3" />
           </button>
         </Badge>
       )}
 
-      {/* Price Range Chip */}
       {(minPrice || maxPrice) && (
-        <Badge variant="secondary" className="pl-3 pr-1 py-1 rounded-full gap-1 border-border glass text-foreground">
+        <Badge variant="secondary" className="pl-2.5 pr-1 py-1 rounded-full gap-1 border-border bg-card text-foreground text-xs shadow-2xs">
           Giá: {minPrice ? `${Number(minPrice).toLocaleString('vi-VN')}đ` : '0đ'} - {maxPrice ? `${Number(maxPrice).toLocaleString('vi-VN')}đ` : 'Trở lên'}
-          <button onClick={() => { setMinPrice(''); setMaxPrice(''); resetPage(); }} className="hover:bg-secondary rounded-full p-0.5 transition-colors">
-            <X className="w-3.5 h-3.5" />
+          <button onClick={() => { setMinPrice(''); setMaxPrice(''); resetPage(); }} className="hover:bg-muted rounded-full p-0.5 transition-colors">
+            <X className="w-3 h-3" />
           </button>
         </Badge>
       )}
@@ -117,7 +112,7 @@ export function ActiveFilters({
           setMaxPrice('');
           resetPage();
         }}
-        className="text-xs text-primary hover:bg-primary/10 ml-2 h-7 rounded-full"
+        className="text-xs text-primary hover:bg-primary/10 ml-1 h-7 rounded-full px-2.5 font-medium"
       >
         Xóa tất cả
       </Button>

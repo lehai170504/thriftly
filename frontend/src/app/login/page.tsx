@@ -111,123 +111,118 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Left Column - Image Banner */}
-      <div className="dark hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden">
-        {/* Background Image */}
+      <div className="dark hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-muted/40">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1523381294911-8d3cead13475?auto=format&fit=crop&q=80&w=1200")' }}
         />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/40 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-black/70 to-black/85" />
 
-        {/* Content */}
         <div className="relative z-10">
           <BrandWordmark className="hover:opacity-90" />
         </div>
 
         <div className="relative z-10 mb-10">
-          <div className="bg-muted/80 backdrop-blur-xl border border-border p-8 rounded-[2rem] shadow-2xl max-w-md">
-            <Quote className="text-muted-foreground w-10 h-10 mb-4" />
-            <p className="text-2xl font-medium text-foreground leading-snug mb-6 drop-shadow-sm">
+          <div className="bg-card/90 border border-border p-8 rounded-2xl shadow-xl max-w-md">
+            <Quote className="text-muted-foreground w-8 h-8 mb-4" />
+            <p className="text-xl font-medium text-foreground leading-snug mb-6">
               "Thriftly đã thay đổi hoàn toàn cách tôi mua sắm. Những món đồ độc lạ với giá cực kỳ hời đang chờ đón bạn."
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <img
                 src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100&h=100"
                 alt="User avatar"
-                className="w-12 h-12 rounded-full border-2 border-border object-cover"
+                className="w-10 h-10 rounded-full border border-border object-cover"
               />
               <div>
-                <h4 className="text-foreground font-bold">Linh Nguyễn</h4>
-                <p className="text-muted-foreground text-sm">Thành viên từ 2023</p>
+                <h4 className="text-foreground font-semibold text-sm">Linh Nguyễn</h4>
+                <p className="text-muted-foreground text-xs">Thành viên từ 2023</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right Column - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
-        {/* Mobile Background Elements (hidden on desktop) */}
-        <div className="lg:hidden absolute top-0 right-0 -z-10 w-[600px] h-[600px] opacity-20 blur-[120px] rounded-full bg-gradient-to-tr from-primary to-blue-600 translate-x-1/3 -translate-y-1/4 pointer-events-none"></div>
-        <div className="lg:hidden absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] opacity-20 blur-[120px] rounded-full bg-gradient-to-tr from-blue-600 to-transparent -translate-x-1/2 translate-y-1/3 pointer-events-none"></div>
-
-        <div className="w-full max-w-[420px] relative z-10">
-          <div className="mb-10 flex justify-center lg:hidden">
+        <div className="w-full max-w-[400px] relative z-10">
+          <div className="mb-8 flex justify-center lg:hidden">
             <BrandWordmark />
           </div>
 
-          <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-heading font-bold tracking-tight text-foreground mb-2">
-              Chào mừng trở lại!
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-foreground mb-1">
+              Chào mừng trở lại
             </h1>
-            <p className="text-muted-foreground text-lg">Đăng nhập vào tài khoản của bạn</p>
+            <p className="text-muted-foreground text-sm">Đăng nhập để tiếp tục khám phá và mua bán</p>
           </div>
 
-          <form onSubmit={handleSubmit(onLogin)} className="space-y-5">
-            <div className="space-y-2 group">
-              <Label className="text-foreground font-semibold group-focus-within:text-primary transition-colors">Địa chỉ Email</Label>
+          <form onSubmit={handleSubmit(onLogin)} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground">Địa chỉ Email</Label>
               <Input
                 type="email"
-                placeholder="Nhập email của bạn"
+                placeholder="email@example.com"
                 {...register('email')}
-                className={`h-14 bg-background/50 border-border focus:bg-background text-base rounded-[24px] glass transition-all duration-300 ${errors.email ? 'border-red-500 ring-1 ring-red-500/20' : 'hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10'}`}
+                className={`h-11 bg-background text-sm rounded-xl ${errors.email ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
               />
-              {errors.email && <p className="text-red-500 text-sm font-medium animate-in slide-in-from-top-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-destructive text-xs mt-1">{errors.email.message}</p>}
             </div>
 
-            <div className="space-y-2 group">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label className="text-foreground font-semibold group-focus-within:text-primary transition-colors">Mật khẩu</Label>
-                <Link href="/forgot-password" className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors">Quên mật khẩu?</Link>
+                <Label className="text-xs font-semibold text-foreground">Mật khẩu</Label>
+                <Link href="/forgot-password" className="text-xs text-primary hover:underline">Quên mật khẩu?</Link>
               </div>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   {...register('password')}
-                  className={`h-14 bg-background/50 border-border focus:bg-background text-base pr-12 rounded-[24px] glass transition-all duration-300 ${errors.password ? 'border-red-500 ring-1 ring-red-500/20' : 'hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10'}`}
+                  className={`h-11 bg-background text-sm pr-10 rounded-xl ${errors.password ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
                 />
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  shape="pill"
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground h-7 w-7"
                 >
-                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </Button>
               </div>
-              {errors.password && <p className="text-red-500 text-sm font-medium animate-in slide-in-from-top-1">{errors.password.message}</p>}
+              {errors.password && <p className="text-destructive text-xs mt-1">{errors.password.message}</p>}
             </div>
 
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-[24px] shadow-[0_0_20px_rgba(var(--primary),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] text-lg font-bold transition-all hover:-translate-y-0.5 mt-6"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-semibold shadow-xs transition-all mt-4"
             >
               {isLoading ? (
-                <div className="w-6 h-6 border-3 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <>Đăng nhập <ArrowRight size={20} className="ml-2" /></>
+                <>Đăng nhập <ArrowRight size={16} className="ml-1.5" /></>
               )}
             </Button>
           </form>
 
-          <div className="mt-8 flex items-center justify-center space-x-4">
-            <div className="h-[1px] bg-muted/80 flex-1"></div>
-            <span className="text-sm font-bold text-muted-foreground px-2 tracking-wider">HOẶC ĐĂNG NHẬP VỚI</span>
-            <div className="h-[1px] bg-muted/80 flex-1"></div>
+          <div className="my-6 flex items-center justify-center space-x-3">
+            <div className="h-[1px] bg-border flex-1"></div>
+            <span className="text-xs font-medium text-muted-foreground px-2">HOẶC TIẾP TỤC VỚI</span>
+            <div className="h-[1px] bg-border flex-1"></div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 justify-center w-full [&>div]:w-full [&>div]:flex [&>div]:justify-center">
+          <div className="flex flex-col gap-2.5 justify-center w-full [&>div]:w-full [&>div]:flex [&>div]:justify-center">
             <GoogleLogin
               onSuccess={onGoogleLoginSuccess}
               onError={onGoogleLoginError}
-              theme="filled_black"
+              theme="outline"
               size="large"
               width="100%"
               text="continue_with"
-              shape="pill"
+              shape="rectangular"
             />
 
             <FacebookLogin
@@ -238,19 +233,20 @@ export default function LoginPage() {
                 <Button
                   onClick={onClick}
                   type="button"
-                  className="w-full h-[40px] bg-[#1877F2] hover:bg-[#1877F2]/90 text-white rounded-full font-medium shadow-sm transition-all"
+                  variant="outline"
+                  className="w-full h-10 border-border text-foreground hover:bg-accent rounded-xl font-medium text-sm shadow-2xs"
                 >
-                  <svg className="mr-2 w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+                  <svg className="mr-2 w-4 h-4 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                   Tiếp tục với Facebook
                 </Button>
               )}
             />
           </div>
 
-          <div className="text-center mt-10">
-            <p className="text-muted-foreground font-medium text-base">
+          <div className="text-center mt-8">
+            <p className="text-muted-foreground text-sm">
               Chưa có tài khoản?{' '}
-              <Link href="/register" className="text-primary font-bold hover:underline underline-offset-4">
+              <Link href="/register" className="text-primary font-semibold hover:underline">
                 Đăng ký ngay
               </Link>
             </p>

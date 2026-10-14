@@ -38,9 +38,9 @@ export function AnnouncementBanner() {
           transition={{ duration: 0.3 }}
           className="relative z-[60] bg-foreground text-background overflow-hidden"
         >
-          <div className="container mx-auto px-4 py-2.5 sm:py-3 relative flex items-center justify-center text-center">
+          <div className="page-container py-2.5 sm:py-3 relative flex items-center justify-center text-center">
             <div className="flex items-center flex-wrap justify-center gap-x-3 gap-y-1 text-xs sm:text-sm font-medium pr-8">
-              <span className="flex items-center gap-1.5 bg-background text-foreground px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
+              <span className="flex items-center gap-1.5 bg-background text-foreground px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-widest">
                 <Zap className="w-3 h-3" /> Mới
               </span>
               <span>

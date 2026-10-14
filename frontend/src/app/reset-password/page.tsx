@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useResetPassword } from '@/features/auth/hooks/useAuthMutations';
@@ -8,11 +8,12 @@ import { resetPasswordSchema, ResetPasswordFormData } from '@/features/auth/sche
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { ShoppingBag, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { extractError } from '@/lib/utils';
+import { BrandWordmark } from '@/components/layout/BrandWordmark';
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -49,117 +50,106 @@ function ResetPasswordForm() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Left Column - Image Banner */}
-      <div className="dark hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden">
+      <div className="dark hidden lg:flex w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-muted/40">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1616423640778-28d1b53229bd?auto=format&fit=crop&q=80&w=1200")' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent mix-blend-multiply" />
-        <div className="absolute inset-0 bg-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-black/70 to-black/85" />
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-foreground hover:opacity-90 transition-opacity">
-            <div className="w-10 h-10 bg-secondary backdrop-blur-md rounded-xl flex items-center justify-center border border-border">
-              <ShoppingBag className="h-5 w-5 text-primary" />
-            </div>
-            <span className="text-2xl font-black tracking-tight text-foreground drop-shadow-sm">
-              Thriftly
-            </span>
-          </Link>
+          <BrandWordmark className="hover:opacity-90" />
         </div>
       </div>
 
-      {/* Right Column - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
-        {/* Mobile Background Elements (hidden on desktop) */}
-        <div className="lg:hidden absolute top-0 right-0 -z-10 w-[600px] h-[600px] opacity-20 blur-[120px] rounded-full bg-gradient-to-tr from-primary to-blue-600 translate-x-1/3 -translate-y-1/4 pointer-events-none"></div>
-        <div className="lg:hidden absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] opacity-20 blur-[120px] rounded-full bg-gradient-to-tr from-blue-600 to-transparent -translate-x-1/2 translate-y-1/3 pointer-events-none"></div>
-
-        <div className="w-full max-w-[420px] relative z-10">
-          <div className="lg:hidden flex items-center justify-center gap-2 mb-10">
-            <Link href="/" className="w-12 h-12 glass bg-background/50 rounded-[24px] flex items-center justify-center shadow-sm border border-border">
-              <ShoppingBag className="h-6 w-6 text-primary" />
-            </Link>
-            <span className="text-2xl font-black tracking-tight text-foreground">
-              Thriftly
-            </span>
+        <div className="w-full max-w-[400px] relative z-10">
+          <div className="mb-8 flex justify-center lg:hidden">
+            <BrandWordmark />
           </div>
 
-          <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-heading font-bold tracking-tight text-foreground mb-2">
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-foreground mb-1">
               Đặt lại mật khẩu
             </h1>
-            <p className="text-muted-foreground text-lg">Mã OTP đã được gửi đến: <strong className="text-foreground">{defaultEmail}</strong></p>
+            <p className="text-muted-foreground text-sm">Mã OTP đã gửi đến: <strong className="text-foreground">{defaultEmail}</strong></p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div className="space-y-2 group">
-              <Label className="text-foreground font-semibold group-focus-within:text-primary transition-colors">Mã xác nhận (OTP)</Label>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground">Mã xác nhận (OTP)</Label>
               <Input
                 placeholder="Nhập mã 6 số"
                 maxLength={6}
                 {...register('otp')}
-                className={`h-14 bg-background/50 border-border focus:bg-background text-base text-center tracking-widest font-bold text-xl rounded-[24px] glass transition-all duration-300 ${errors.otp ? 'border-red-500 ring-1 ring-red-500/20' : 'hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10'}`}
+                className={`h-11 bg-background text-sm text-center tracking-widest font-bold text-lg rounded-xl ${errors.otp ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
               />
-              {errors.otp && <p className="text-red-500 text-sm font-medium animate-in slide-in-from-top-1 text-center">{errors.otp.message}</p>}
+              {errors.otp && <p className="text-destructive text-xs mt-1 text-center">{errors.otp.message}</p>}
             </div>
 
-            <div className="space-y-2 group">
-              <Label className="text-foreground font-semibold group-focus-within:text-primary transition-colors">Mật khẩu mới</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground">Mật khẩu mới</Label>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   {...register('newPassword')}
-                  className={`h-14 bg-background/50 border-border focus:bg-background text-base pr-12 rounded-[24px] glass transition-all duration-300 ${errors.newPassword ? 'border-red-500 ring-1 ring-red-500/20' : 'hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10'}`}
+                  className={`h-11 bg-background text-sm pr-9 rounded-xl ${errors.newPassword ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
                 />
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  shape="pill"
+                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground h-7 w-7"
                 >
-                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </Button>
               </div>
-              {errors.newPassword && <p className="text-red-500 text-sm font-medium animate-in slide-in-from-top-1">{errors.newPassword.message}</p>}
+              {errors.newPassword && <p className="text-destructive text-xs mt-1">{errors.newPassword.message}</p>}
             </div>
 
-            <div className="space-y-2 group">
-              <Label className="text-foreground font-semibold group-focus-within:text-primary transition-colors">Xác nhận mật khẩu mới</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground">Xác nhận mật khẩu mới</Label>
               <div className="relative">
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
                   {...register('confirmPassword')}
-                  className={`h-14 bg-background/50 border-border focus:bg-background text-base pr-12 rounded-[24px] glass transition-all duration-300 ${errors.confirmPassword ? 'border-red-500 ring-1 ring-red-500/20' : 'hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10'}`}
+                  className={`h-11 bg-background text-sm pr-9 rounded-xl ${errors.confirmPassword ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
                 />
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  shape="pill"
+                  aria-label={showConfirmPassword ? 'Ẩn mật khẩu xác nhận' : 'Hiện mật khẩu xác nhận'}
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground h-7 w-7"
                 >
-                  {showConfirmPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </Button>
               </div>
-              {errors.confirmPassword && <p className="text-red-500 text-sm font-medium animate-in slide-in-from-top-1">{errors.confirmPassword.message}</p>}
+              {errors.confirmPassword && <p className="text-destructive text-xs mt-1">{errors.confirmPassword.message}</p>}
             </div>
 
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground rounded-[24px] shadow-[0_0_20px_rgba(var(--primary),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] text-lg font-bold transition-all hover:-translate-y-0.5 mt-6"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-semibold shadow-xs transition-all mt-4"
             >
               {isLoading ? (
-                <div className="w-6 h-6 border-3 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <>Đổi mật khẩu <ArrowRight size={20} className="ml-2" /></>
+                <>Đổi mật khẩu <ArrowRight size={16} className="ml-1.5" /></>
               )}
             </Button>
           </form>
 
-          <div className="text-center mt-10">
-            <p className="text-muted-foreground font-medium text-base">
-              <Link href="/login" className="text-primary font-bold hover:underline underline-offset-4">
+          <div className="text-center mt-8">
+            <p className="text-muted-foreground text-sm">
+              <Link href="/login" className="text-primary font-semibold hover:underline">
                 Quay lại đăng nhập
               </Link>
             </p>

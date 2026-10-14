@@ -87,7 +87,7 @@ export function UpdatedTestimonials() {
                 />
                 <div>
                   <div className="font-bold text-xs text-foreground">{review.name}</div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{review.role}</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider">{review.role}</div>
                 </div>
               </div>
             </Card>

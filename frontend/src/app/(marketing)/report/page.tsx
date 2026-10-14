@@ -1,6 +1,9 @@
 import { AlertTriangle, ShieldAlert, Flag, Send, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { NativeSelect } from '@/components/ui/native-select';
 
 export const metadata = {
   title: 'Báo cáo vi phạm | Thriftly',
@@ -44,31 +47,31 @@ export default function ReportPage() {
             <form className="space-y-6">
               <div>
                 <label className="block text-sm font-bold text-foreground mb-2">Loại vi phạm *</label>
-                <select className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+                <NativeSelect className="h-12 w-full">
                   <option>Chọn loại vi phạm...</option>
                   <option>Hành vi lừa đảo / Chiếm đoạt tài sản</option>
                   <option>Sản phẩm giả mạo / Nhái thương hiệu</option>
                   <option>Sản phẩm bị cấm (vũ khí, chất cấm...)</option>
                   <option>Ngôn từ đả kích, xúc phạm</option>
                   <option>Spam / Quảng cáo rác</option>
-                </select>
+                </NativeSelect>
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-foreground mb-2">Đường dẫn liên kết (URL) của người bán hoặc sản phẩm *</label>
-                <input
+                <Input
                   type="text"
-                  className="w-full h-12 px-4 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/50"
+                  className="w-full"
                   placeholder="https://thriftly.com/products/..."
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-foreground mb-2">Mô tả chi tiết vi phạm *</label>
-                <textarea
-                  className="w-full p-4 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/50 min-h-[120px]"
+                <Textarea
+                  className="min-h-32 w-full"
                   placeholder="Vui lòng cung cấp thêm chi tiết để chúng tôi có thể xử lý nhanh chóng..."
-                ></textarea>
+                />
               </div>
 
               <Button className="w-full h-14 rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold text-lg shadow-lg">

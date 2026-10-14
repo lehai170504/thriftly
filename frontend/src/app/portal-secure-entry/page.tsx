@@ -209,13 +209,17 @@ export default function AdminLoginPage() {
                       />
                     )}
                   />
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    shape="pill"
+                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
+                  </Button>
                 </div>
                 {errors.password && <p className="text-red-500 text-xs font-medium">{errors.password.message}</p>}
               </div>
@@ -250,7 +254,8 @@ export default function AdminLoginPage() {
                 {isLoading ? 'Đang xác minh...' : 'Xác nhận'}
               </Button>
               <div className="text-center mt-4">
-                <button
+                <Button
+                  variant="link"
                   type="button"
                   onClick={() => {
                     setStep('LOGIN');
@@ -259,7 +264,7 @@ export default function AdminLoginPage() {
                   className="text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   Quay lại đăng nhập
-                </button>
+                </Button>
               </div>
             </form>
           )}

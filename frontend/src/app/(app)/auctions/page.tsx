@@ -122,19 +122,19 @@ function AuctionsContent() {
             </div>
 
             <div className="flex gap-4 w-full md:w-auto z-10">
-              <div className="glass bg-background/60 backdrop-blur-xl rounded-[24px] p-5 flex-1 md:flex-none md:w-40 border border-white/20 dark:border-white/10 text-center shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group">
+              <div className="bg-card rounded-2xl p-4 flex-1 md:flex-none md:w-36 border border-border text-center shadow-surface">
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mx-auto mb-3 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
                   <Activity className="w-6 h-6" />
                 </div>
                 <div className="text-3xl font-black text-foreground mb-1 tracking-tight">24/7</div>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Liên tục hoạt động</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Liên tục hoạt động</div>
               </div>
-              <div className="glass bg-background/60 backdrop-blur-xl rounded-[24px] p-5 flex-1 md:flex-none md:w-40 border border-white/20 dark:border-white/10 text-center shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group">
+              <div className="bg-card rounded-2xl p-4 flex-1 md:flex-none md:w-36 border border-border text-center shadow-surface">
                 <div className="w-12 h-12 rounded-2xl bg-chart-2/10 flex items-center justify-center text-chart-2 mx-auto mb-3 group-hover:scale-110 group-hover:bg-chart-2 group-hover:text-white transition-all duration-300">
                   <Flame className="w-6 h-6" />
                 </div>
                 <div className="text-3xl font-black text-foreground mb-1 tracking-tight">HOT</div>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Phiên sôi động</div>
+                <div className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Phiên sôi động</div>
               </div>
             </div>
           </div>

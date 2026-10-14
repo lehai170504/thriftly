@@ -18,7 +18,6 @@ export const NotificationDropdown = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Connect to websocket
   useNotificationSocket(isAuthenticated);
 
   const { data: notifications = [] } = useMyNotifications(isAuthenticated);
@@ -34,7 +33,6 @@ export const NotificationDropdown = () => {
     }
     setIsOpen(false);
 
-    // Routing logic based on type
     switch (notification.type) {
       case 'AUCTION_WON':
       case 'ORDER_CREATED':
@@ -68,13 +66,13 @@ export const NotificationDropdown = () => {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'AUCTION_WON': return <Trophy className="w-5 h-5 text-yellow-500" />;
-      case 'AUCTION_OUTBID': return <TrendingDown className="w-5 h-5 text-red-500" />;
+      case 'AUCTION_WON': return <Trophy className="w-5 h-5 text-amber-500" />;
+      case 'AUCTION_OUTBID': return <TrendingDown className="w-5 h-5 text-destructive" />;
       case 'ORDER_CREATED': return <Package className="w-5 h-5 text-blue-500" />;
       case 'ORDER_PAID': return <Wallet className="w-5 h-5 text-emerald-500" />;
       case 'ORDER_SHIPPED': return <Truck className="w-5 h-5 text-blue-500" />;
       case 'ESCROW_RELEASED': return <CheckCircle className="w-5 h-5 text-emerald-500" />;
-      case 'ORDER_DISPUTED': return <AlertTriangle className="w-5 h-5 text-red-500" />;
+      case 'ORDER_DISPUTED': return <AlertTriangle className="w-5 h-5 text-destructive" />;
       case 'AUCTION_START': return <Play className="w-5 h-5 text-primary" />;
       default: return <Info className="w-5 h-5 text-muted-foreground" />;
     }
@@ -84,24 +82,24 @@ export const NotificationDropdown = () => {
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger className="relative h-10 w-10 flex items-center justify-center rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 outline-none">
-        <Bell className="h-5 w-5" />
+      <DropdownMenuTrigger className="relative h-9 w-9 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent outline-none transition-colors border border-transparent hover:border-border">
+        <Bell className="h-4.5 w-4.5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background flex items-center justify-center text-[9px] font-bold text-destructive-foreground">
+          <span className="absolute top-1 right-1 w-4 h-4 bg-destructive rounded-full border border-background flex items-center justify-center text-[10px] font-bold text-destructive-foreground">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-80 md:w-96 max-h-[85vh] overflow-hidden flex flex-col p-0 rounded-[24px] glass border-border" align="end">
-        <div className="p-4 border-b border-border flex items-center justify-between bg-background/50 sticky top-0 z-10">
-          <h3 className="font-heading font-bold text-foreground">Thông báo</h3>
+      <DropdownMenuContent className="w-80 md:w-96 max-h-[85vh] overflow-hidden flex flex-col p-0 rounded-2xl bg-card border border-border shadow-xl" align="end">
+        <div className="p-3.5 border-b border-border flex items-center justify-between bg-card sticky top-0 z-10">
+          <h3 className="font-heading font-bold text-sm text-foreground">Thông báo</h3>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs text-primary hover:text-primary hover:bg-primary/5 h-8 px-2"
+                className="text-xs text-primary hover:text-primary hover:bg-primary/5 h-7 px-2 font-medium"
                 onClick={() => markAllAsRead()}
                 title="Đánh dấu tất cả đã đọc"
               >
@@ -113,7 +111,7 @@ export const NotificationDropdown = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 px-2"
+                className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-7 px-2 font-medium"
                 onClick={handleDeleteAll}
                 title="Xóa tất cả thông báo"
               >
@@ -124,41 +122,41 @@ export const NotificationDropdown = () => {
           </div>
         </div>
 
-        <div className="overflow-y-auto max-h-[60vh] bg-transparent">
+        <div className="overflow-y-auto max-h-[60vh] bg-card">
           {notifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground flex flex-col items-center">
               <Bell className="w-8 h-8 text-muted-foreground/30 mb-2" />
-              <p className="text-sm">Bạn chưa có thông báo nào</p>
+              <p className="text-xs">Bạn chưa có thông báo nào</p>
             </div>
           ) : (
-            <div className="flex flex-col">
+            <div className="flex flex-col divide-y divide-border/50">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
                   className={cn(
-                    "group p-4 border-b border-border last:border-0 cursor-pointer transition-colors hover:bg-background/80 flex gap-3 items-start relative",
-                    !notification.isRead ? "bg-primary/10 hover:bg-primary/20" : "bg-transparent"
+                    "group p-3.5 cursor-pointer transition-colors hover:bg-muted/40 flex gap-3 items-start relative",
+                    !notification.isRead ? "bg-primary/5 hover:bg-primary/10" : "bg-card"
                   )}
                 >
-                  <div className="mt-1 flex-shrink-0">
+                  <div className="mt-0.5 shrink-0">
                     {getNotificationIcon(notification.type)}
                   </div>
-                  <div className="flex-1 min-w-0 pr-6">
-                    <p className={cn("text-sm mb-1 text-foreground leading-snug", !notification.isRead && "font-bold text-primary")}>
+                  <div className="flex-1 min-w-0 pr-5">
+                    <p className={cn("text-xs mb-1 text-foreground leading-relaxed", !notification.isRead && "font-semibold text-primary")}>
                       {formatNotificationMessage(notification.message)}
                     </p>
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+                    <p className="text-[10px] text-muted-foreground tabular-nums">
                       {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: vi })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0 mt-1">
+                  <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
                     {!notification.isRead && (
-                      <div className="w-2 h-2 bg-primary rounded-full" />
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full" />
                     )}
                     <button
                       onClick={(e) => handleDeleteSingle(e, notification.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
                       title="Xóa thông báo này"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

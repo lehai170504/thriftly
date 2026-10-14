@@ -296,7 +296,7 @@ function LiveVideoChat({ liveSession, isHost, auctionSessionId }: LiveVideoChatP
                     🔥 {msg.senderUsername} vừa ra giá {msg.content}
                   </div>
                 ) : (
-                  <div className="text-center text-[11px] text-muted-foreground italic font-medium">
+                  <div className="text-center text-xs text-muted-foreground italic font-medium">
                     {msg.senderUsername} {msg.type === 'JOIN' ? 'vừa vào phòng' : 'vừa rời phòng'}
                   </div>
                 )}

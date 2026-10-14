@@ -1,6 +1,7 @@
 import { HelpCircle, Search, Mail, MessageCircle, FileText, ArrowRight, ShieldCheck, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export const metadata = {
   title: 'Trung tâm trợ giúp | Thriftly',
@@ -32,9 +33,9 @@ export default function HelpPage() {
               <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
                 <Search className="h-5 w-5 text-muted-foreground" />
               </div>
-              <input
+              <Input
                 type="text"
-                className="w-full h-14 pl-12 pr-4 rounded-full glass bg-background/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-4 focus:ring-primary/50 text-lg shadow-[0_0_15px_rgba(255,255,255,0.05)] border border-border"
+                className="h-14 w-full rounded-full pl-12 pr-4 text-lg"
                 placeholder="Nhập từ khóa tìm kiếm..."
               />
               <Button className="absolute right-2 top-2 bottom-2 rounded-full px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-bold">

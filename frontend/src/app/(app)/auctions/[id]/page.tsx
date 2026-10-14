@@ -45,13 +45,13 @@ export default function LiveRoomPage() {
   if (error || !liveSession) {
     return (
       <div className="dark flex flex-col min-h-[calc(100vh-4rem)] items-center justify-center bg-background text-foreground px-4">
-        <div className="flex flex-col items-center text-center bg-background/40 backdrop-blur-xl border border-border rounded-[40px] p-10 sm:p-14 max-w-lg w-full shadow-2xl">
-          <div className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center mb-6">
-            <VideoOff className="w-12 h-12 text-muted-foreground" />
+        <div className="flex flex-col items-center text-center bg-card border border-border rounded-2xl p-8 sm:p-10 max-w-md w-full shadow-xl">
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-5">
+            <VideoOff className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h1 className="text-3xl font-heading font-bold mb-3 text-foreground">Phiên Live không khả dụng</h1>
-          <p className="text-muted-foreground mb-8 max-w-sm text-lg">Phiên live này chưa bắt đầu, đã kết thúc hoặc không tồn tại.</p>
-          <Button onClick={() => router.push(`/products/${productId}`)} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-[24px] font-bold h-12 px-8">
+          <h1 className="text-2xl font-heading font-bold mb-2 text-foreground">Phiên Live không khả dụng</h1>
+          <p className="text-muted-foreground mb-6 max-w-sm text-sm">Phiên live này chưa bắt đầu, đã kết thúc hoặc không tồn tại.</p>
+          <Button onClick={() => router.push(`/products/${productId}`)} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold h-10 px-6 text-sm shadow-xs">
             Quay lại sản phẩm
           </Button>
         </div>

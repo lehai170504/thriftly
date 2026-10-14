@@ -72,7 +72,7 @@ export function HowItWorks() {
             ].map((stat, i) => (
               <div key={i} className="flex flex-col items-center text-center cursor-default">
                 <span className="text-3xl md:text-4xl font-bold text-foreground mb-1 font-sans">{stat.value}</span>
-                <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">{stat.label}</span>
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">{stat.label}</span>
               </div>
             ))}
           </div>

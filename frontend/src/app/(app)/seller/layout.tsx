@@ -9,7 +9,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
       <div className="flex flex-col md:flex-row gap-6">
         <SellerSidebar />
         <main className="flex-1 min-w-0">
-          <div className="bg-card glass border border-border rounded-[24px] p-6 shadow-sm min-h-[500px]">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-surface min-h-[500px]">
             {children}
           </div>
         </main>

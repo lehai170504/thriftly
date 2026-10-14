@@ -6,9 +6,11 @@ import { useCreateBuyNowOrder, useCheckoutPreview } from '@/features/orders/hook
 import { extractError } from '@/lib/utils';
 import { Product } from '@/features/products/types/product';
 import { CheckoutPreviewResponse } from '@/features/orders/types/order';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useProductCheckout(product: Product | null | undefined, user: any, isSeller: boolean) {
   const router = useRouter();
+  const { openAuthPrompt } = useAuth();
   const buyNowMutation = useCreateBuyNowOrder();
   const previewMutation = useCheckoutPreview();
   const { data: availableVouchers } = useAvailableVouchers(product?.sellerId);
@@ -80,8 +82,11 @@ export function useProductCheckout(product: Product | null | undefined, user: an
 
   const handleBuyNow = () => {
     if (!user) {
-      toast.error('Vui lòng đăng nhập để mua hàng!');
-      router.push('/login');
+      openAuthPrompt({
+        title: 'Đăng nhập để mua hàng',
+        description: 'Vui lòng đăng nhập tài khoản Thriftly để tiếp tục đặt hàng và bảo vệ thanh toán qua ví ký quỹ.',
+        redirectUrl: product ? `/products/${product.id}` : '/products'
+      });
       return;
     }
 

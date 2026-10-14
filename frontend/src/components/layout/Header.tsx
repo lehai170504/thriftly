@@ -83,7 +83,7 @@ export default function Header() {
                 <Search className="h-4 w-4 shrink-0 group-hover:text-primary transition-colors" />
                 <span className="truncate">Tìm kiếm...</span>
               </div>
-              <kbd className="pointer-events-none inline-flex h-5 shrink-0 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground ml-2">
+              <kbd className="pointer-events-none inline-flex h-5 shrink-0 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-xs font-medium text-muted-foreground ml-2">
                 <span className="text-xs">⌘</span>K
               </kbd>
             </button>

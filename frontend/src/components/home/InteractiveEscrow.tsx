@@ -64,7 +64,7 @@ export function InteractiveEscrow() {
                 ].map((stat, i) => (
                   <div key={i} className="flex flex-col items-start">
                     <span className="text-xl font-bold text-foreground mb-0.5 font-sans">{stat.value}</span>
-                    <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">{stat.label}</span>
+                    <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">{stat.label}</span>
                   </div>
                 ))}
                 <Link href="/products">
@@ -89,10 +89,10 @@ export function InteractiveEscrow() {
                       </div>
                       <div>
                         <h4 className="font-bold text-foreground text-xs">{step.title}</h4>
-                        <p className="text-[10px] text-muted-foreground">{step.desc}</p>
+                        <p className="text-xs text-muted-foreground">{step.desc}</p>
                       </div>
                     </div>
-                    <span className={`text-[9px] uppercase font-bold px-2 py-0.5 rounded-full ${step.active ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'}`}>
+                    <span className={`text-xs uppercase font-bold px-2 py-0.5 rounded-full ${step.active ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'}`}>
                       {step.status}
                     </span>
                   </div>
@@ -101,7 +101,7 @@ export function InteractiveEscrow() {
 
               <div className="p-4 rounded-2xl bg-card border border-border text-foreground flex items-center justify-between shadow-lg">
                 <div>
-                  <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">Bảo chứng giao dịch</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Bảo chứng giao dịch</p>
                   <p className="text-base font-bold text-foreground">Bảo vệ 100% tài sản</p>
                 </div>
                 <ShieldCheck className="w-7 h-7 text-emerald-500" />

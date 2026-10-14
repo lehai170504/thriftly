@@ -40,23 +40,23 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md glass border-border p-0 overflow-hidden rounded-[24px]">
-        <div className={`${isDestructive ? 'bg-red-950/20 border-red-900/30' : 'bg-primary/10 border-border'} p-6 flex flex-col items-center justify-center text-center border-b`}>
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isDestructive ? 'bg-red-500/20 text-red-500' : 'bg-primary/20 text-primary'}`}>
-            <Icon className="w-8 h-8" />
+      <DialogContent className="sm:max-w-md bg-card border-border p-0 overflow-hidden rounded-2xl shadow-xl">
+        <div className={`${isDestructive ? 'bg-destructive/10 border-destructive/20' : 'bg-muted/40 border-border'} p-6 flex flex-col items-center justify-center text-center border-b`}>
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${isDestructive ? 'bg-destructive/15 text-destructive' : 'bg-primary/10 text-primary'}`}>
+            <Icon className="w-6 h-6" />
           </div>
-          <DialogTitle className={`text-2xl font-heading font-bold mb-2 ${isDestructive ? 'text-red-500' : 'text-primary'}`}>
+          <DialogTitle className={`text-lg font-heading font-bold mb-1.5 ${isDestructive ? 'text-destructive' : 'text-foreground'}`}>
             {title}
           </DialogTitle>
-          <DialogDescription render={<div className="text-muted-foreground" />}>
+          <DialogDescription render={<div className="text-muted-foreground text-sm" />}>
             {description}
           </DialogDescription>
         </div>
-        <div className="p-6 bg-transparent flex items-center justify-end gap-3">
+        <div className="p-4 px-6 bg-card flex items-center justify-end gap-2.5">
           <Button
             variant="outline"
             onClick={handleCancel}
-            className="rounded-xl h-12 px-6 border-border text-muted-foreground hover:bg-accent font-bold"
+            className="rounded-xl h-9 px-4 border-border text-foreground hover:bg-accent text-sm font-medium"
             disabled={isLoading}
           >
             {cancelText}
@@ -64,7 +64,7 @@ export function ConfirmDialog({
           <Button
             variant={isDestructive ? 'destructive' : 'default'}
             onClick={onConfirm}
-            className="rounded-xl h-12 px-6 font-bold"
+            className="rounded-xl h-9 px-4 text-sm font-semibold shadow-xs"
             disabled={isLoading}
           >
             {isLoading ? 'Đang xử lý...' : confirmText}

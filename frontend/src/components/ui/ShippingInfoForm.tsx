@@ -127,7 +127,7 @@ export function ShippingInfoForm({
         {errors?.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
 
         {addressSuggestions.length > 0 && (
-          <div className="absolute top-[80px] left-0 right-0 glass border-border shadow-2xl rounded-2xl z-[100] max-h-60 overflow-y-auto overflow-x-hidden">
+          <div className="absolute top-[80px] left-0 right-0 bg-card border border-border shadow-xl rounded-xl z-[100] max-h-60 overflow-y-auto overflow-x-hidden">
             {addressSuggestions.map((s: any) => (
               <div
                 key={s.place_id}

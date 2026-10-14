@@ -14,6 +14,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { PageHeader } from '@/components/patterns/page-header';
 import { NumberText } from '@/components/ui/typography';
+import { NativeSelect } from '@/components/ui/native-select';
+import { Button } from '@/components/ui/button';
 
 const ACTION_CONFIG: Record<string, { color: string; icon: React.ElementType; label: string }> = {
   DELETE_PRODUCT: { color: 'bg-red-100 text-red-700 border-red-200', icon: Trash2, label: 'Xóa sản phẩm' },
@@ -87,7 +89,10 @@ export default function AuditLogsPage() {
           const Icon = tab.icon;
           const isActive = roleFilter === tab.value;
           return (
-            <button
+            <Button
+              type="button"
+              variant={isActive ? 'primary' : 'ghost'}
+              size="sm"
               key={tab.value}
               onClick={() => { setRoleFilter(tab.value); setActionFilter(''); setPage(0); }}
               className={`
@@ -101,7 +106,7 @@ export default function AuditLogsPage() {
             >
               <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-primary' : ''}`} />
               {tab.label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -118,17 +123,17 @@ export default function AuditLogsPage() {
               className="pl-9 bg-background border-border h-10 transition-shadow focus:shadow-md"
             />
           </div>
-          <button
+          <Button
             type="submit"
             className="px-5 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-all duration-150 shadow-sm"
           >
             Tìm
-          </button>
+          </Button>
         </form>
 
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          <select
+          <NativeSelect
             value={actionFilter}
             onChange={(e) => { setActionFilter(e.target.value); setPage(0); }}
             className="pl-9 pr-4 py-2 h-10 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 min-w-[200px] cursor-pointer transition-shadow hover:shadow-sm"
@@ -137,7 +142,7 @@ export default function AuditLogsPage() {
             {actionOptions.map((a) => (
               <option key={a} value={a}>{ACTION_CONFIG[a]?.label ?? a}</option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
       </div>
 
@@ -195,7 +200,7 @@ export default function AuditLogsPage() {
 
                       {/* Role badge */}
                       <span className={`
-                        inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border
+                        inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold border
                         ${isAdmin
                           ? 'bg-red-50 text-red-600 border-red-200'
                           : 'bg-primary/8 text-primary border-primary/20'
@@ -229,7 +234,7 @@ export default function AuditLogsPage() {
                   {/* Meta */}
                   <div className="flex items-center gap-3 text-xs text-muted-foreground flex-shrink-0">
                     {log.ipAddress && (
-                      <span className="font-mono bg-muted px-2 py-1 rounded-md text-[11px] hidden sm:block">
+                      <span className="font-mono bg-muted px-2 py-1 rounded-md text-xs hidden sm:block">
                         {log.ipAddress}
                       </span>
                     )}
@@ -252,22 +257,26 @@ export default function AuditLogsPage() {
             Trang <span className="font-semibold text-foreground">{page + 1}</span> / {totalPages}
           </p>
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-accent active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150"
             >
               <ChevronLeft className="w-4 h-4" />
               Trước
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm font-medium hover:bg-accent active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150"
             >
               Sau
               <ChevronRight className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -65,7 +65,7 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
             onKeyDown={handleSearch}
             className="flex h-12 w-full rounded-md bg-transparent py-3 text-base outline-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground"
           />
-          <kbd className="pointer-events-none hidden sm:inline-flex h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground ml-2">
+          <kbd className="pointer-events-none hidden sm:inline-flex h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-xs font-medium text-muted-foreground ml-2">
             <span className="text-xs">ESC</span>
           </kbd>
         </div>

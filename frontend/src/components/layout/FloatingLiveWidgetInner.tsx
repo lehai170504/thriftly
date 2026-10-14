@@ -68,7 +68,7 @@ function FloatingLivePlayer({ session, onDismiss }: { session: LiveSessionRespon
         </button>
 
         {/* Live Badge */}
-        <div className="absolute top-3 left-3 z-40 flex items-center gap-1.5 bg-destructive/90 backdrop-blur-md text-destructive-foreground px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider animate-pulse">
+        <div className="absolute top-3 left-3 z-40 flex items-center gap-1.5 bg-destructive/90 backdrop-blur-md text-destructive-foreground px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse">
           <div className="w-1.5 h-1.5 rounded-full bg-destructive-foreground animate-ping" />
           LIVE
         </div>

@@ -91,8 +91,8 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl h-[calc(100vh-64px)]">
-      <div className="bg-background/50 rounded-[24px] shadow-lg border border-border glass flex overflow-hidden h-[85vh]">
+    <div className="page-container py-8 max-w-6xl h-[calc(100vh-64px)]">
+      <div className="bg-background/50 rounded-2xl shadow-lg border border-border glass flex overflow-hidden h-[85vh]">
         <ChatSidebar
           conversations={conversations}
           activeUser={activeUser}

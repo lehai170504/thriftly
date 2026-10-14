@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { useMyOrders, usePayOrder, useConfirmReceipt, useDisputeOrder, useReturnShipped, useHideOrder } from '@/features/orders/hooks/useOrders';
 import { Order } from '@/features/orders/api/orderApi';
 import { extractError } from '@/lib/utils';
 import { ReviewModal } from '@/features/reviews/components/ReviewModal';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ShoppingBag, Package, CheckCircle, Star, Store, Truck, MessageCircle } from 'lucide-react';
@@ -18,6 +19,7 @@ import { PageHeader } from '@/components/patterns/page-header';
 import { EmptyState } from '@/components/patterns/state-panel';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { EntityId, Money } from '@/components/ui/typography';
+import { Input } from '@/components/ui/input';
 
 export default function OrdersPage() {
   const { data: ordersData, isLoading } = useMyOrders();
@@ -166,7 +168,12 @@ export default function OrdersPage() {
       </Tabs>
 
       {!filteredOrders || filteredOrders.length === 0 ? (
-        <EmptyState title="Chưa có đơn hàng" description="Các giao dịch của bạn sẽ xuất hiện tại đây." icon={<ShoppingBag className="size-8" />} />
+        <EmptyState
+          title="Chưa có đơn hàng"
+          description="Các giao dịch mua sắm của bạn sẽ xuất hiện tại đây sau khi bạn đặt mua đồ cũ."
+          icon={<ShoppingBag className="size-8" />}
+          action={<Link href="/products" className={buttonVariants({ variant: 'primary' })}>Khám phá sản phẩm ngay</Link>}
+        />
       ) : (
         <div className="space-y-4 mt-4">
           {filteredOrders.map((order) => (
@@ -179,7 +186,7 @@ export default function OrdersPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-6 px-2 text-[11px] rounded-full ml-2"
+                    className="h-6 px-2 text-xs rounded-full ml-2"
                     onClick={() => openChatWith({ id: order.sellerId || order.sellerName || '', username: order.sellerUsername || order.sellerName || '', fullName: order.sellerName, avatar: '' })}
                   >
                     <MessageCircle className="w-3 h-3 mr-1" /> Chat
@@ -308,7 +315,7 @@ export default function OrdersPage() {
               Sau khi đã đóng gói và gửi hàng cho đơn vị vận chuyển, vui lòng nhập mã vận đơn vào đây để người bán và hệ thống theo dõi.
             </p>
             <label className="text-sm font-medium text-foreground mb-2 block">Mã vận đơn (Ví dụ: GHN, J&T,...)</label>
-            <input
+            <Input
               type="text"
               placeholder="Nhập mã vận đơn..."
               value={returnTrackingCode}

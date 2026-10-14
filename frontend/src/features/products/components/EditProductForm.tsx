@@ -293,7 +293,7 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
               <div key={index} className="relative w-32 h-32 rounded-[16px] overflow-hidden border border-border group shadow-sm flex-shrink-0">
                 <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                 {index === 0 && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-foreground text-[10px] font-bold text-center py-0.5 z-10">
+                  <div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-foreground text-xs font-bold text-center py-0.5 z-10">
                     Ảnh bìa
                   </div>
                 )}
@@ -450,7 +450,7 @@ export const EditProductForm = ({ initialData, onSuccess }: EditProductFormProps
             </p>
           )}
           {suggestedPriceText && (
-            <div className="mt-3 p-4 bg-primary/10 border border-primary/20 rounded-xl text-sm text-foreground leading-relaxed glass">
+            <div className="mt-3 p-4 bg-muted/40 border border-border rounded-xl text-sm text-foreground leading-relaxed">
               <span className="font-bold text-primary flex items-center gap-2 mb-1"><TrendingUp className="w-4 h-4" /> Gợi ý từ AI:</span>
               {suggestedPriceText}
             </div>

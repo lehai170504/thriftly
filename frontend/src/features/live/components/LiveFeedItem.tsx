@@ -78,7 +78,7 @@ export default function LiveFeedItem({ session, isActive }: LiveFeedItemProps) {
       {/* Overlay top */}
       <div className="absolute top-6 left-6 z-10 flex items-center gap-2">
         <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-full pl-1.5 pr-3 py-1 flex items-center gap-2 shadow-sm">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-rose-500 to-orange-400 flex items-center justify-center text-[11px] font-bold text-white shadow-inner">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-rose-500 to-orange-400 flex items-center justify-center text-xs font-bold text-white shadow-inner">
             {(session.hostUsername || 'H').charAt(0).toUpperCase()}
           </div>
           <span className="text-white text-xs font-semibold">@{session.hostUsername || 'host'}</span>

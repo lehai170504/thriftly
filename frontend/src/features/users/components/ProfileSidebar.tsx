@@ -89,13 +89,13 @@ export function ProfileSidebar({
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <p className="text-[10px] text-muted-foreground mt-2 text-center font-medium">
+            <p className="text-xs text-muted-foreground mt-2 text-center font-medium">
               Còn <span className="font-bold text-foreground">{new Intl.NumberFormat('vi-VN').format(remainingPoints)} điểm</span> để thăng hạng
             </p>
           </>
         )}
         {profile.tier === 'DIAMOND' && (
-          <p className="text-[10px] text-cyan-500 mt-2 text-center font-bold">
+          <p className="text-xs text-cyan-500 mt-2 text-center font-bold">
             Hạng cao nhất!
           </p>
         )}

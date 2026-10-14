@@ -96,7 +96,7 @@ export function ProductActionPanel({ product, user, isSeller }: ProductActionPan
                       <Ticket className="w-4 h-4" />
                       Mã giảm giá của Shop
                     </h4>
-                    <span className="text-[10px] text-muted-foreground font-medium bg-background px-2 py-0.5 rounded-full border border-border">Cuộn ngang</span>
+                    <span className="text-xs text-muted-foreground font-medium bg-background px-2 py-0.5 rounded-full border border-border">Cuộn ngang</span>
                   </div>
 
                   <div className="flex gap-3 overflow-x-auto pb-2 snap-x scroll-smooth [&::-webkit-scrollbar]:hidden">
@@ -108,7 +108,7 @@ export function ProductActionPanel({ product, user, isSeller }: ProductActionPan
 
                         <div className="flex flex-col pl-3 pr-3">
                           <span className="font-bold text-primary text-sm uppercase tracking-wide">{v.code}</span>
-                          <span className="text-[11px] text-muted-foreground mt-1 leading-tight">
+                          <span className="text-xs text-muted-foreground mt-1 leading-tight">
                             Giảm {v.type === 'PERCENTAGE' ? `${v.discountValue}%` : formatCurrency(v.discountValue)}
                             {v.minOrderValue ? ` cho đơn từ ${formatCurrency(v.minOrderValue)}` : ''}
                           </span>

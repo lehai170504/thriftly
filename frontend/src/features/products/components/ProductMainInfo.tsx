@@ -61,7 +61,7 @@ export function ProductMainInfo({ product }: ProductMainInfoProps) {
           <span className="font-medium truncate">{new Date(product.createdAt).toLocaleDateString('vi-VN')}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-[10px] rounded-md font-normal truncate max-w-full">
+          <Badge variant="outline" className="text-xs rounded-md font-normal truncate max-w-full">
             {product.categoryName}
           </Badge>
         </div>

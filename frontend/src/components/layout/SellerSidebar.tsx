@@ -16,8 +16,8 @@ export function SellerSidebar() {
 
   return (
     <aside className="w-64 flex-shrink-0 hidden md:block">
-      <div className="sticky top-24 bg-card glass border border-border rounded-[24px] p-4 shadow-sm">
-        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4 px-2">
+      <div className="sticky top-24 bg-card border border-border rounded-2xl p-3.5 shadow-surface">
+        <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-2">
           Kênh người bán
         </h2>
         <nav className="space-y-1">
@@ -27,16 +27,13 @@ export function SellerSidebar() {
               <Link key={item.path} href={item.path}>
                 <div
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group w-full",
+                    "flex items-center gap-3 px-3 py-2 rounded-xl transition-colors w-full",
                     isActive
-                      ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20 font-bold'
-                      : 'text-muted-foreground hover:bg-accent hover:text-foreground font-medium'
+                      ? 'bg-primary text-primary-foreground font-semibold shadow-2xs'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground font-medium'
                   )}
                 >
-                  <item.icon className={cn(
-                    "w-5 h-5 transition-transform duration-200",
-                    !isActive && 'group-hover:scale-110'
-                  )} />
+                  <item.icon className="w-4 h-4 shrink-0" />
                   <span className="text-sm">{item.name}</span>
                 </div>
               </Link>
