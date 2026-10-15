@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.NonNull;
@@ -18,10 +17,13 @@ import java.time.Duration;
 import java.util.Arrays;
 
 @Component
-@RequiredArgsConstructor
 public class LegacyTokenCookieCleanupFilter extends OncePerRequestFilter {
 
     private final BrowserSecurityProperties properties;
+
+    public LegacyTokenCookieCleanupFilter(BrowserSecurityProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,

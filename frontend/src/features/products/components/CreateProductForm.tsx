@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -40,7 +40,7 @@ const PHOTO_HINTS = [
 ];
 
 export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
-  const { register, handleSubmit, control, watch, setValue, trigger, formState: { errors } } = useForm<CreateProductFormData>({
+  const { register, handleSubmit, control, watch, getValues, setValue, trigger, formState: { errors } } = useForm<CreateProductFormData>({
     resolver: zodResolver(createProductSchema),
     defaultValues: {
       title: '',
@@ -75,15 +75,15 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
   const generateDescMutation = useGenerateDescription();
   const suggestPriceMutation = useSuggestPrice();
 
-  const sellType = watch('sellType');
-  const priceWatch = watch('price');
+  const sellType = useWatch({ control, name: 'sellType' });
+  const priceWatch = useWatch({ control, name: 'price' });
 
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const mutation = useCreateProduct();
 
   const handleGenerateDescription = () => {
-    const title = watch('title');
-    const condition = watch('condition');
+    const title = getValues('title');
+    const condition = getValues('condition');
     if (!title) {
       toast.error('Vui lòng nhập Tên sản phẩm trước');
       return;
@@ -98,8 +98,8 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
   };
 
   const handleSuggestPrice = () => {
-    const title = watch('title');
-    const condition = watch('condition');
+    const title = getValues('title');
+    const condition = getValues('condition');
     if (!title) {
       toast.error('Vui lòng nhập Tên sản phẩm trước');
       return;
@@ -250,13 +250,13 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
                           key={cond.value}
                           onClick={() => field.onChange(cond.value)}
                           className={`cursor-pointer rounded-xl border p-3 transition-all ${isSelected
-                              ? 'border-primary bg-primary/5 shadow-2xs'
-                              : 'border-border bg-card hover:border-border/80 hover:bg-accent/30'
+                            ? 'border-primary bg-primary/5 shadow-2xs'
+                            : 'border-border bg-card hover:border-border/80 hover:bg-accent/30'
                             }`}
                         >
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-bold text-foreground">{cond.label}</span>
-                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
+                            <span className="text-xs font-bold text-foreground whitespace-nowrap">{cond.label}</span>
+                            {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />}
                           </div>
                           <p className="text-[11px] text-muted-foreground leading-snug">{cond.desc}</p>
                         </div>

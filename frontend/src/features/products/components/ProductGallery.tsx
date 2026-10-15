@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Gavel, PlayCircle, Image as ImageIcon } from 'lucide-react';
 import { Product } from '@/features/products/types/product';
@@ -12,7 +12,7 @@ interface ProductGalleryProps {
 
 export function ProductGallery({ product }: ProductGalleryProps) {
   const [showMagnifier, setShowMagnifier] = useState(false);
-  const [magnifierState, setMagnifierState] = useState({ x: 0, y: 0, mouseX: 0, mouseY: 0 });
+  const magnifierRef = useRef<HTMLDivElement>(null);
 
   const fallbackImage = `https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800&h=800&seed=${product.id}`;
   const images = (product.images && product.images.length > 0)
@@ -23,27 +23,25 @@ export function ProductGallery({ product }: ProductGalleryProps) {
   const [showingVideo, setShowingVideo] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (showingVideo) return;
+    if (showingVideo || !magnifierRef.current) return;
     const elem = e.currentTarget;
     const { left, top, width, height } = elem.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-    setMagnifierState({
-      x,
-      y,
-      mouseX: e.clientX - left,
-      mouseY: e.clientY - top
-    });
+    const mouseX = e.clientX - left;
+    const mouseY = e.clientY - top;
+    const x = (mouseX / width) * 100;
+    const y = (mouseY / height) * 100;
+
+    magnifierRef.current.style.transform = `translate3d(${mouseX - 100}px, ${mouseY - 100}px, 0)`;
+    magnifierRef.current.style.backgroundPosition = `${x}% ${y}%`;
   };
 
   const currentImageUrl = images[activeIndex];
 
   return (
     <div className="lg:col-span-5 flex flex-col gap-4">
-      {/* Main Display */}
       <div
         className={cn(
-          "relative aspect-square rounded-xl overflow-hidden bg-muted border border-border group",
+          "relative aspect-square rounded-xl overflow-hidden bg-muted border border-border group isolate [transform:translateZ(0)]",
           !showingVideo && "cursor-crosshair"
         )}
         onMouseEnter={() => !showingVideo && setShowMagnifier(true)}
@@ -62,27 +60,22 @@ export function ProductGallery({ product }: ProductGalleryProps) {
             <img
               src={currentImageUrl}
               alt={product.title}
-              className="w-full h-full object-cover transition-all duration-300"
+              className="w-full h-full object-cover transform-gpu [backface-visibility:hidden]"
             />
 
-            {/* Magnifier Glass */}
-            {showMagnifier && (
-              <div
-                className="absolute pointer-events-none border-2 border-primary/50 shadow-lg z-50 bg-white dark:bg-black/50"
-                style={{
-                  width: '200px',
-                  height: '200px',
-                  borderRadius: '50%',
-                  left: `${magnifierState.mouseX - 100}px`,
-                  top: `${magnifierState.mouseY - 100}px`,
-                  backgroundImage: `url(${currentImageUrl})`,
-                  backgroundSize: '250%',
-                  backgroundPosition: `${magnifierState.x}% ${magnifierState.y}%`,
-                  backgroundRepeat: 'no-repeat',
-                  boxShadow: 'inset 0 0 10px rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.3)'
-                }}
-              />
-            )}
+            <div
+              ref={magnifierRef}
+              className={cn(
+                "absolute top-0 left-0 w-[200px] h-[200px] rounded-full pointer-events-none border-2 border-primary/60 z-50 bg-white dark:bg-black/60 shadow-xl will-change-transform transition-opacity duration-150",
+                showMagnifier ? "opacity-100" : "opacity-0"
+              )}
+              style={{
+                backgroundImage: `url(${currentImageUrl})`,
+                backgroundSize: '250%',
+                backgroundRepeat: 'no-repeat',
+                boxShadow: 'inset 0 0 10px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.3)'
+              }}
+            />
           </>
         )}
 

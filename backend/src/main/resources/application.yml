@@ -35,6 +35,7 @@ spring:
       repository-type: indexed
       flush-mode: on-save
       save-mode: on-set-attribute
+      configure-action: ${SESSION_REDIS_CONFIGURE_ACTION:none}
   data:
     redis:
       repositories:

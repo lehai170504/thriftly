@@ -37,4 +37,9 @@ public class SessionSecurityConfig {
     SessionAuthenticationStrategy sessionAuthenticationStrategy() {
         return new ChangeSessionIdAuthenticationStrategy();
     }
+
+    @Bean
+    public static org.springframework.session.data.redis.config.ConfigureRedisAction configureRedisAction() {
+        return org.springframework.session.data.redis.config.ConfigureRedisAction.NO_OP;
+    }
 }

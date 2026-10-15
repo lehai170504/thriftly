@@ -72,16 +72,16 @@ function MarketplaceProductCard({ product, variant = "standard" }: MarketplacePr
     toggleFavorite(product.id);
   };
 
-  const conditionLabel = product.condition === "NEW" ? "Mới 100%" : product.condition === "LIKE_NEW" ? "Như mới" : product.condition === "FAIR" ? "Khá" : "Đã sử dụng";
+  const conditionLabel = product.condition === "NEW" ? "Mới 100%" : product.condition === "LIKE_NEW" ? "Như mới" : product.condition === "GOOD" ? "Tốt" : product.condition === "FAIR" ? "Khá" : "Đã sử dụng";
 
   return (
     <Link href={href} className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      <Card variant="interactive" className="h-full cursor-pointer gap-0 py-0 overflow-hidden transform-gpu will-change-transform rounded-xl border-border bg-card transition-all duration-200 hover:border-border/80 hover:shadow-surface">
-        <div className="relative aspect-square overflow-hidden bg-muted">
+      <Card variant="interactive" className="h-full cursor-pointer gap-0 py-0 overflow-hidden rounded-xl border-border bg-card transition-[border-color,box-shadow] duration-200 hover:border-border/80 hover:shadow-surface">
+        <div className="relative aspect-square overflow-hidden bg-muted isolate [transform:translateZ(0)]">
           <img
             src={imageUrl}
             alt={product.title}
-            className="h-full w-full object-cover transform-gpu will-change-transform transition-transform duration-300 ease-out group-hover:scale-105"
+            className="h-full w-full object-cover transform-gpu transition-transform duration-300 ease-out group-hover:scale-105 [backface-visibility:hidden]"
             onError={(event) => { event.currentTarget.src = fallbackImage; }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
@@ -111,11 +111,11 @@ function MarketplaceProductCard({ product, variant = "standard" }: MarketplacePr
           </div>
 
           <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[11px] font-medium text-white/95">
-            <span className="bg-black/40 backdrop-blur-[2px] px-2 py-0.5 rounded-md border border-white/10">
+            <span className="bg-black/50 backdrop-blur-[2px] px-2 py-0.5 rounded-md border border-white/10 whitespace-nowrap shrink-0">
               {conditionLabel}
             </span>
             {product.location && (
-              <span className="flex items-center gap-0.5 bg-black/40 backdrop-blur-[2px] px-1.5 py-0.5 rounded-md border border-white/10 truncate max-w-[120px]">
+              <span className="flex items-center gap-0.5 bg-black/50 backdrop-blur-[2px] px-1.5 py-0.5 rounded-md border border-white/10 truncate max-w-[120px] whitespace-nowrap">
                 <MapPin className="size-3 shrink-0" />
                 <span className="truncate">{product.location}</span>
               </span>

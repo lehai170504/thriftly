@@ -53,7 +53,7 @@ export function ProductMainInfo({ product }: ProductMainInfoProps) {
         <div className="flex items-center gap-2">
           <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
           <span className="text-muted-foreground whitespace-nowrap">Tình trạng:</span>
-          <span className="font-medium truncate">{product.condition === 'NEW' ? 'Mới 100%' : product.condition === 'LIKE_NEW' ? 'Như mới' : 'Đã sử dụng'}</span>
+          <span className="font-medium whitespace-nowrap truncate">{product.condition === 'NEW' ? 'Mới 100%' : product.condition === 'LIKE_NEW' ? 'Như mới' : product.condition === 'GOOD' ? 'Tốt' : product.condition === 'FAIR' ? 'Khá' : 'Đã sử dụng'}</span>
         </div>
         <div className="flex items-center gap-2">
           <CalendarDays className="w-4 h-4 text-muted-foreground shrink-0" />

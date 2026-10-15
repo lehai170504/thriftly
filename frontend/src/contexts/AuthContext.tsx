@@ -109,7 +109,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AuthContext.Provider value={{
       user, login, logout, isAuthenticated: !!user, isAuthLoading,
       isLoginModalOpen, isRegisterModalOpen,
-      openLoginModal: () => openAuthPrompt(),
+      openLoginModal: () => {
+        if (typeof window !== 'undefined') {
+          const current = window.location.pathname + window.location.search;
+          if (current && current !== '/' && !current.startsWith('/login')) {
+            router.push(`/login?redirect=${encodeURIComponent(current)}`);
+            return;
+          }
+        }
+        router.push('/login');
+      },
       closeLoginModal: () => setIsLoginModalOpen(false),
       openRegisterModal: () => router.push('/register'),
       closeRegisterModal: () => setIsRegisterModalOpen(false),

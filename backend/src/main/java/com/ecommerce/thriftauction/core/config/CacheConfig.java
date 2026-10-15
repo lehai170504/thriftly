@@ -2,7 +2,7 @@ package com.ecommerce.thriftauction.core.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;
@@ -34,9 +34,10 @@ public class CacheConfig implements CachingConfigurer {
 
     @Bean
     public CacheManager cacheManager(
-            @Autowired(required = false) RedisConnectionFactory redisConnectionFactory,
+            ObjectProvider<RedisConnectionFactory> redisConnectionFactoryProvider,
             @Value("${app.cache.redis-enabled:true}") boolean redisEnabled,
             @Value("${app.cache.prefix:thriftly:cache:}") String cachePrefix) {
+        RedisConnectionFactory redisConnectionFactory = redisConnectionFactoryProvider.getIfAvailable();
         if (redisEnabled && redisConnectionFactory != null) {
             try (var connection = redisConnectionFactory.getConnection()) {
                 String ping = connection.ping();
