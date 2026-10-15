@@ -19,7 +19,11 @@ export function GlobalSearchModal({ open, onOpenChange }: GlobalSearchModalProps
   const router = useRouter()
   const [searchQuery, setSearchQuery] = React.useState("")
   const debouncedQuery = useDebounce(searchQuery, 300)
-  const { data: searchResults, isLoading: isSearching } = useSearchProducts({ query: debouncedQuery })
+  const isSearchActive = open && debouncedQuery.trim().length > 0
+  const { data: searchResults, isLoading: isSearching } = useSearchProducts(
+    { query: debouncedQuery },
+    { enabled: isSearchActive }
+  )
 
   const inputRef = React.useRef<HTMLInputElement>(null)
 

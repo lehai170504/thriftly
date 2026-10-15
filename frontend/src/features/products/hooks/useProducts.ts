@@ -9,6 +9,7 @@ export const useCategories = () => {
   return useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -27,10 +28,11 @@ export const useRecommendedProducts = (isAuthenticated: boolean) => {
   });
 };
 
-export const useSearchProducts = (params: ProductSearchParams) => {
+export const useSearchProducts = (params: ProductSearchParams, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['products', 'search', params],
     queryFn: () => searchProducts(params),
+    enabled: options?.enabled ?? true,
   });
 };
 

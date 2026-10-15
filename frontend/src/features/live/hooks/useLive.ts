@@ -51,6 +51,7 @@ export const useActiveLiveAuctions = () => {
   return useQuery({
     queryKey: ['activeLiveAuctions'],
     queryFn: () => liveApi.getActiveLiveAuctions(),
+    staleTime: 30 * 1000,
   });
 };
 
