@@ -1,6 +1,5 @@
 package com.ecommerce.thriftauction.core.config;
 
-import com.ecommerce.thriftauction.core.security.IpWhitelistFilter;
 import com.ecommerce.thriftauction.core.security.LegacyTokenCookieCleanupFilter;
 import com.ecommerce.thriftauction.core.security.SessionLifetimeFilter;
 import com.ecommerce.thriftauction.core.security.UserActivityFilter;
@@ -9,7 +8,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** Security-chain filters must not also run as container filters. */
 @Configuration
 public class SecurityFilterRegistrationConfig {
 
@@ -26,11 +24,6 @@ public class SecurityFilterRegistrationConfig {
     @Bean
     FilterRegistrationBean<LegacyTokenCookieCleanupFilter> legacyCookieRegistration(
             LegacyTokenCookieCleanupFilter filter) {
-        return disabled(filter);
-    }
-
-    @Bean
-    FilterRegistrationBean<IpWhitelistFilter> ipWhitelistRegistration(IpWhitelistFilter filter) {
         return disabled(filter);
     }
 

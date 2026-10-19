@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,7 +46,7 @@ public class OrderController {
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/checkout-preview")
     public ResponseEntity<?> validateCheckout(
-            @RequestBody VoucherValidationRequest request,
+            @RequestBody @Valid VoucherValidationRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(orderService.validateCheckout(request, authentication.getName()));
     }

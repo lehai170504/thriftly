@@ -110,11 +110,9 @@ public class WalletService {
                         throw new RuntimeException("Deposit amount must be greater than zero");
                 }
 
-                // Add to balance
                 wallet.setBalance(wallet.getBalance().add(request.getAmount()));
                 walletRepository.save(wallet);
 
-                // Record transaction
                 Transaction tx = Transaction.builder()
                                 .wallet(wallet)
                                 .amount(request.getAmount())
@@ -182,12 +180,8 @@ public class WalletService {
                         throw new RuntimeException("Số tiền rút tối thiểu là: " + minWithdrawalAmount + " VNĐ");
                 }
 
-                BigDecimal withdrawalFee = new BigDecimal("5000"); // 5k VND fee
-                BigDecimal totalDeduction = request.getAmount().add(withdrawalFee);
-
-                if (wallet.getBalance().compareTo(totalDeduction) < 0) {
-                        throw new RuntimeException(
-                                        "Insufficient balance to cover amount and 5,000 VND withdrawal fee.");
+                if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
+                        throw new RuntimeException("Số dư ví không đủ để thực hiện rút tiền.");
                 }
 
                 String description = "";
@@ -206,24 +200,8 @@ public class WalletService {
                                         request.getBankName(), request.getAccountNumber(), request.getAccountName());
                 }
 
-                // Deduct from balance
                 executeDebit(wallet, request.getAmount(), TransactionType.WITHDRAW, TransactionStatus.PENDING,
                                 description, null, null);
-
-                // Record fee transaction for user
-                executeDebit(wallet, withdrawalFee, TransactionType.WITHDRAWAL_FEE, "Phí rút tiền", null, null);
-
-                // Transfer fee to admin wallet
-                userRepository.findByRole(Role.ADMIN).stream()
-                                .findFirst()
-                                .ifPresent(admin -> {
-                                        Wallet adminWallet = walletRepository.findByUserId(admin.getId()).orElse(null);
-                                        if (adminWallet != null) {
-                                                executeCredit(adminWallet, withdrawalFee,
-                                                                TransactionType.WITHDRAWAL_FEE, "Phí rút tiền user",
-                                                                null, null);
-                                        }
-                                });
 
                 return getMyWallet(username);
         }

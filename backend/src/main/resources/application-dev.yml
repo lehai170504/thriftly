@@ -30,7 +30,6 @@ app:
   admin:
     email: ${ADMIN_EMAIL:admin@thrift.com}
     password: ${ADMIN_PASSWORD:admin123}
-    allowed-ips: ${ADMIN_ALLOWED_IPS:127.0.0.1,0:0:0:0:0:0:0:1}
   staff:
     email: ${STAFF_EMAIL:staff@thriftly.com}
     password: ${STAFF_PASSWORD:staff123}

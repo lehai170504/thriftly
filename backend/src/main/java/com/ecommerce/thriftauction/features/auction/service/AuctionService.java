@@ -65,7 +65,7 @@ public class AuctionService {
                         throw new RuntimeException("Seller cannot bid on their own auction");
                 }
 
-                Wallet wallet = walletRepository.findByUserId(bidder.getId())
+                walletRepository.findByUserId(bidder.getId())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "Bạn chưa mở ví điện tử. Vui lòng vào trang cá nhân để mở ví."));
 
@@ -80,6 +80,10 @@ public class AuctionService {
                         throw new RuntimeException("Auction has already ended");
                 }
 
+                if (session.getEndTime().minusMinutes(2).isBefore(LocalDateTime.now())) {
+                        session.setEndTime(session.getEndTime().plusMinutes(2));
+                }
+
                 BigDecimal currentHighest = session.getCurrentHighestPrice() != null
                                 ? session.getCurrentHighestPrice()
                                 : session.getStartingPrice();
@@ -89,7 +93,6 @@ public class AuctionService {
                                         "Bid amount must be at least " + currentHighest.add(session.getStepPrice()));
                 }
 
-                // Find previous highest bidder to notify
                 List<AuctionBid> previousBids = auctionBidRepository
                                 .findByAuctionSessionIdOrderByBidAmountDesc(session.getId());
                 User previousHighestBidder = null;
@@ -115,7 +118,6 @@ public class AuctionService {
                                 "Đặt giá " + String.format(new Locale("vi", "VN"), "%,.0f VNĐ",
                                                 request.getBidAmount()));
 
-                // Send outbid notification
                 if (previousHighestBidder != null && !previousHighestBidder.getId().equals(bidder.getId())) {
                         notificationService.createAndSendNotification(
                                         previousHighestBidder,

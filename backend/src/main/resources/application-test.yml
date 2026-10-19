@@ -31,7 +31,6 @@ app:
   admin:
     email: admin@test.com
     password: test
-    allowed-ips: 127.0.0.1
   staff:
     email: staff@test.com
     password: test

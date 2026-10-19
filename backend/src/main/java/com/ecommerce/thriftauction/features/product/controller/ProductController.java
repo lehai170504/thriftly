@@ -41,7 +41,7 @@ public class ProductController {
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(
-            @RequestBody ProductRequest request,
+            @jakarta.validation.Valid @RequestBody ProductRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(productCommandService.createProduct(request, authentication.getName()));
     }
@@ -130,7 +130,7 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable String id,
-            @RequestBody ProductRequest request,
+            @jakarta.validation.Valid @RequestBody ProductRequest request,
             Authentication authentication) {
         return ResponseEntity.ok(productCommandService.updateProduct(id, request, authentication.getName()));
     }

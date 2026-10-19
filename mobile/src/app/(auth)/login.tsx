@@ -326,6 +326,12 @@ export default function LoginModal() {
           )}
         </TouchableOpacity>
 
+        {mode === 'REGISTER' && (
+          <Text style={[styles.termsNoticeText, { color: colors.textSecondary }]}>
+            Bằng việc tạo tài khoản, bạn đồng ý với Điều khoản sử dụng, Quy chế đấu giá và Chính sách bảo mật của Thriftly.
+          </Text>
+        )}
+
         <View style={styles.dividerRow}>
           <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
           <Text style={[styles.dividerText, { color: colors.textSecondary }]}>HOẶC</Text>
@@ -638,5 +644,12 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '700',
+  },
+  termsNoticeText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 12,
+    lineHeight: 17,
+    paddingHorizontal: 8,
   },
 });

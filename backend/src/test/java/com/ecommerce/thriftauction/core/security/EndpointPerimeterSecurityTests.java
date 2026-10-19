@@ -32,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 UserActivityFilter.class,
                 LegacyTokenCookieCleanupFilter.class,
                 ClientIpResolver.class,
-                IpWhitelistFilter.class,
                 EndpointPerimeterSecurityTests.PropertiesConfig.class
 })
 @TestPropertySource(properties = {
@@ -40,8 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "app.security.browser.session-cookie-name=THRIFTLY_SESSION",
                 "app.security.browser.secure-cookie=false",
                 "app.security.browser.same-site=Lax",
-                "app.security.browser.absolute-timeout=12h",
-                "app.admin.allowed-ips=127.0.0.1"
+                "app.security.browser.absolute-timeout=12h"
 })
 class EndpointPerimeterSecurityTests {
 

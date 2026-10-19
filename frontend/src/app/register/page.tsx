@@ -217,6 +217,22 @@ export default function RegisterPage() {
                 "Bắt đầu ngay"
               )}
             </Button>
+
+            <p className="text-[12px] text-muted-foreground text-center mt-3 leading-relaxed">
+              Bằng việc đăng ký, bạn đồng ý với{' '}
+              <Link href="/policies?tab=terms" target="_blank" className="text-primary hover:underline font-medium">
+                Điều khoản
+              </Link>
+              {', '}
+              <Link href="/policies?tab=auction" target="_blank" className="text-primary hover:underline font-medium">
+                Quy chế đấu giá
+              </Link>{' '}
+              &amp;{' '}
+              <Link href="/policies?tab=privacy" target="_blank" className="text-primary hover:underline font-medium">
+                Bảo mật
+              </Link>{' '}
+              của Thriftly.
+            </p>
           </form>
 
           <div className="my-6 flex items-center justify-center space-x-3">

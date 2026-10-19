@@ -74,7 +74,6 @@ class WalletServiceWithdrawalTest {
         when(walletRepository.findByUserIdForUpdate("user-1")).thenReturn(Optional.of(wallet));
         when(walletRepository.findByUserId("user-1")).thenReturn(Optional.of(wallet));
         when(systemConfigService.getConfig()).thenReturn(config);
-        when(userRepository.findByRole(Role.ADMIN)).thenReturn(List.of());
         when(walletRepository.save(any(Wallet.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(transactionRepository.findByWalletIdOrderByCreatedAtDesc("wallet-1")).thenReturn(List.of());
@@ -82,14 +81,64 @@ class WalletServiceWithdrawalTest {
         walletService.requestWithdraw("buyer@example.com", request);
 
         ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
-        verify(transactionRepository, times(2)).save(captor.capture());
+        verify(transactionRepository, times(1)).save(captor.capture());
         List<Transaction> transactions = captor.getAllValues();
 
         assertThat(transactions.get(0).getType()).isEqualTo(TransactionType.WITHDRAW);
         assertThat(transactions.get(0).getStatus()).isEqualTo(TransactionStatus.PENDING);
         assertThat(transactions.get(0).getAmount()).isEqualByComparingTo("50000");
-        assertThat(transactions.get(1).getType()).isEqualTo(TransactionType.WITHDRAWAL_FEE);
-        assertThat(transactions.get(1).getStatus()).isEqualTo(TransactionStatus.COMPLETED);
-        assertThat(wallet.getBalance()).isEqualByComparingTo("945000");
+        assertThat(wallet.getBalance()).isEqualByComparingTo("950000");
+    }
+
+    @Test
+    void withdrawFailsWhenAmountBelowMinimum() {
+        User user = User.builder().id("user-1").username("buyer").email("buyer@example.com").build();
+        Wallet wallet = Wallet.builder()
+                .id("wallet-1")
+                .user(user)
+                .balance(new BigDecimal("1000000"))
+                .heldBalance(BigDecimal.ZERO)
+                .build();
+        SystemConfig config = SystemConfig.builder()
+                .minWithdrawalAmount(new BigDecimal("50000"))
+                .platformFeePercent(new BigDecimal("0.05"))
+                .isMaintenanceMode(false)
+                .build();
+        WithdrawRequest request = new WithdrawRequest();
+        request.setAmount(new BigDecimal("20000"));
+
+        when(userRepository.findByEmail("buyer@example.com")).thenReturn(Optional.of(user));
+        when(walletRepository.findByUserIdForUpdate("user-1")).thenReturn(Optional.of(wallet));
+        when(systemConfigService.getConfig()).thenReturn(config);
+
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            walletService.requestWithdraw("buyer@example.com", request);
+        });
+    }
+
+    @Test
+    void withdrawFailsWhenInsufficientBalance() {
+        User user = User.builder().id("user-1").username("buyer").email("buyer@example.com").build();
+        Wallet wallet = Wallet.builder()
+                .id("wallet-1")
+                .user(user)
+                .balance(new BigDecimal("30000"))
+                .heldBalance(BigDecimal.ZERO)
+                .build();
+        SystemConfig config = SystemConfig.builder()
+                .minWithdrawalAmount(new BigDecimal("50000"))
+                .platformFeePercent(new BigDecimal("0.05"))
+                .isMaintenanceMode(false)
+                .build();
+        WithdrawRequest request = new WithdrawRequest();
+        request.setAmount(new BigDecimal("100000"));
+
+        when(userRepository.findByEmail("buyer@example.com")).thenReturn(Optional.of(user));
+        when(walletRepository.findByUserIdForUpdate("user-1")).thenReturn(Optional.of(wallet));
+        when(systemConfigService.getConfig()).thenReturn(config);
+
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> {
+            walletService.requestWithdraw("buyer@example.com", request);
+        });
     }
 }

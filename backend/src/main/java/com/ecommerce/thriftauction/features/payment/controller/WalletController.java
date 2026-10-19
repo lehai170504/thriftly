@@ -35,7 +35,7 @@ public class WalletController {
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("/withdraw")
     public ResponseEntity<WalletResponse> requestWithdraw(
-            @RequestBody WithdrawRequest request, Authentication authentication) {
+            @Valid @RequestBody WithdrawRequest request, Authentication authentication) {
         return ResponseEntity.ok(walletService.requestWithdraw(authentication.getName(), request));
     }
 

@@ -24,7 +24,7 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto request) {
+    public ResponseEntity<CategoryDto> createCategory(@jakarta.validation.Valid @RequestBody CategoryDto request) {
         return ResponseEntity.ok(categoryService.createCategory(request));
     }
 
@@ -38,7 +38,8 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable String id, @RequestBody CategoryDto request) {
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable String id,
+            @jakarta.validation.Valid @RequestBody CategoryDto request) {
         return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 

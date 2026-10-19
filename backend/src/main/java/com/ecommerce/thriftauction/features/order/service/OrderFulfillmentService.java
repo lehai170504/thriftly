@@ -159,8 +159,9 @@ public class OrderFulfillmentService {
 
             String description = "Thanh toán đơn hàng (Thắng khiếu nại) #"
                     + order.getId().substring(0, 8).toUpperCase() + " - "
-                    + order.getProduct().getTitle() + " (Đã trừ phí sàn 5%: "
-                    + platformFee + "đ)";
+                    + order.getProduct().getTitle() + " (Đã trừ phí sàn "
+                    + discountedFeePercentage.multiply(new BigDecimal("100")).intValue()
+                    + "%: " + platformFee + "đ)";
 
             walletService.executeEscrowRelease(buyerWallet, sellerWallet, order.getTotalAmount(),
                     platformFee, adminWallet, description, null, order);

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.Valid;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,6 +20,7 @@ import java.util.Map;
 import java.security.Principal;
 import org.springframework.security.core.Authentication;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Auction", description = "Quản lý đấu giá: Đặt giá thầu, lịch sử đấu giá, đặt cọc và kết thúc phiên")
@@ -28,23 +31,22 @@ public class AuctionController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/auction/bid")
-    public void placeBid(@Payload BidRequest request, Principal principal) {
-        System.out.println(
-                "Received bid request for: " + request.getAuctionSessionId() + " amount: " + request.getBidAmount());
+    public void placeBid(@Payload @Valid BidRequest request, Principal principal) {
+        log.info("Received bid request for session: {} amount: {}", request.getAuctionSessionId(),
+                request.getBidAmount());
         try {
             if (principal == null) {
-                System.out.println("Unauthorized STOMP request");
+                log.warn("Unauthorized STOMP bid request received");
                 return;
             }
             String username = principal.getName();
 
             BidResponse response = auctionService.placeBid(request, username);
 
-            System.out.println("Bid placed successfully. Broadcasting...");
+            log.info("Bid placed successfully for session: {}. Broadcasting...", request.getAuctionSessionId());
             messagingTemplate.convertAndSend("/topic/auction/" + request.getAuctionSessionId(), response);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Bid Error: " + e.getMessage());
+            log.error("Bid error for session {}: {}", request.getAuctionSessionId(), e.getMessage());
 
             if (principal != null) {
                 messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/errors", e.getMessage());

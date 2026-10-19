@@ -31,8 +31,6 @@ server:
   port: ${PORT:8080}
 
 app:
-  admin:
-    allowed-ips: ${ADMIN_ALLOWED_IPS:}
   security:
     browser:
       allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}

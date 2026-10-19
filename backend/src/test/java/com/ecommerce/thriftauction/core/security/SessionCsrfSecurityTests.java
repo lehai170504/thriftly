@@ -32,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AuthController.class)
 @Import({ SecurityConfig.class, SessionSecurityConfig.class, SessionLifetimeFilter.class,
                 UserActivityFilter.class, LegacyTokenCookieCleanupFilter.class, ClientIpResolver.class,
-                IpWhitelistFilter.class,
                 SessionCsrfSecurityTests.PropertiesConfig.class })
 @TestPropertySource(properties = {
                 "app.security.browser.allowed-origins=http://localhost:3000",
@@ -40,8 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "app.security.browser.secure-cookie=false",
                 "app.security.browser.same-site=Lax",
                 "app.security.browser.cookie-domain=.example.test",
-                "app.security.browser.absolute-timeout=12h",
-                "app.admin.allowed-ips=127.0.0.1"
+                "app.security.browser.absolute-timeout=12h"
 })
 class SessionCsrfSecurityTests {
 

@@ -21,18 +21,17 @@ public class AdminRevenueService {
 
     @Transactional(readOnly = true)
     public RevenueStatsResponse getRevenueStats() {
-        // Platform Revenue = COMMISSION (from orders) + WITHDRAWAL_FEE
         List<Transaction> commissionTx = transactionRepository.findByType(TransactionType.COMMISSION);
         List<Transaction> feeTx = transactionRepository.findByType(TransactionType.WITHDRAWAL_FEE);
-        
+
         BigDecimal totalCommission = commissionTx.stream()
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-                
+
         BigDecimal totalFees = feeTx.stream()
                 .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-                
+
         return RevenueStatsResponse.builder()
                 .totalCommission(totalCommission)
                 .totalWithdrawalFees(totalFees)
@@ -43,8 +42,7 @@ public class AdminRevenueService {
     @Transactional(readOnly = true)
     public Page<Transaction> getRevenueTransactions(Pageable pageable) {
         return transactionRepository.findByTypeInOrderByCreatedAtDesc(
-            List.of(TransactionType.COMMISSION, TransactionType.WITHDRAWAL_FEE), 
-            pageable
-        );
+                List.of(TransactionType.COMMISSION, TransactionType.WITHDRAWAL_FEE),
+                pageable);
     }
 }

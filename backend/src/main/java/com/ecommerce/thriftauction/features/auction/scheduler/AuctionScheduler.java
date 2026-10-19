@@ -20,7 +20,6 @@ public class AuctionScheduler {
     private final AuctionSessionRepository auctionSessionRepository;
     private final OrderService orderService;
 
-    // Run every 1 minute
     @Scheduled(fixedRate = 60000)
     public void checkAndEndExpiredAuctions() {
         log.info("Running Scheduled Job: checkAndEndExpiredAuctions");

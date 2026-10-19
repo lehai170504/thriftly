@@ -45,9 +45,10 @@ public class Voucher {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
-    private User seller; // Null means platform voucher
+    private User seller;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isActive = true;
 
     private LocalDateTime createdAt;

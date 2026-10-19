@@ -238,6 +238,7 @@ public class AuthService {
                                                 .avatar(finalPictureUrl)
                                                 .role(Role.USER)
                                                 .isActive(true)
+                                                .hasPassword(false)
                                                 .build();
                                 User saved = userRepository.save(newUser);
                                 Wallet wallet = Wallet.builder()
@@ -262,7 +263,6 @@ public class AuthService {
                 }
                 User user = userResult.get();
 
-                // Generate 6-digit OTP
                 String otp = generateOtp();
 
                 otpTokenRepository.invalidateUnused(user, OtpPurpose.PASSWORD_RESET);
@@ -297,16 +297,13 @@ public class AuthService {
                         throw new RuntimeException("OTP has expired");
                 }
 
-                // Check if new password is the same as the old one
                 if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
                         throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu cũ");
                 }
 
-                // Update password
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 userRepository.save(user);
 
-                // Mark OTP as used
                 otpToken.setUsed(true);
                 otpTokenRepository.save(otpToken);
 

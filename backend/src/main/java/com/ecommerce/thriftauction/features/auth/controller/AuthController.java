@@ -6,6 +6,7 @@ import com.ecommerce.thriftauction.features.auth.dto.*;
 import com.ecommerce.thriftauction.features.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest body,
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest body,
             HttpServletRequest request, HttpServletResponse response) {
         AuthResponse result = authService.register(body);
         if (!result.isRequires2FA()) {
@@ -43,7 +44,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthRequest body,
+    public ResponseEntity<?> authenticate(@Valid @RequestBody AuthRequest body,
             HttpServletRequest request, HttpServletResponse response) {
         AuthResponse result;
         try {
@@ -60,7 +61,7 @@ public class AuthController {
     }
 
     @PostMapping("/google-login")
-    public ResponseEntity<?> googleLogin(@RequestBody GoogleLoginRequest body,
+    public ResponseEntity<?> googleLogin(@Valid @RequestBody GoogleLoginRequest body,
             HttpServletRequest request, HttpServletResponse response) {
         AuthResponse result;
         try {
@@ -75,7 +76,7 @@ public class AuthController {
     }
 
     @PostMapping("/facebook-login")
-    public ResponseEntity<?> facebookLogin(@RequestBody FacebookLoginRequest body,
+    public ResponseEntity<?> facebookLogin(@Valid @RequestBody FacebookLoginRequest body,
             HttpServletRequest request, HttpServletResponse response) {
         AuthResponse result;
         try {
@@ -90,11 +91,11 @@ public class AuthController {
     }
 
     @PostMapping("/verify-2fa")
-    public ResponseEntity<?> verify2Fa(@RequestBody Map<String, String> body,
+    public ResponseEntity<?> verify2Fa(@Valid @RequestBody Verify2FaRequest body,
             HttpServletRequest request, HttpServletResponse response) {
         AuthResponse result;
         try {
-            result = authService.verify2Fa(body.get("email"), body.get("otp"));
+            result = authService.verify2Fa(body.getEmail(), body.getOtp());
         } catch (Exception exception) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired verification code");
         }
@@ -120,7 +121,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest body) {
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest body) {
         try {
             authService.forgotPassword(body.getEmail());
             return ResponseEntity.ok("OTP sent to email");
@@ -130,7 +131,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest body) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest body) {
         authService.resetPassword(body);
         return ResponseEntity.ok("Password has been reset successfully");
     }

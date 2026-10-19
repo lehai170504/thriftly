@@ -82,9 +82,7 @@ public class ProductCommandService {
         }
 
         final Product savedProduct = product;
-        List<Follow> followers = followRepository.findAll().stream()
-                .filter(f -> f.getFollowing().getId().equals(seller.getId()))
-                .toList();
+        List<Follow> followers = followRepository.findByFollowing(seller);
 
         for (Follow f : followers) {
             notificationService.createAndSendNotification(

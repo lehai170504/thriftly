@@ -62,6 +62,7 @@ public class Product {
     private String location;
 
     @Column(columnDefinition = "boolean default false")
+    @Builder.Default
     private Boolean isHidden = false;
 
     @Column(columnDefinition = "boolean default false")

@@ -38,6 +38,7 @@ export default function Footer() {
             <h3 className="text-foreground font-heading font-semibold mb-5 text-sm tracking-wider uppercase">Chính sách</h3>
             <ul className="space-y-3 text-sm">
               <li><Link href="/policies?tab=terms" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Điều khoản sử dụng</Link></li>
+              <li><Link href="/policies?tab=auction" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Quy chế đấu giá</Link></li>
               <li><Link href="/policies?tab=privacy" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Chính sách bảo mật</Link></li>
               <li><Link href="/policies?tab=refund" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Chính sách hoàn tiền</Link></li>
               <li><Link href="/report" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Báo cáo vi phạm</Link></li>

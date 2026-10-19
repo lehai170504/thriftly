@@ -32,7 +32,6 @@ import java.io.IOException;
 public class SecurityConfig {
 
         private final AuthenticationProvider authenticationProvider;
-        private final IpWhitelistFilter ipWhitelistFilter;
         private final SessionLifetimeFilter sessionLifetimeFilter;
         private final UserActivityFilter userActivityFilter;
         private final LegacyTokenCookieCleanupFilter legacyTokenCookieCleanupFilter;
@@ -106,8 +105,7 @@ public class SecurityConfig {
                                 .authenticationProvider(authenticationProvider)
                                 .addFilterBefore(sessionLifetimeFilter, SecurityContextHolderFilter.class)
                                 .addFilterAfter(userActivityFilter, SecurityContextHolderFilter.class)
-                                .addFilterAfter(legacyTokenCookieCleanupFilter, UserActivityFilter.class)
-                                .addFilterAfter(ipWhitelistFilter, LegacyTokenCookieCleanupFilter.class);
+                                .addFilterAfter(legacyTokenCookieCleanupFilter, UserActivityFilter.class);
 
                 return http.build();
         }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ShieldCheck, Lock, RefreshCw, Gavel, ArrowLeft, FileText } from 'lucide-react';
+import { ShieldCheck, Lock, RefreshCw, Gavel, Scale, ArrowLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +18,20 @@ const policies = {
       { title: "Giới thiệu", content: "<p>Chào mừng bạn đến với Thriftly. Bằng việc truy cập, đăng ký tài khoản hoặc sử dụng các dịch vụ của chúng tôi, bạn đồng ý tuân thủ và bị ràng buộc bởi các <strong>Điều khoản sử dụng</strong> này. Nếu bạn không đồng ý với bất kỳ phần nào, vui lòng ngừng sử dụng dịch vụ.</p>" },
       { title: "Tài khoản người dùng", content: "<p>Bạn cần phải tạo một tài khoản hợp lệ để sử dụng đầy đủ các tính năng như mua bán, đấu giá, và ví Escrow. Bạn chịu trách nhiệm hoàn toàn về việc bảo mật thông tin đăng nhập và mọi hoạt động diễn ra dưới tài khoản của mình. Thriftly có quyền tạm khóa hoặc xóa tài khoản nếu phát hiện hành vi gian lận.</p>" },
       { title: "Quy định về hàng hóa", content: "<p>Tất cả hàng hóa đăng bán phải tuân thủ pháp luật Việt Nam hiện hành. Nghiêm cấm mua bán các danh mục sau:</p><ul><li>Vũ khí, đạn dược, vật liệu nổ.</li><li>Chất gây nghiện, ma túy, hóa chất độc hại.</li><li>Hàng giả, hàng nhái, hàng vi phạm bản quyền sở hữu trí tuệ.</li><li>Động vật hoang dã, các sản phẩm từ động vật quý hiếm.</li></ul>" },
-      { title: "Phí dịch vụ", content: "<p>Thriftly áp dụng mức phí dịch vụ <strong>2%</strong> trên tổng giá trị đối với mỗi giao dịch thành công (chỉ thu từ phía Người bán). Người mua hoàn toàn không phải chịu phí dịch vụ nền tảng. Các khoản phí này được tự động trừ khi tiền từ hệ thống Escrow được chuyển vào ví người bán.</p>" }
+      { title: "Phí dịch vụ nền tảng (Platform Commission)", content: "<p>Thriftly áp dụng mức phí dịch vụ từ <strong>3% đến 5%</strong> trên tổng giá trị đối với mỗi giao dịch hoặc phiên đấu giá thành công (chỉ thu từ Người bán khi tiền từ Escrow giải ngân vào ví):</p><ul><li>Thành viên Đồng (Bronze): <strong>5%</strong>.</li><li>Thành viên Bạc (Silver): <strong>4%</strong>.</li><li>Thành viên Vàng (Gold): <strong>3%</strong>.</li></ul><p>Người mua hoàn toàn không phải chịu phí dịch vụ nền tảng.</p>" },
+      { title: "Chính sách rút tiền về ngân hàng", content: "<p>Người dùng được <strong>miễn phí 100%</strong> khi thực hiện lệnh rút tiền từ ví Thriftly về tài khoản ngân hàng nội địa chính chủ. Hạn mức rút tối thiểu là <strong>50.000 VNĐ</strong> mỗi lần giao dịch. Hệ thống xử lý lệnh rút tiền tự động và hoàn tất trong vòng 24 giờ làm việc.</p>" }
+    ]
+  },
+  auction: {
+    id: 'auction',
+    title: 'Quy chế đấu giá & Ký quỹ',
+    desc: 'Quy tắc tham gia đấu giá, ký quỹ cọc và xử lý vi phạm khi thắng phiên.',
+    icon: Gavel,
+    sections: [
+      { title: "Ký quỹ cọc khi tham gia đấu giá", content: "<p>Để đảm bảo tính nghiêm túc và minh bạch trong từng phiên đấu giá, người tham gia cần có số dư khả dụng trong ví tối thiểu bằng <strong>10% giá khởi điểm</strong> của sản phẩm (hoặc mức cọc tối thiểu do người bán quy định). Khoản cọc này sẽ được tạm giữ tự động trong thời gian bạn đang là người trả giá cao nhất.</p>" },
+      { title: "Quy tắc trả giá & Tự động gia hạn", content: "<p>Mỗi lượt trả giá phải cao hơn giá hiện tại ít nhất <strong>01 bước giá</strong> quy định. Để chống tình trạng 'bắn tỉa' (sniper bid) gây mất công bằng, nếu có lượt trả giá hợp lệ trong <strong>02 phút cuối cùng</strong> của phiên, hệ thống sẽ tự động gia hạn thêm 02 phút cho đến khi không còn lượt trả giá mới.</p>" },
+      { title: "Trách nhiệm thanh toán của người thắng cuộc", content: "<p>Khi phiên đấu giá kết thúc, người trả giá cao nhất là người thắng cuộc hợp lệ. Người thắng có thời hạn tối đa <strong>48 giờ</strong> để hoàn tất đơn hàng và thanh toán số tiền còn lại (tiền cọc sẽ được cấn trừ trực tiếp vào đơn hàng). Hàng hóa sẽ được người bán đóng gói và bàn giao cho đơn vị vận chuyển.</p>" },
+      { title: "Chế tài xử phạt hành vi bùng kèo (Hủy mua)", content: "<p>Nếu người thắng không hoàn tất thanh toán sau 48 giờ:</p><ul><li>Toàn bộ tiền đặt cọc sẽ bị tịch thu: <strong>50%</strong> được chuyển cho Người bán để bù đắp thiệt hại lưu kho/phiên đấu, <strong>50%</strong> được nộp vào quỹ vận hành và bảo hiểm rủi ro của sàn.</li><li>Tài khoản người mua sẽ bị trừ điểm uy tín (Trust Score) và tạm khóa quyền tham gia đấu giá trong vòng <strong>30 ngày</strong>. Tái phạm lần thứ hai sẽ bị khóa tài khoản vĩnh viễn.</li></ul>" }
     ]
   },
   privacy: {
@@ -48,7 +61,7 @@ const policies = {
     id: 'dispute-resolution',
     title: 'Giải quyết khiếu nại',
     desc: 'Quy trình xử lý tranh chấp minh bạch và công bằng.',
-    icon: Gavel,
+    icon: Scale,
     sections: [
       { title: "Tiếp nhận khiếu nại", content: "<p>Khi có tranh chấp xảy ra giữa người mua và người bán (ví dụ: yêu cầu hoàn tiền bị từ chối), bất kỳ bên nào cũng có thể nhấn nút <strong>'Yêu cầu Thriftly can thiệp'</strong>. Khiếu nại sẽ được chuyển đến Trung tâm Giải quyết Tranh chấp.</p>" },
       { title: "Cung cấp bằng chứng", content: "<p>Cả hai bên có 48 giờ để tải lên các bằng chứng chứng minh. <strong>Đối với Người mua:</strong> Video mở hộp (unbox) liên tục không cắt ghép, hình ảnh chi tiết lỗi sản phẩm. <strong>Đối với Người bán:</strong> Video/hình ảnh đóng gói sản phẩm trước khi giao, bill gửi hàng.</p>" },
