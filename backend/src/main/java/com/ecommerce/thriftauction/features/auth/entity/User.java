@@ -42,6 +42,10 @@ public class User {
     @Builder.Default
     private boolean isActive = true;
 
+    @Builder.Default
+    @Column(name = "has_password", nullable = false)
+    private boolean hasPassword = true;
+
     @Column(columnDefinition = "numeric(38,2) default 0")
     @Builder.Default
     private BigDecimal totalPoints = BigDecimal.ZERO;

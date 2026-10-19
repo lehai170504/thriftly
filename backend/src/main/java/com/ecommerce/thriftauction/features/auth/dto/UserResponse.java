@@ -29,4 +29,6 @@ public class UserResponse {
     private BigDecimal totalPoints;
     private String tier;
     private LocalDateTime createdAt;
+    @JsonProperty("hasPassword")
+    private boolean hasPassword;
 }

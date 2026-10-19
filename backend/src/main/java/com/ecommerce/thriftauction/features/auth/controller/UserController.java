@@ -1,6 +1,7 @@
 package com.ecommerce.thriftauction.features.auth.controller;
 
 import com.ecommerce.thriftauction.features.auth.dto.ChangePasswordRequest;
+import com.ecommerce.thriftauction.features.auth.dto.SetPasswordRequest;
 import com.ecommerce.thriftauction.features.auth.dto.UserResponse;
 import com.ecommerce.thriftauction.features.auth.entity.User;
 import com.ecommerce.thriftauction.features.auth.entity.UserTier;
@@ -188,6 +189,20 @@ public class UserController {
                 }
         }
 
+        @Operation(summary = "Thiết lập mật khẩu lần đầu", description = "Thiết lập mật khẩu trực tiếp cho tài khoản đăng nhập qua Google.")
+        @SecurityRequirement(name = "Bearer Authentication")
+        @PostMapping("/me/set-password")
+        public ResponseEntity<UserResponse> setPassword(
+                        @Valid @RequestBody SetPasswordRequest request,
+                        Authentication authentication) {
+                User user = userRepository.findByEmail(authentication.getName())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                user.setHasPassword(true);
+                userRepository.save(user);
+                return ResponseEntity.ok(mapToResponse(user));
+        }
+
         private UserResponse mapToResponse(User user) {
                 return UserResponse.builder()
                                 .id(user.getId())
@@ -196,13 +211,14 @@ public class UserController {
                                 .fullName(user.getFullName())
                                 .phone(user.getPhone())
                                 .address(user.getAddress())
-                                .avatar(user.getAvatar()).interests(user.getInterests())
-
+                                .avatar(user.getAvatar())
+                                .interests(user.getInterests())
                                 .role(user.getRole().name())
                                 .isActive(user.isActive())
                                 .totalPoints(user.getTotalPoints())
                                 .tier(user.getTier() != null ? user.getTier().name() : "BRONZE")
                                 .createdAt(user.getCreatedAt())
+                                .hasPassword(user.isHasPassword())
                                 .build();
         }
 }

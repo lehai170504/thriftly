@@ -165,6 +165,7 @@ public class AuthService {
                                                         .avatar(pictureUrl)
                                                         .role(Role.USER)
                                                         .isActive(true)
+                                                        .hasPassword(false)
                                                         .build();
                                         User saved = userRepository.save(newUser);
                                         Wallet wallet = Wallet.builder()
@@ -357,6 +358,7 @@ public class AuthService {
                                 .interests(user.getInterests())
                                 .totalPoints(user.getTotalPoints())
                                 .tier(user.getTier() != null ? user.getTier().name() : "BRONZE")
+                                .hasPassword(user.isHasPassword())
                                 .build();
         }
 }

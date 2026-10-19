@@ -29,9 +29,13 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private Bucket newBucket(String ip) {
-        // Limit: 50 requests per minute per IP for sensitive endpoints
-        Bandwidth limit = Bandwidth.classic(50, Refill.greedy(50, Duration.ofMinutes(1)));
+        int capacity = isLocalhost(ip) ? 1000 : 300;
+        Bandwidth limit = Bandwidth.classic(capacity, Refill.greedy(capacity, Duration.ofMinutes(1)));
         return Bucket4j.builder().addLimit(limit).build();
+    }
+
+    private boolean isLocalhost(String ip) {
+        return "127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip) || "localhost".equalsIgnoreCase(ip);
     }
 
     @Override

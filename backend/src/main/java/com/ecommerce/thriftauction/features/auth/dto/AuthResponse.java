@@ -25,4 +25,5 @@ public class AuthResponse {
     private BigDecimal totalPoints;
     private String tier;
     private boolean requires2FA;
+    private boolean hasPassword;
 }
