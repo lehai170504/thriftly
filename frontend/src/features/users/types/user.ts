@@ -12,6 +12,7 @@ export interface UserProfile {
   reputationScore?: number;
   tier?: string;
   createdAt: string;
+  hasPassword?: boolean;
 }
 
 export interface UpdateProfileRequest {
@@ -25,4 +26,8 @@ export interface ChangePasswordRequest {
   currentPassword?: string;
   oldPassword?: string;
   newPassword?: string;
+}
+
+export interface SetInitialPasswordRequest {
+  newPassword: string;
 }

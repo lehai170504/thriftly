@@ -24,3 +24,13 @@ export const useChangePassword = () => {
     mutationFn: userApi.changePassword,
   });
 };
+
+export const useSetPassword = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: userApi.setPassword,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+  });
+};

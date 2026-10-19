@@ -18,6 +18,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { extractError } from '@/lib/utils';
 import { BrandWordmark } from '@/components/layout/BrandWordmark';
+import { InitialPasswordModal } from '@/components/auth/InitialPasswordModal';
+import { AuthResponse } from '@/features/auth/types/auth';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -26,6 +28,8 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [pendingGoogleAuth, setPendingGoogleAuth] = useState<AuthResponse | null>(null);
+  const [isInitialPasswordModalOpen, setIsInitialPasswordModalOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -64,6 +68,11 @@ export default function RegisterPage() {
       googleLoginMutation.mutate(credentialResponse.credential, {
         onSuccess: (responseData) => {
           toast.success('Đăng nhập Google thành công!');
+          if (responseData.hasPassword === false) {
+            setPendingGoogleAuth(responseData);
+            setIsInitialPasswordModalOpen(true);
+            return;
+          }
           login(responseData);
           router.push('/products');
         },
@@ -254,6 +263,26 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
+
+      <InitialPasswordModal
+        isOpen={isInitialPasswordModalOpen}
+        onComplete={() => {
+          if (pendingGoogleAuth) {
+            login({ ...pendingGoogleAuth, hasPassword: true });
+          }
+          setIsInitialPasswordModalOpen(false);
+          setPendingGoogleAuth(null);
+          router.push('/products');
+        }}
+        onSkip={() => {
+          if (pendingGoogleAuth) {
+            login(pendingGoogleAuth);
+          }
+          setIsInitialPasswordModalOpen(false);
+          setPendingGoogleAuth(null);
+          router.push('/products');
+        }}
+      />
     </div>
   );
 }

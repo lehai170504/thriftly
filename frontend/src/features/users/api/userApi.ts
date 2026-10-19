@@ -1,5 +1,5 @@
 import api from '@/lib/axios';
-import { UserProfile } from '../types/user';
+import { UserProfile, SetInitialPasswordRequest } from '../types/user';
 
 export const userApi = {
   getProfile: async (): Promise<UserProfile> => {
@@ -23,6 +23,11 @@ export const userApi = {
     newPassword: string;
   }): Promise<void> => {
     await api.put('/users/me/password', payload);
+  },
+
+  setPassword: async (payload: SetInitialPasswordRequest): Promise<UserProfile> => {
+    const { data } = await api.post('/users/me/set-password', payload);
+    return data;
   },
 
   getUserByUsername: async (username: string): Promise<UserProfile> => {

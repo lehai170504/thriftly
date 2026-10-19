@@ -11,6 +11,7 @@ export interface AuthResponse {
   totalPoints?: number;
   tier?: string;
   requires2FA?: boolean;
+  hasPassword?: boolean;
   user?: {
     id: string;
     username: string;
@@ -21,6 +22,6 @@ export interface AuthResponse {
     phone?: string;
     address?: string;
     interests?: string[];
+    hasPassword?: boolean;
   };
 }
-
