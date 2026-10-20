@@ -16,9 +16,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { Search, SlidersHorizontal, PackageOpen, X, Check } from 'lucide-react-native';
+import { Search, SlidersHorizontal, PackageOpen, X } from 'lucide-react-native';
 import { api } from '../../lib/api';
-import { Colors } from '../../constants/theme';
+import { Colors, Shadows } from '../../constants/theme';
 import { Product, Category, PageResponse } from '../../types';
 import { useDebounce } from '../../hooks/useDebounce';
 import { ProductCard } from '../../components/common/ProductCard';
@@ -147,30 +147,58 @@ export default function ExploreScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
-      <View style={styles.header}>
-        <View style={[styles.searchBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Search size={18} color={colors.textSecondary} />
-          <TextInput
-            placeholder="Tìm kiếm đồ cũ, thương hiệu..."
-            placeholderTextColor={colors.textSecondary}
-            value={searchInput}
-            onChangeText={setSearchInput}
-            style={[styles.searchInput, { color: colors.text }]}
-            returnKeyType="search"
-            clearButtonMode="while-editing"
-          />
+      <View style={styles.topSection}>
+        <View style={styles.brandRow}>
+          <View>
+            <Text style={[styles.brandTitle, { color: colors.text }]}>
+              Thriftly<Text style={{ color: Colors.primary }}>.</Text>
+            </Text>
+            <Text style={[styles.brandSubtitle, { color: colors.textSecondary }]}>
+              Khám phá đồ cũ tuyển chọn chất lượng
+            </Text>
+          </View>
         </View>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-            hasActiveFilters && styles.filterButtonActive,
-          ]}
-          onPress={() => setIsFilterModalVisible(true)}
-          activeOpacity={0.7}
-        >
-          <SlidersHorizontal size={18} color={hasActiveFilters ? '#ffffff' : Colors.primary} />
-        </TouchableOpacity>
+
+        <View style={styles.header}>
+          <View
+            style={[
+              styles.searchBar,
+              Shadows.sm,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <Search size={18} color={colors.textSecondary} />
+            <TextInput
+              placeholder="Tìm kiếm đồ cũ, thương hiệu..."
+              placeholderTextColor={colors.textSecondary}
+              value={searchInput}
+              onChangeText={setSearchInput}
+              style={[styles.searchInput, { color: colors.text }]}
+              returnKeyType="search"
+            />
+            {searchInput.length > 0 ? (
+              <TouchableOpacity
+                onPress={() => setSearchInput('')}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <X size={16} color={colors.textSecondary} />
+              </TouchableOpacity>
+            ) : null}
+          </View>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              Shadows.sm,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+              hasActiveFilters && styles.filterButtonActive,
+            ]}
+            onPress={() => setIsFilterModalVisible(true)}
+            activeOpacity={0.7}
+          >
+            <SlidersHorizontal size={18} color={hasActiveFilters ? '#ffffff' : Colors.primary} />
+            {hasActiveFilters ? <View style={styles.filterDot} /> : null}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.categoriesSection}>
@@ -188,8 +216,10 @@ export default function ExploreScreen() {
                 selectedCategory === null
                   ? styles.categoryChipActive
                   : { backgroundColor: colors.surface, borderColor: colors.border },
+                selectedCategory === null && Shadows.sm,
               ]}
               onPress={() => setSelectedCategory(null)}
+              activeOpacity={0.8}
             >
               <Text
                 style={[
@@ -212,8 +242,10 @@ export default function ExploreScreen() {
                   isSelected
                     ? styles.categoryChipActive
                     : { backgroundColor: colors.surface, borderColor: colors.border },
+                  isSelected && Shadows.sm,
                 ]}
                 onPress={() => setSelectedCategory(isSelected ? null : item.id)}
+                activeOpacity={0.8}
               >
                 <Text
                   style={[
@@ -246,6 +278,20 @@ export default function ExploreScreen() {
           maxToRenderPerBatch={10}
           windowSize={5}
           removeClippedSubviews={Platform.OS !== 'web'}
+          ListHeaderComponent={
+            products.length > 0 ? (
+              <View style={styles.listHeaderRow}>
+                <Text style={[styles.listHeaderTitle, { color: colors.text }]}>
+                  {selectedCategory
+                    ? categories?.find((c) => c.id === selectedCategory)?.name || 'Sản phẩm'
+                    : 'Tất cả sản phẩm hiện có'}
+                </Text>
+                <View style={styles.listCountBadge}>
+                  <Text style={styles.listCountText}>{products.length} món</Text>
+                </View>
+              </View>
+            ) : null
+          }
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
@@ -255,11 +301,16 @@ export default function ExploreScreen() {
           }
           ListEmptyComponent={
             <EmptyState
-              icon={<PackageOpen size={48} color={colors.textSecondary} />}
+              icon={<PackageOpen size={36} color={Colors.primary} />}
               title="Không tìm thấy sản phẩm nào"
-              subtitle="Thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc"
+              subtitle="Thử tìm kiếm với từ khóa khác hoặc xóa bớt tiêu chí lọc."
               textColor={colors.text}
               subtextColor={colors.textSecondary}
+              actionText={hasActiveFilters || searchInput ? 'Đặt lại bộ lọc' : undefined}
+              onActionPress={() => {
+                setSearchInput('');
+                handleResetFilters();
+              }}
             />
           }
         />
@@ -426,50 +477,77 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  topSection: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 6,
+  },
+  brandRow: {
+    marginBottom: 12,
+  },
+  brandTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    letterSpacing: -0.8,
+  },
+  brandSubtitle: {
+    fontSize: 12.5,
+    marginTop: 2,
+    fontWeight: '400',
+  },
   header: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
+    gap: 10,
     alignItems: 'center',
   },
   searchBar: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    height: 44,
-    borderRadius: 12,
+    paddingHorizontal: 14,
+    height: 48,
+    borderRadius: 16,
     borderWidth: 1,
-    gap: 8,
+    gap: 10,
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
+    fontWeight: '500',
   },
   filterButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   filterButtonActive: {
     backgroundColor: Colors.primary,
     borderColor: Colors.primary,
   },
+  filterDot: {
+    position: 'absolute',
+    top: 9,
+    right: 9,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ffffff',
+  },
   categoriesSection: {
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   categoriesList: {
     paddingHorizontal: 16,
     gap: 8,
   },
   categoryChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8.5,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   categoryChipActive: {
@@ -478,19 +556,45 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   categoryTextActive: {
     color: '#ffffff',
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  listHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingTop: 6,
+    paddingBottom: 12,
+  },
+  listHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  listCountBadge: {
+    backgroundColor: '#ecfdf5',
+    paddingHorizontal: 10,
+    paddingVertical: 3.5,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: '#a7f3d0',
+  },
+  listCountText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#047857',
   },
   productList: {
-    paddingHorizontal: 12,
-    paddingBottom: 24,
+    paddingHorizontal: 11,
+    paddingBottom: 28,
   },
   productRow: {
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 4,
   },
   centerContainer: {
     flex: 1,
@@ -499,32 +603,33 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
     justifyContent: 'flex-end',
   },
   modalSheet: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 16,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
-    maxHeight: '80%',
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingTop: 18,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    maxHeight: '85%',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 14,
+    paddingHorizontal: 22,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(150, 150, 150, 0.1)',
+    borderBottomColor: '#f1f5f9',
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 19,
+    fontWeight: '800',
+    letterSpacing: -0.3,
   },
   modalBody: {
-    padding: 20,
-    gap: 20,
+    padding: 22,
+    gap: 22,
   },
   filterGroup: {
     gap: 10,
@@ -539,9 +644,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 9,
+    borderRadius: 12,
     borderWidth: 1,
   },
   chipActive: {
@@ -550,11 +655,11 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   chipTextActive: {
     color: '#ffffff',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   priceRow: {
     flexDirection: 'row',
@@ -563,29 +668,30 @@ const styles = StyleSheet.create({
   },
   priceInput: {
     flex: 1,
-    height: 44,
-    borderRadius: 10,
+    height: 46,
+    borderRadius: 14,
     borderWidth: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     fontSize: 14,
+    fontWeight: '500',
   },
   modalFooter: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingTop: 14,
+    paddingHorizontal: 22,
+    paddingTop: 16,
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(150, 150, 150, 0.1)',
+    borderTopColor: '#f1f5f9',
   },
   footerBtn: {
     flex: 1,
-    height: 46,
-    borderRadius: 12,
+    height: 50,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   footerBtnText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
   },
 });
