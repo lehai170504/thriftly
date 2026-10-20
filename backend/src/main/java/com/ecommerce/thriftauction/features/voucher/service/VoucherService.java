@@ -4,6 +4,7 @@ import com.ecommerce.thriftauction.features.voucher.dto.VoucherResponse;
 import com.ecommerce.thriftauction.features.voucher.entity.Voucher;
 import com.ecommerce.thriftauction.features.voucher.repository.VoucherRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import com.ecommerce.thriftauction.features.voucher.dto.VoucherUsageResponse;
 import com.ecommerce.thriftauction.features.voucher.repository.VoucherUsageRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VoucherService {
@@ -129,11 +131,9 @@ public class VoucherService {
                 .collect(Collectors.toList());
     }
 
-    // --- Admin Platform Voucher Methods ---
     @Transactional(readOnly = true)
     public List<VoucherResponse> getAllPlatformVouchers() {
-        return voucherRepository.findBySellerIsNullAndIsActiveTrue().stream() // We might want all, even inactive, for
-                                                                              // admin.
+        return voucherRepository.findBySellerIsNullAndIsActiveTrue().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

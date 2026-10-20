@@ -250,7 +250,8 @@ public class OrderService {
                                 product.getSeller(),
                                 "Có người vừa mua sản phẩm của bạn!",
                                 "Người dùng " + buyer.getUsername() + " đã mua " + product.getTitle() + " với giá "
-                                                + String.format(new Locale("vi", "VN"), "%,.0fđ", product.getPrice())
+                                                + String.format(Locale.forLanguageTag("vi-VN"), "%,.0fđ",
+                                                                product.getPrice())
                                                 + ".",
                                 NotificationType.ORDER_CREATED,
                                 order.getId());
@@ -259,7 +260,8 @@ public class OrderService {
                                 buyer.getUsername(), "BUY_NOW",
                                 "ORDER", order.getId(),
                                 product.getTitle(),
-                                "Mua sản phẩm giá " + String.format(new Locale("vi", "VN"), "%,.0f VNĐ", finalPrice));
+                                "Mua sản phẩm giá " + String.format(Locale.forLanguageTag("vi-VN"), "%,.0f VNĐ",
+                                                finalPrice));
 
                 return orderResponseMapper.toResponse(order);
         }

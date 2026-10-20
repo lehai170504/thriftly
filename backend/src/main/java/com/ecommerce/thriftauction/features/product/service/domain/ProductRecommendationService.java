@@ -11,6 +11,7 @@ import com.ecommerce.thriftauction.features.product.repository.ProductRepository
 import com.ecommerce.thriftauction.features.product.repository.ProductViewHistoryRepository;
 import com.ecommerce.thriftauction.features.product.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -89,7 +91,7 @@ public class ProductRecommendationService {
                                 }
                         }
                 } catch (Exception e) {
-                        System.err.println("Lỗi gọi AI Recommend: " + e.getMessage());
+                        log.error("Lỗi gọi AI Recommend: {}", e.getMessage());
                 }
 
                 List<Product> fallbackProducts = availableProducts.stream().limit(8).collect(Collectors.toList());

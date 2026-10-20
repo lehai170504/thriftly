@@ -9,6 +9,7 @@ import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
 import com.ecommerce.thriftauction.features.voucher.repository.VoucherRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,17 +19,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
-
-import com.ecommerce.thriftauction.features.product.entity.Category;
-import com.ecommerce.thriftauction.features.product.entity.Product;
-import com.ecommerce.thriftauction.features.product.entity.ProductCondition;
-import com.ecommerce.thriftauction.features.product.entity.SellType;
-import com.ecommerce.thriftauction.features.product.entity.ProductStatus;
-import com.ecommerce.thriftauction.features.product.repository.CategoryRepository;
-import com.ecommerce.thriftauction.features.product.repository.ProductRepository;
-import java.util.Arrays;
 import org.springframework.context.annotation.Profile;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @Profile("!prod")
@@ -37,8 +30,6 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
     private final VoucherRepository voucherRepository;
-    private final CategoryRepository categoryRepository;
-    private final ProductRepository productRepository;
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbcTemplate;
 
@@ -60,16 +51,16 @@ public class DataSeeder implements CommandLineRunner {
             jdbcTemplate.execute("ALTER TABLE transactions DROP CONSTRAINT IF EXISTS transactions_type_check;");
             jdbcTemplate.execute("ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;");
             jdbcTemplate.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;");
-            System.out.println("Dropped constraints if they existed.");
+            log.info("Dropped constraints if they existed.");
         } catch (Exception e) {
-            System.out.println("Could not drop constraint: " + e.getMessage());
+            log.warn("Could not drop constraint: {}", e.getMessage());
         }
 
         userRepository.findByEmail(adminEmail).ifPresentOrElse(admin -> {
             admin.setRole(Role.ADMIN);
             admin.setPassword(passwordEncoder.encode(adminPassword));
             userRepository.save(admin);
-            System.out.println("Admin account updated: " + adminEmail);
+            log.info("Admin account updated: {}", adminEmail);
         }, () -> {
             String adminUsername = adminEmail.split("@")[0];
             if (userRepository.existsByUsername(adminUsername)) {
@@ -93,14 +84,14 @@ public class DataSeeder implements CommandLineRunner {
                     .build();
             walletRepository.save(adminWallet);
 
-            System.out.println("Admin account seeded: " + adminEmail);
+            log.info("Admin account seeded: {}", adminEmail);
         });
 
         userRepository.findByEmail(staffEmail).ifPresentOrElse(staff -> {
             staff.setRole(Role.STAFF);
             staff.setPassword(passwordEncoder.encode(staffPassword));
             userRepository.save(staff);
-            System.out.println("Staff account updated: " + staffEmail);
+            log.info("Staff account updated: {}", staffEmail);
         }, () -> {
             String staffUsername = staffEmail.split("@")[0];
             if (userRepository.existsByUsername(staffUsername)) {
@@ -124,7 +115,7 @@ public class DataSeeder implements CommandLineRunner {
                     .build();
             walletRepository.save(staffWallet);
 
-            System.out.println("Staff account seeded: " + staffEmail);
+            log.info("Staff account seeded: {}", staffEmail);
         });
 
         if (voucherRepository.findByCodeAndIsActiveTrue("WELCOME2026").isEmpty()) {
@@ -139,7 +130,7 @@ public class DataSeeder implements CommandLineRunner {
                     .seller(null)
                     .build();
             voucherRepository.save(voucher);
-            System.out.println("Platform voucher seeded: WELCOME2026 (50k off for orders >= 100k)");
+            log.info("Platform voucher seeded: WELCOME2026 (50k off for orders >= 100k)");
         }
     }
 }

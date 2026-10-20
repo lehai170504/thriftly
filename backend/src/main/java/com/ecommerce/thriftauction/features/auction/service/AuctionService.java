@@ -16,7 +16,6 @@ import com.ecommerce.thriftauction.features.auction.repository.AuctionSessionRep
 import com.ecommerce.thriftauction.features.auth.repository.UserRepository;
 import com.ecommerce.thriftauction.features.payment.entity.TransactionType;
 import com.ecommerce.thriftauction.features.payment.entity.Wallet;
-import com.ecommerce.thriftauction.features.payment.repository.TransactionRepository;
 import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
 import com.ecommerce.thriftauction.features.payment.service.WalletService;
 import com.ecommerce.thriftauction.features.notification.entity.NotificationType;
@@ -40,7 +39,6 @@ public class AuctionService {
         private final NotificationService notificationService;
         private final WalletRepository walletRepository;
         private final AuctionDepositRepository auctionDepositRepository;
-        private final TransactionRepository transactionRepository;
         private final AuditLogService auditLogService;
         private final WalletService walletService;
 
@@ -115,7 +113,7 @@ public class AuctionService {
                                 bidder.getUsername(), "PLACE_BID",
                                 "AUCTION", session.getId(),
                                 session.getProduct().getTitle(),
-                                "Đặt giá " + String.format(new Locale("vi", "VN"), "%,.0f VNĐ",
+                                "Đặt giá " + String.format(Locale.forLanguageTag("vi-VN"), "%,.0f VNĐ",
                                                 request.getBidAmount()));
 
                 if (previousHighestBidder != null && !previousHighestBidder.getId().equals(bidder.getId())) {

@@ -123,7 +123,7 @@ public class AuctionOrderSettlementService {
                                 buyer,
                                 "Chúc mừng! Bạn đã thắng đấu giá",
                                 "Bạn đã thắng đấu giá sản phẩm " + product.getTitle() + " với giá "
-                                                + String.format(new Locale("vi", "VN"), "%,.0fđ",
+                                                + String.format(Locale.forLanguageTag("vi-VN"), "%,.0fđ",
                                                                 highestBid.getBidAmount())
                                                 + ". Vui lòng thanh toán đơn hàng.",
                                 NotificationType.AUCTION_WON,
@@ -134,7 +134,7 @@ public class AuctionOrderSettlementService {
                                 "Sản phẩm đấu giá đã kết thúc!",
                                 "Người dùng " + buyer.getUsername() + " đã thắng đấu giá " + product.getTitle()
                                                 + " với giá "
-                                                + String.format(new Locale("vi", "VN"), "%,.0fđ",
+                                                + String.format(Locale.forLanguageTag("vi-VN"), "%,.0fđ",
                                                                 highestBid.getBidAmount())
                                                 + ".",
                                 NotificationType.ORDER_CREATED,

@@ -14,7 +14,6 @@ import com.ecommerce.thriftauction.features.common.dto.BidRequest;
 import com.ecommerce.thriftauction.features.common.dto.BidResponse;
 import com.ecommerce.thriftauction.features.notification.service.NotificationService;
 import com.ecommerce.thriftauction.features.payment.entity.Wallet;
-import com.ecommerce.thriftauction.features.payment.repository.TransactionRepository;
 import com.ecommerce.thriftauction.features.payment.repository.WalletRepository;
 import com.ecommerce.thriftauction.features.payment.service.WalletService;
 import com.ecommerce.thriftauction.features.product.entity.Product;
@@ -54,9 +53,6 @@ class AuctionServiceTests {
 
         @Mock
         private AuctionDepositRepository auctionDepositRepository;
-
-        @Mock
-        private TransactionRepository transactionRepository;
 
         @Mock
         private AuditLogService auditLogService;
