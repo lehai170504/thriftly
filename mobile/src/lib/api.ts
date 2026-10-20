@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { storage } from './storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://thriftly-backend.onrender.com/api/v1';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://thrift-swap.onrender.com/api/v1';
 
 export const api = axios.create({
   baseURL: API_URL,

@@ -85,8 +85,13 @@ export default function LoginModal() {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
+      const googleClientId =
+        process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ||
+        '825210251579-s9tachforq9as3tcnqubtt6n8nsi3h6a.apps.googleusercontent.com';
       const redirectUrl = Linking.createURL('/auth/callback');
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=default-google-client-id&response_type=id_token&scope=openid%20profile%20email&redirect_uri=${encodeURIComponent(
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
+        googleClientId
+      )}&response_type=id_token&scope=openid%20profile%20email&redirect_uri=${encodeURIComponent(
         redirectUrl
       )}&nonce=${Math.random().toString(36).substring(2)}`;
 

@@ -103,9 +103,16 @@ export default function AuctionDetailScreen() {
   useEffect(() => {
     if (!id) return;
 
-    let baseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://thriftly-backend.onrender.com/api/v1';
-    baseUrl = baseUrl.replace('/api/v1', '');
-    const wsUrl = baseUrl.replace(/^http/, 'ws') + '/ws/auction';
+    const rawWsUrl = process.env.EXPO_PUBLIC_WS_URL;
+    let wsUrl = '';
+    if (rawWsUrl) {
+      const baseWs = rawWsUrl.replace(/\/$/, '').replace(/\/ws$/, '');
+      wsUrl = `${baseWs}/ws/auction`;
+    } else {
+      let baseUrl = process.env.EXPO_PUBLIC_API_URL || 'https://thrift-swap.onrender.com/api/v1';
+      baseUrl = baseUrl.replace('/api/v1', '');
+      wsUrl = baseUrl.replace(/^http/, 'ws') + '/ws/auction';
+    }
 
     const client = new Client({
       brokerURL: wsUrl,
