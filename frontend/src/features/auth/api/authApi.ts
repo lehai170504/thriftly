@@ -1,14 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import api from '@/lib/axios';
+import api, { getCsrfToken } from '@/lib/axios';
 import { AuthResponse } from '../types/auth';
 
 let csrfRequest: Promise<void> | null = null;
 
-const prepareCsrf = (): Promise<void> => {
-  if (!csrfRequest) {
-    csrfRequest = api.get('/auth/csrf').then(() => undefined).finally(() => { csrfRequest = null; });
+const prepareCsrf = async (): Promise<void> => {
+  if (typeof window !== 'undefined' && getCsrfToken()) {
+    api.defaults.headers.common['X-XSRF-TOKEN'] = getCsrfToken();
+    return;
   }
-  return csrfRequest;
+
+  if (!csrfRequest) {
+    csrfRequest = api.get('/auth/csrf')
+      .then((response) => {
+        const token = response.data?.token ?? getCsrfToken();
+        if (token) {
+          api.defaults.headers.common['X-XSRF-TOKEN'] = token;
+        }
+      })
+      .finally(() => {
+        csrfRequest = null;
+      });
+  }
+
+  await csrfRequest;
 };
 
 const post = async <T>(url: string, data?: unknown): Promise<T> => {

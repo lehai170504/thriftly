@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient } from '@tanstack/react-query';
 import { isAdminPortalRole, canAccessAdminRoute } from '../lib/admin-permissions';
+import { getCookie, getCsrfToken } from '../lib/axios';
 import { AuthResponse } from '../features/auth/types/auth';
 
 describe('Auth, Session and Permission rules', () => {
@@ -40,6 +41,13 @@ describe('Auth, Session and Permission rules', () => {
     };
 
     expect(Boolean(normalUserResponse.requires2FA)).toBe(false);
+  });
+
+  it('reads the csrf token from the browser cookie when present', () => {
+    document.cookie = 'XSRF-TOKEN=csrf-token-123; path=/';
+
+    expect(getCookie('XSRF-TOKEN')).toBe('csrf-token-123');
+    expect(getCsrfToken()).toBe('csrf-token-123');
   });
 
   it('clears query client cache on session expiration or logout', () => {
