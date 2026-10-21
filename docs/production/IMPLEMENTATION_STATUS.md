@@ -615,3 +615,22 @@ Commands actually run and exit results:
 
 Rollback/forward-fix: Revert the CI remediation commit to restore the previous action references and wrapper mode; rerun the focused Maven test after any controller contract change.
 Open risks/manual checks: Confirm the pushed workflow completes on a Docker-enabled GitHub Actions runner; this local environment cannot verify Testcontainers integration tests.
+
+## Frontend Dependency CVE Remediation — 2026-10-21
+
+Scope delivered:
+- Upgraded `next` and `eslint-config-next` from `16.2.10` to `16.4.2`, and Axios from `^1.18.1` to `^1.20.0`; refreshed the lockfile while retaining `shadcn@4.13.0`.
+- Moved the `shadcn/tailwind.css` import from `globals.css` to the root layout after the production build could not resolve the package import from the stylesheet.
+
+Commands actually run and results:
+- `npm run lint` — passed.
+- `npm run typecheck` — passed.
+- `npm run test:run` — passed, 3 files and 12 tests.
+- `npm run build` — passed; Next.js generated all 40 static pages.
+- `npm ls shadcn next axios --depth=0` — passed; resolved versions are `shadcn@4.13.0`, `next@16.4.2`, and `axios@1.20.0`.
+- `npm audit` — 8 HIGH, 0 CRITICAL findings remain. The prior CVE assessment identified `braces@3.0.3` as an unfixed upstream finding; no force upgrade was applied.
+- `npm ci --legacy-peer-deps` — the final clean-install attempt was blocked on Windows by `EPERM` while unlinking the Tailwind native binary. `npm install --legacy-peer-deps` restored packages from the lockfile, after which the dependency check and frontend validations passed.
+- `git diff --check` — passed.
+
+Rollback/forward-fix: Restore the previous frontend dependency versions and lockfile, and move the stylesheet import back only if reverting the dependency/build changes together.
+Open risks/manual checks: Trivy is unavailable locally, and this worktree has not been pushed, so the GitHub Actions repository scan has not verified the remediation. The remaining npm audit findings and the `braces` advisory need review against a new CI scan; do not mark the scanner gate green until that run succeeds.

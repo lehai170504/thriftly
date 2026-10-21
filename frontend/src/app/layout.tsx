@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Be_Vietnam_Pro, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import "shadcn/tailwind.css";
 import Providers from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/layout/CookieConsent";
