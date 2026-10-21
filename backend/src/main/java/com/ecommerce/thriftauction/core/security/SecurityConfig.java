@@ -57,7 +57,15 @@ public class SecurityConfig {
                                 .csrf(csrf -> csrf
                                                 .csrfTokenRepository(csrfRepository)
                                                 .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
-                                                .ignoringRequestMatchers("/api/v1/payment/payos/webhook",
+                                                .ignoringRequestMatchers(
+                                                                "/api/v1/auth/register",
+                                                                "/api/v1/auth/login",
+                                                                "/api/v1/auth/google-login",
+                                                                "/api/v1/auth/facebook-login",
+                                                                "/api/v1/auth/verify-2fa",
+                                                                "/api/v1/auth/forgot-password",
+                                                                "/api/v1/auth/reset-password",
+                                                                "/api/v1/payment/payos/webhook",
                                                                 "/api/v1/webhooks/**"))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf")
