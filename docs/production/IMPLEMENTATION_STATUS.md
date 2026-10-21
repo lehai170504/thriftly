@@ -600,3 +600,18 @@ Reviewer decision:
 - PayOS/GHN production webhook capabilities and credential/signature rotation process.
 - Wallet accounting model, reconciliation owner, refund policy, and admin-adjustment approval process.
 - Recovery objectives (RPO/RTO), SLOs, alert ownership, privacy retention, and final launch window.
+
+## Phase 10 CI Runner Failure Remediation — 2026-10-21
+
+Scope delivered:
+- Pinned all Trivy Action workflow references to the verified, non-compromised `v0.35.0` commit SHA after GitHub Actions could not resolve the old unprefixed `0.28.0` tag.
+- Marked `backend/mvnw` executable in Git so Linux runners can invoke the Maven wrapper.
+- Updated `PaymentControllerStatusTests` to mock the controller's current `PaymentService` dependency; the prior test injected obsolete repository mocks and failed with a null service.
+
+Commands actually run and exit results:
+- `.\mvnw.cmd clean -Dtest=PaymentControllerStatusTests test -B` — passed, 2 tests.
+- `.\mvnw.cmd clean test -B` — not fully verified locally; Testcontainers integration tests could not start because Docker is unavailable in this environment. The run also exposed the stale payment-controller test, which was corrected and passed in the focused run.
+- `git diff --cached --check` — passed.
+
+Rollback/forward-fix: Revert the CI remediation commit to restore the previous action references and wrapper mode; rerun the focused Maven test after any controller contract change.
+Open risks/manual checks: Confirm the pushed workflow completes on a Docker-enabled GitHub Actions runner; this local environment cannot verify Testcontainers integration tests.
