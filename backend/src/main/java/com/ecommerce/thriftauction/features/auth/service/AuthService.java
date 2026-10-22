@@ -58,6 +58,9 @@ public class AuthService {
         private final EmailService emailService;
         private final SessionRevocationService sessionRevocationService;
 
+        @Value("${app.auth.admin-2fa-enabled:true}")
+        private boolean adminTwoFactorEnabled = true;
+
         @Value("${google.client.id}")
         private String googleClientId;
 
@@ -315,6 +318,9 @@ public class AuthService {
                         throw new DisabledException("Account is disabled");
                 }
                 if (!isPrivileged(user)) {
+                        return buildAuthResponse(user);
+                }
+                if (!adminTwoFactorEnabled) {
                         return buildAuthResponse(user);
                 }
 

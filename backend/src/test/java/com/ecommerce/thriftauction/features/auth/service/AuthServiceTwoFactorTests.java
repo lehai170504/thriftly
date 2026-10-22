@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -50,6 +51,7 @@ class AuthServiceTwoFactorTests {
 
     @Test
     void privilegedPasswordLoginCreatesPurposeBoundChallengeWithoutSessionResponse() {
+        ReflectionTestUtils.setField(authService, "adminTwoFactorEnabled", true);
         User admin = User.builder()
                 .id("admin-id")
                 .username("admin")
@@ -74,5 +76,30 @@ class AuthServiceTwoFactorTests {
         assertThat(token.getValue().getPurpose()).isEqualTo(OtpPurpose.LOGIN_2FA);
         assertThat(token.getValue().getOtp()).matches("\\d{6}");
         verify(emailService).sendOtpEmail("admin@example.com", token.getValue().getOtp());
+    }
+
+    @Test
+    void privilegedPasswordLoginSkipsEmailChallengeWhenDemoTwoFactorSettingIsDisabled() {
+        ReflectionTestUtils.setField(authService, "adminTwoFactorEnabled", false);
+        User admin = User.builder()
+                .id("admin-id")
+                .username("admin")
+                .email("admin@example.com")
+                .password("encoded")
+                .role(Role.ADMIN)
+                .isActive(true)
+                .build();
+        AuthRequest request = new AuthRequest();
+        request.setEmail("admin@example.com");
+        request.setPassword("password");
+        when(userRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(admin));
+
+        AuthResponse response = authService.authenticate(request);
+
+        assertThat(response.isRequires2FA()).isFalse();
+        assertThat(response.getEmail()).isEqualTo("admin@example.com");
+        assertThat(response.getRole()).isEqualTo(Role.ADMIN.name());
+        verify(emailService, org.mockito.Mockito.never()).sendOtpEmail(org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString());
     }
 }

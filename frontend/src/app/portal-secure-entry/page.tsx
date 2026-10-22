@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
     loginMutation.mutate(data, {
       onSuccess: (responseData) => {
         if (responseData.requires2FA) {
-          toast.success('Mã OTP đã được gửi đến email của bạn.');
+          toast.info('Yêu cầu xác thực đã được tạo. Hãy kiểm tra email và thư mục Spam để nhận mã OTP.');
           setPendingEmail(responseData.email);
           setStep('OTP');
           setIsLoading(false);
@@ -166,7 +166,7 @@ export default function AdminLoginPage() {
               {step === 'LOGIN' ? 'Admin Portal' : 'Xác thực 2 lớp'}
             </h1>
             <p className="text-muted-foreground text-sm font-medium">
-              {step === 'LOGIN' ? 'Đăng nhập để quản lý hệ thống Thriftly.' : `Mã xác nhận (OTP) đã được gửi đến ${pendingEmail}`}
+              {step === 'LOGIN' ? 'Đăng nhập để quản lý hệ thống Thriftly.' : `Kiểm tra email ${pendingEmail} và thư mục Spam để nhận mã xác nhận (OTP).`}
             </p>
           </div>
 

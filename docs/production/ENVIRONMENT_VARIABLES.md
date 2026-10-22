@@ -11,8 +11,8 @@ Required configuration:
 | Runtime | `SPRING_PROFILES_ACTIVE=prod`, `PORT` | Production profile is mandatory. |
 | PostgreSQL | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | The database account needs Flyway DDL privileges during migration. |
 | Redis/session | `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`, `REDIS_SSL_ENABLED`, `SESSION_REDIS_NAMESPACE` | Use TLS for managed/external Redis; Docker Compose uses a private unencrypted network. |
-| Browser security | `CORS_ALLOWED_ORIGINS`, `FRONTEND_URL`, `ADMIN_ALLOWED_IPS`, `TRUSTED_PROXY_IPS` | Exact HTTPS origins and actual reverse-proxy CIDRs only; no wildcards. |
-| Mail | `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` | Needed for OTP and password reset. |
+| Browser security | `CORS_ALLOWED_ORIGINS`, `FRONTEND_URL`, `ADMIN_ALLOWED_IPS`, `TRUSTED_PROXY_IPS`, `ADMIN_2FA_ENABLED` | Exact HTTPS origins and actual reverse-proxy CIDRs only; no wildcards. Keep admin 2FA enabled except for an explicitly temporary demo deployment. |
+| Mail | `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` | OTP and password-reset messages use SMTP. For Gmail, use an App Password; Render Free blocks outbound SMTP ports. |
 | Google | `GOOGLE_CLIENT_ID` | Must match the frontend Google client ID and allowed origins. |
 | PayOS | `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY` | Store and rotate as secrets. |
 | Cloudinary | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Store API secret outside Git. |

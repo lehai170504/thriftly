@@ -5,6 +5,11 @@ spring:
     url: jdbc:tc:postgresql:15.3:///thrift_auction_test
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     password: postgres
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
   jpa:
     hibernate:
       ddl-auto: validate
@@ -16,12 +21,6 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
-  mail:
-    host: localhost
-    port: 3025
-    username: test
-    password: test
-
 server:
   port: 0
 
