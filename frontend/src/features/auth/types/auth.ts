@@ -25,3 +25,13 @@ export interface AuthResponse {
     hasPassword?: boolean;
   };
 }
+
+export interface RegisterPayload {
+  username: string;
+  email: string;
+  password: string;
+  fullName: string;
+  phone?: string;
+  address?: string;
+  interests?: string[];
+}

@@ -51,7 +51,8 @@ export default function RegisterPage() {
 
   const onRegister = (data: RegisterFormData) => {
     setIsLoading(true);
-    registerMutation.mutate(data, {
+    const { confirmPassword, ...payload } = data;
+    registerMutation.mutate(payload, {
       onSuccess: (responseData) => {
         toast.success('Đăng ký thành công! Đang tự động đăng nhập...');
         login(responseData);
@@ -152,6 +153,38 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit(onRegister)} className="space-y-4">
             <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-foreground">Họ và tên</Label>
+              <Input
+                placeholder="Nguyễn Văn A"
+                {...register('fullName')}
+                className={`h-11 bg-background text-sm rounded-xl ${errors.fullName ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
+              />
+              {errors.fullName && <p className="text-destructive text-xs mt-1">{errors.fullName.message}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">Tên đăng nhập</Label>
+                <Input
+                  placeholder="tennguoidung"
+                  {...register('username')}
+                  className={`h-11 bg-background text-sm rounded-xl ${errors.username ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
+                />
+                {errors.username && <p className="text-destructive text-xs mt-1">{errors.username.message}</p>}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground">Số điện thoại</Label>
+                <Input
+                  placeholder="0912345678"
+                  {...register('phone')}
+                  className={`h-11 bg-background text-sm rounded-xl ${errors.phone ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
+                />
+                {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone.message}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-foreground">Địa chỉ Email</Label>
               <Input
                 type="email"
@@ -160,16 +193,6 @@ export default function RegisterPage() {
                 className={`h-11 bg-background text-sm rounded-xl ${errors.email ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
               />
               {errors.email && <p className="text-destructive text-xs mt-1">{errors.email.message}</p>}
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-foreground">Tên đăng nhập</Label>
-              <Input
-                placeholder="tennguoidung"
-                {...register('username')}
-                className={`h-11 bg-background text-sm rounded-xl ${errors.username ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
-              />
-              {errors.username && <p className="text-destructive text-xs mt-1">{errors.username.message}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
