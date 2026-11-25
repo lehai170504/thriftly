@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+build/
+coverage/
+storybook-static/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+*.log
+.git
+.gitignore
+Dockerfile
+.dockerignore

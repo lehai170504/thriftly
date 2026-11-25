@@ -7,4 +7,10 @@ mobile/.expo/
 .vscode/
 .env
 .env.local
+**/.env
+**/.env.local
+**/.env.*.local
+!**/.env.example
 *.log
+.DS_Store
+Thumbs.db
