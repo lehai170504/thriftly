@@ -3,7 +3,6 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useSearchProducts, useCategories } from '@/features/products/hooks/useProducts';
-import { CreateProductModal } from '@/features/products/components/CreateProductModal';
 import { useState, useEffect, Suspense } from 'react';
 
 import { ProductCard } from '@/features/products/components/ProductCard';
@@ -62,7 +61,7 @@ function ProductsContent() {
   const { data: profile } = useProfile(isAuthenticated);
   const { data: categories } = useCategories();
 
-  const { data: productsPage, isLoading, error } = useSearchProducts({
+  const { data: productsPage, isLoading, error, refetch } = useSearchProducts({
     query: query || undefined,
     categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
     condition: condition !== 'all' ? condition : undefined,
@@ -83,7 +82,12 @@ function ProductsContent() {
   return (
     <div className="min-h-screen bg-background">
       <div className="page-container py-6 md:py-8">
-        <PageHeader className="mb-8" title={query ? <>Kết quả cho “<span className="text-primary">{query}</span>”</> : "Khám phá sản phẩm"} description="Khám phá những món đồ cũ chất lượng với giá tốt nhất, được tuyển chọn dành riêng cho bạn." actions={<CreateProductModal />} />
+        <PageHeader
+          className="mb-8"
+          eyebrow="Sàn giao dịch tuyển chọn"
+          title={query ? <>Kết quả cho “<span className="text-primary">{query}</span>”</> : "Khám phá sản phẩm"}
+          description="Khám phá những món đồ cũ chất lượng, được tuyển chọn và bảo vệ giao dịch qua Escrow."
+        />
 
         <div className="flex flex-col lg:flex-row gap-8">
           <ProductSidebar
@@ -138,7 +142,11 @@ function ProductsContent() {
             {isLoading ? (
               <ProductGridSkeleton />
             ) : error ? (
-              <ErrorState title="Không thể tải sản phẩm" description="Vui lòng thử lại sau." />
+              <ErrorState
+                title="Không thể tải sản phẩm"
+                description="Vui lòng kiểm tra kết nối máy chủ hoặc thử tải lại."
+                onRetry={() => refetch()}
+              />
             ) : products?.length === 0 ? (
               <ProductEmptyState />
             ) : (

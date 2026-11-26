@@ -1,112 +1,155 @@
-import { Search, ShoppingBag, ShieldCheck, Star, ArrowRight, Zap, RefreshCw, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Gavel,
+  PackageCheck,
+  Search,
+  ShieldCheck,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 export const metadata = {
   title: 'Cách thức hoạt động | Thriftly',
-  description: 'Hướng dẫn mua bán trên nền tảng Thriftly từ A đến Z.',
+  description: 'Hướng dẫn mua bán và đấu giá an toàn trên nền tảng Thriftly.',
 };
+
+const steps = [
+  {
+    number: '01',
+    icon: Search,
+    title: 'Khám phá & Chọn lựa',
+    description:
+      'Tìm kiếm sản phẩm theo danh mục, tình trạng hoặc từ khóa. Bạn có thể mua ngay với mức giá cố định hoặc tham gia các phiên đấu giá trực tiếp.',
+    highlights: ['Bộ lọc chi tiết theo nhu cầu', 'Thông tin tình trạng minh bạch'],
+  },
+  {
+    number: '02',
+    icon: Gavel,
+    title: 'Đặt giá thầu hoặc Mua ngay',
+    description:
+      'Theo dõi giá thầu cập nhật theo thời gian thực trong phòng đấu giá, hoặc tiến hành đặt hàng trực tiếp với sản phẩm mua ngay.',
+    highlights: ['Cập nhật giá tức thì qua WebSocket', 'Tự động gia hạn cuối phiên'],
+  },
+  {
+    number: '03',
+    icon: ShieldCheck,
+    title: 'Thanh toán qua Escrow',
+    description:
+      'Số tiền thanh toán được giữ an toàn trong quy trình ký quỹ trung gian của Thriftly. Người bán yên tâm đóng gói giao hàng.',
+    highlights: ['Tạm giữ tiền an toàn', 'Hạn chế rủi ro giao dịch'],
+  },
+  {
+    number: '04',
+    icon: PackageCheck,
+    title: 'Nhận hàng & Xác nhận',
+    description:
+      'Khi nhận hàng và kiểm tra đúng mô tả, bạn xác nhận hoàn tất đơn hàng để hệ thống giải ngân cho người bán và để lại đánh giá.',
+    highlights: ['Xác nhận trước khi giải ngân', 'Đánh giá người bán công khai'],
+  },
+];
 
 export default function HowItWorksPage() {
   return (
-    <div className="bg-background">
-      {/* Hero Section */}
-      <section className="dark relative pt-8 pb-24 bg-blue-900 overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-400 via-blue-900 to-slate-900"></div>
-        <div className="container mx-auto px-4 relative z-10 max-w-5xl">
-          <Link href="/">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground mb-8 rounded-full px-6 transition-colors">
-              <ArrowLeft className="w-5 h-5 mr-2" /> Về trang chủ
+    <div className="w-full bg-[#F5F2EC] dark:bg-background text-[#191919] dark:text-foreground">
+      <section className="pt-8 pb-16 border-b border-[#E5E0D7] dark:border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="inline-block mb-8">
+            <Button
+              variant="ghost"
+              className="rounded-xl px-3 text-[#77736D] dark:text-muted-foreground hover:text-[#191919] dark:hover:text-foreground hover:bg-white/70 dark:hover:bg-accent"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Về trang chủ
             </Button>
           </Link>
-          <div className="text-center max-w-4xl mx-auto">
-            <Badge className="bg-blue-500/20 text-blue-200 border-none mb-6 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-md">
-              Dành cho người mới
-            </Badge>
-            <h1 className="text-4xl md:text-6xl font-serif font-black text-foreground mb-6 tracking-tight">
-              Cách thức hoạt động của <br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-emerald-300">
-                Thriftly
-              </span>
+
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold tracking-[0.16em] uppercase text-[#244C3A] dark:text-primary mb-3">
+              Hướng dẫn sử dụng
+            </p>
+            <h1 className="font-serif text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.12] mb-5">
+              Cách Thức Hoạt Động Của{' '}
+              <span className="italic font-normal text-[#244C3A] dark:text-primary">Thriftly</span>
             </h1>
-            <p className="text-lg md:text-xl text-blue-100/80 mb-10 leading-relaxed max-w-2xl mx-auto">
-              Giao dịch đồ cũ chưa bao giờ an tâm và dễ dàng đến thế. Khám phá quy trình 3 bước mua bán bảo mật tuyệt đối trên nền tảng của chúng tôi.
+            <p className="text-base sm:text-lg text-[#77736D] dark:text-muted-foreground leading-relaxed">
+              Quy trình 4 bước rõ ràng giúp bạn mua, bán và tham gia đấu giá đồ secondhand an tâm trên một nền tảng thống nhất.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Steps Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="glass bg-background/50 p-8 rounded-[2rem] border border-border shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] transition-shadow relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-8">
-                <Search className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">1. Khám phá & Chọn lựa</h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                Tìm kiếm hàng ngàn sản phẩm chất lượng từ cộng đồng. Bạn có thể mua trực tiếp hoặc tham gia các phiên đấu giá đầy kịch tính.
-              </p>
-              <ul className="space-y-3 text-muted-foreground font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-emerald-500" /> Bộ lọc thông minh</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-emerald-500" /> Đấu giá thời gian thực</li>
-              </ul>
-            </div>
+      <section className="py-16 lg:py-24 bg-white dark:bg-card border-b border-[#E5E0D7] dark:border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {steps.map((step) => (
+              <div
+                key={step.number}
+                className="editorial-card rounded-2xl bg-[#F5F2EC] dark:bg-muted/40 border border-[#E5E0D7] dark:border-border p-7 sm:p-8 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="size-12 rounded-xl bg-white dark:bg-card border border-[#E5E0D7] dark:border-border flex items-center justify-center text-[#244C3A] dark:text-primary shadow-surface">
+                      <step.icon className="w-5 h-5" />
+                    </div>
+                    <span className="font-numeric text-xs font-semibold tracking-[0.16em] text-[#244C3A] dark:text-primary">
+                      BƯỚC {step.number}
+                    </span>
+                  </div>
 
-            {/* Step 2 */}
-            <div className="glass bg-background/50 p-8 rounded-[2rem] border border-border shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] transition-shadow relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
-              <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-8">
-                <ShieldCheck className="w-8 h-8 text-blue-500" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">2. Thanh toán Escrow</h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                Tiền của bạn được nạp vào hệ thống và đóng băng lại. Người bán yên tâm giao hàng, người mua yên tâm nhận hàng.
-              </p>
-              <ul className="space-y-3 text-muted-foreground font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-emerald-500" /> An toàn 100%</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-emerald-500" /> Chống lừa đảo, bom hàng</li>
-              </ul>
-            </div>
+                  <h2 className="text-xl font-semibold mb-3">{step.title}</h2>
+                  <p className="text-sm text-[#77736D] dark:text-muted-foreground leading-relaxed mb-6">
+                    {step.description}
+                  </p>
+                </div>
 
-            {/* Step 3 */}
-            <div className="glass bg-background/50 p-8 rounded-[2rem] border border-border shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)] transition-shadow relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
-              <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-8">
-                <Star className="w-8 h-8 text-emerald-500" />
+                <ul className="space-y-2.5 pt-4 border-t border-[#E5E0D7] dark:border-border">
+                  {step.highlights.map((hl) => (
+                    <li key={hl} className="flex items-center gap-2.5 text-sm font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-[#244C3A] dark:text-primary shrink-0" />
+                      <span>{hl}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">3. Nhận hàng & Đánh giá</h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
-                Kiểm tra sản phẩm khi nhận. Chỉ khi bạn xác nhận hài lòng, tiền mới được chuyển cho người bán. Cuối cùng, hãy để lại đánh giá nhé!
-              </p>
-              <ul className="space-y-3 text-muted-foreground font-medium">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-emerald-500" /> Quyền kiểm tra hàng</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-emerald-500" /> Hệ thống uy tín</li>
-              </ul>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-primary">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-black text-primary-foreground mb-6">Sẵn sàng trải nghiệm Thriftly?</h2>
-          <Link href="/products">
-            <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-full px-10 h-14 text-lg font-bold">
-              Bắt đầu ngay <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
+      <section className="py-16 lg:py-24 bg-[#F5F2EC] dark:bg-background">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl bg-[#244C3A] dark:bg-card text-white dark:text-foreground border border-[#244C3A] dark:border-border px-6 py-12 sm:px-12 sm:py-16 text-center">
+            <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
+              Sẵn Sàng Trải Nghiệm Thriftly?
+            </h2>
+            <p className="text-sm sm:text-base text-white/80 dark:text-muted-foreground mb-8 max-w-xl mx-auto">
+              Khám phá các sản phẩm và phiên đấu giá đang mở ngay hôm nay.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-3.5">
+              <Link href="/products">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto h-12 px-7 rounded-xl bg-white text-[#191919] hover:bg-[#F5F2EC] dark:bg-primary dark:text-primary-foreground font-medium group"
+                >
+                  Bắt đầu ngay
+                  <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <Link href="/escrow">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto h-12 px-7 rounded-xl border-white/30 bg-transparent text-white hover:bg-white/10 dark:border-border dark:text-foreground dark:hover:bg-accent font-medium"
+                >
+                  Xem quy trình Escrow
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>
   );
 }
-
-const CheckCircle2 = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
-);

@@ -75,9 +75,9 @@ function MarketplaceProductCard({ product, variant = "standard" }: MarketplacePr
   const conditionLabel = product.condition === "NEW" ? "Mới 100%" : product.condition === "LIKE_NEW" ? "Như mới" : product.condition === "GOOD" ? "Tốt" : product.condition === "FAIR" ? "Khá" : "Đã sử dụng";
 
   return (
-    <Link href={href} className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-      <Card variant="interactive" className="h-full cursor-pointer gap-0 py-0 overflow-hidden rounded-xl border-border bg-card transition-[border-color,box-shadow] duration-200 hover:border-border/80 hover:shadow-surface">
-        <div className="relative aspect-square overflow-hidden bg-muted isolate [transform:translateZ(0)]">
+    <Link href={href} className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <Card variant="interactive" className="editorial-card h-full cursor-pointer gap-0 py-0 overflow-hidden rounded-2xl border-border bg-card hover:border-primary/40 hover:shadow-elevated">
+        <div className="relative aspect-[4/3] overflow-hidden bg-muted isolate [transform:translateZ(0)]">
           <img
             src={imageUrl}
             alt={product.title}

@@ -53,8 +53,8 @@ export default function AppHeader() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 shadow-2xs backdrop-blur-md">
-      <div className="page-container flex h-16 items-center justify-between gap-4 md:gap-8">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/90 shadow-2xs backdrop-blur-md">
+      <div className="page-container flex h-[72px] items-center justify-between gap-4 md:gap-6">
         <div className="flex items-center gap-4 md:gap-8">
           <div className="xl:hidden">
             <Sheet>
@@ -111,8 +111,8 @@ export default function AppHeader() {
               onMouseEnter={() => setIsCategoryOpen(true)}
               onMouseLeave={() => setIsCategoryOpen(false)}
             >
-              <div className={`inline-flex items-center font-bold uppercase tracking-widest text-xs px-3 h-9 rounded-md outline-none cursor-pointer transition-colors ${isCategoryOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'}`}>
-                <Menu className="w-4 h-4 mr-2" />
+              <div className={`inline-flex items-center whitespace-nowrap font-medium text-sm px-3 h-9 rounded-lg outline-none cursor-pointer transition-colors ${isCategoryOpen ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-accent/60'}`}>
+                <Menu className="w-4 h-4 mr-2 shrink-0" />
                 Danh mục
               </div>
 
@@ -188,27 +188,27 @@ export default function AppHeader() {
             </div>
 
             <Link href="/products?sort=createdAt_desc">
-              <Button variant="ghost" className="font-bold uppercase tracking-widest text-xs text-muted-foreground hover:text-primary hover:bg-primary/10 px-3">
+              <Button variant="ghost" className="whitespace-nowrap font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-accent/60 px-3 h-9 rounded-lg">
                 Mới nhất
               </Button>
             </Link>
 
             <Link href="/products?sort=price_asc">
-              <Button variant="ghost" className="font-bold uppercase tracking-widest text-xs text-muted-foreground hover:text-primary hover:bg-primary/10 px-3">
-                Giá rẻ
+              <Button variant="ghost" className="whitespace-nowrap font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-accent/60 px-3 h-9 rounded-lg">
+                Giá tốt
               </Button>
             </Link>
 
             <Link href="/auctions">
-              <Button variant="ghost" className="font-bold uppercase tracking-widest text-xs text-red-500 hover:text-red-400 hover:bg-red-500/10 px-3 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
-                Đấu giá LIVE
+              <Button variant="ghost" className="whitespace-nowrap font-medium text-sm text-primary hover:bg-primary/10 px-3 h-9 rounded-lg flex items-center gap-1.5">
+                <span className="size-1.5 rounded-full bg-primary shrink-0" />
+                Đấu giá
               </Button>
             </Link>
 
             <Link href="/live">
-              <Button variant="ghost" className="font-bold uppercase tracking-widest text-xs text-primary hover:bg-primary/10 px-3 flex items-center gap-1.5">
-                Khám Phá Live
+              <Button variant="ghost" className="whitespace-nowrap font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-accent/60 px-3 h-9 rounded-lg flex items-center gap-1.5">
+                Phiên Live
               </Button>
             </Link>
           </nav>
@@ -217,7 +217,7 @@ export default function AppHeader() {
         <div className="flex-1 max-w-2xl min-w-[150px] hidden md:flex items-center justify-end xl:justify-center">
           <button
             onClick={() => setIsSearchModalOpen(true)}
-            className="group flex items-center justify-between w-full max-w-[380px] h-10 px-3.5 bg-background border border-border hover:border-primary/50 hover:bg-muted/30 rounded-xl transition-colors text-sm text-muted-foreground shadow-2xs"
+            className="group flex items-center justify-between w-full max-w-[380px] h-10 px-4 bg-card/90 border border-border hover:border-primary/50 hover:bg-card rounded-full transition-colors text-sm text-muted-foreground shadow-2xs"
           >
             <div className="flex items-center gap-2 overflow-hidden">
               <Search className="h-4 w-4 shrink-0 group-hover:text-primary transition-colors" />

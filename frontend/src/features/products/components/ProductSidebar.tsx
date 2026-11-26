@@ -46,9 +46,9 @@ export function ProductSidebar({
 
   return (
     <aside className="w-full lg:w-64 xl:w-72 shrink-0">
-      <div className="sticky top-[80px] bg-background/50 border border-border/50 rounded-[2rem] p-6 shadow-sm">
-        <div className="flex items-center gap-2 text-lg font-bold border-b border-border/50 pb-4 mb-6">
-          <Filter className="w-5 h-5" /> Bộ lọc tìm kiếm
+      <div className="sticky top-[88px] bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-surface">
+        <div className="flex items-center gap-2 text-base font-semibold border-b border-border pb-4 mb-5">
+          <Filter className="w-4 h-4 text-primary" /> Bộ lọc tìm kiếm
         </div>
 
         {/* Gợi ý cho bạn */}
@@ -78,7 +78,7 @@ export function ProductSidebar({
         <div className="space-y-6">
           {/* Danh mục */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-3">Danh mục</h3>
+            <h3 className="font-semibold text-xs uppercase tracking-[0.12em] text-muted-foreground mb-3">Danh mục</h3>
             <div className="flex flex-col gap-1 max-h-[220px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
               <button onClick={() => { setCategoryIds([]); resetPage(); }} className={`text-left px-3 py-2 rounded-xl text-sm font-medium transition-colors ${categoryIds.length === 0 ? 'bg-primary/10 text-primary font-bold' : 'hover:bg-muted text-foreground'}`}>
                 Tất cả danh mục
@@ -110,7 +110,7 @@ export function ProductSidebar({
 
           {/* Khu vực */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-3">Khu vực</h3>
+            <h3 className="font-semibold text-xs uppercase tracking-[0.12em] text-muted-foreground mb-3">Khu vực</h3>
             <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
               <Button variant="outline" className="w-full justify-between font-medium bg-background border-border/60 rounded-xl hover:bg-muted/50 transition-all h-10 px-3" onClick={() => setIsLocationDialogOpen(true)}>
                 <span className="line-clamp-1 text-left">
@@ -132,7 +132,7 @@ export function ProductSidebar({
           {/* Hình thức */}
           {!hideSellTypeFilter && (
             <div>
-              <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-3">Hình thức bán</h3>
+              <h3 className="font-semibold text-xs uppercase tracking-[0.12em] text-muted-foreground mb-3">Hình thức bán</h3>
               <Select value={sellType} onValueChange={(val) => { setSellType(val || 'all'); resetPage(); }}>
                 <SelectTrigger className="w-full bg-background border-border/60 font-medium rounded-xl hover:bg-muted/50 transition-all h-10 px-3">
                   <span className="line-clamp-1 text-left">
@@ -150,7 +150,7 @@ export function ProductSidebar({
 
           {/* Tình trạng */}
           <div>
-            <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-3">Tình trạng</h3>
+            <h3 className="font-semibold text-xs uppercase tracking-[0.12em] text-muted-foreground mb-3">Tình trạng</h3>
             <Select value={condition} onValueChange={(val) => { setCondition(val || 'all'); resetPage(); }}>
               <SelectTrigger className="w-full bg-background border-border/60 font-medium rounded-xl hover:bg-muted/50 transition-all h-10 px-3">
                 <span className="line-clamp-1 text-left">

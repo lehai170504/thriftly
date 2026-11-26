@@ -1,127 +1,167 @@
-import { ShieldCheck, Wallet, RefreshCw, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  CreditCard,
+  Lock,
+  PackageCheck,
+  ShieldCheck,
+  Truck,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const metadata = {
   title: 'Chính sách Escrow | Thriftly',
-  description: 'Tìm hiểu về hệ thống thanh toán trung gian an toàn tuyệt đối trên Thriftly.',
+  description: 'Tìm hiểu về quy trình thanh toán ký quỹ trung gian trên Thriftly.',
 };
+
+const escrowSteps = [
+  {
+    step: '01',
+    icon: CreditCard,
+    title: 'Hoàn tất thanh toán',
+    description: 'Người mua thanh toán đơn hàng mua ngay hoặc đơn thắng đấu giá qua ví Thriftly hoặc cổng thanh toán.',
+  },
+  {
+    step: '02',
+    icon: Lock,
+    title: 'Tạm giữ tiền (Escrow)',
+    description: 'Khoản thanh toán được tạm giữ an toàn trên hệ thống trung gian và chưa chuyển ngay cho người bán.',
+  },
+  {
+    step: '03',
+    icon: Truck,
+    title: 'Đóng gói & Giao hàng',
+    description: 'Người bán tiến hành đóng gói và bàn giao vận chuyển khi đơn hàng đã được xác nhận thanh toán.',
+  },
+  {
+    step: '04',
+    icon: PackageCheck,
+    title: 'Kiểm tra & Xác nhận',
+    description: 'Người mua nhận hàng, kiểm tra tình trạng thực tế và bấm xác nhận đã nhận hàng trên hệ thống.',
+  },
+  {
+    step: '05',
+    icon: CheckCircle2,
+    title: 'Giải ngân cho người bán',
+    description: 'Hệ thống hoàn tất đơn hàng và giải ngân khoản tiền tương ứng về ví của người bán.',
+  },
+];
 
 export default function EscrowPage() {
   return (
-    <div className="bg-background">
-      {/* Hero Section */}
-      <section className="dark relative pt-8 pb-20 bg-blue-900 overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-400 via-blue-900 to-slate-900"></div>
-        <div className="container mx-auto px-4 relative z-10 max-w-5xl">
-          <Link href="/">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground mb-8 rounded-full px-6 transition-colors">
-              <ArrowLeft className="w-5 h-5 mr-2" /> Về trang chủ
+    <div className="w-full bg-[#F5F2EC] dark:bg-background text-[#191919] dark:text-foreground">
+      <section className="pt-8 pb-16 border-b border-[#E5E0D7] dark:border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="inline-block mb-8">
+            <Button
+              variant="ghost"
+              className="rounded-xl px-3 text-[#77736D] dark:text-muted-foreground hover:text-[#191919] dark:hover:text-foreground hover:bg-white/70 dark:hover:bg-accent"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Về trang chủ
             </Button>
           </Link>
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-8 border border-blue-400/30">
-              <ShieldCheck className="w-10 h-10 text-blue-300" />
+
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-card border border-[#E5E0D7] dark:border-border text-xs font-semibold text-[#244C3A] dark:text-primary mb-5">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Cơ chế bảo vệ thanh toán</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black text-foreground mb-6 tracking-tight">
-              Thanh toán an toàn với <br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-emerald-300">
-                Hệ thống Escrow
-              </span>
+            <h1 className="font-serif text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.12] mb-5">
+              Thanh Toán An Toàn Với{' '}
+              <span className="italic font-normal text-[#244C3A] dark:text-primary">Hệ Thống Escrow</span>
             </h1>
-            <p className="text-lg md:text-xl text-blue-100/80 mb-10 leading-relaxed max-w-2xl mx-auto">
-              Giao dịch đồ cũ chưa bao giờ an tâm đến thế. Tiền của bạn được giữ an toàn trên hệ thống trung gian và chỉ được chuyển đi khi bạn đã hoàn toàn hài lòng với món đồ nhận được.
+            <p className="text-base sm:text-lg text-[#77736D] dark:text-muted-foreground leading-relaxed">
+              Tiền của bạn được giữ an toàn trên hệ thống trung gian và chỉ giải ngân cho người bán sau khi bạn xác nhận đã nhận được đúng sản phẩm.
             </p>
           </div>
         </div>
       </section>
 
-      {/* How it works Section */}
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-foreground mb-4">Escrow hoạt động như thế nào?</h2>
-            <p className="text-muted-foreground text-lg">Quy trình 3 bước đơn giản bảo vệ quyền lợi tối đa cho cả người mua và người bán.</p>
+      <section className="py-16 lg:py-24 bg-white dark:bg-card border-b border-[#E5E0D7] dark:border-border">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mb-12">
+            <p className="text-xs font-semibold tracking-[0.16em] uppercase text-[#244C3A] dark:text-primary mb-3">
+              Quy trình ký quỹ
+            </p>
+            <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-3">
+              Escrow Hoạt Động Như Thế Nào?
+            </h2>
+            <p className="text-sm sm:text-base text-[#77736D] dark:text-muted-foreground">
+              5 bước bảo vệ quyền lợi công bằng cho cả người mua và người bán.
+            </p>
           </div>
 
-          <div className="relative">
-            {/* Connecting line (desktop only) */}
-            <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-blue-200 via-primary/30 to-emerald-200 z-0"></div>
-
-            <div className="grid md:grid-cols-3 gap-12 relative z-10">
-              {/* Step 1 */}
-              <div className="text-center">
-                <div className="w-24 h-24 glass bg-background/50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)] border-4 border-primary/20 relative">
-                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold border-2 border-background">1</div>
-                  <Wallet className="w-10 h-10 text-blue-500" />
+          <div className="space-y-4">
+            {escrowSteps.map((item) => (
+              <div
+                key={item.step}
+                className="editorial-card rounded-2xl bg-[#F5F2EC] dark:bg-muted/40 border border-[#E5E0D7] dark:border-border p-5 sm:p-6 flex items-start gap-4 sm:gap-6"
+              >
+                <div className="size-12 rounded-xl bg-white dark:bg-card border border-[#E5E0D7] dark:border-border flex items-center justify-center text-[#244C3A] dark:text-primary shrink-0 shadow-surface">
+                  <item.icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">Tạm giữ tiền (Hold)</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Khi bạn thanh toán đơn hàng, tiền sẽ được trừ vào ví nhưng <span className="font-semibold text-foreground">chưa chuyển cho người bán</span>. Số tiền này được Thriftly "Giam giữ" an toàn.
-                </p>
-              </div>
-
-              {/* Step 2 */}
-              <div className="text-center">
-                <div className="w-24 h-24 glass bg-background/50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)] border-4 border-primary/20 relative">
-                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold border-2 border-background">2</div>
-                  <RefreshCw className="w-10 h-10 text-primary" />
+                <div>
+                  <span className="font-numeric text-xs font-semibold tracking-[0.14em] text-[#244C3A] dark:text-primary">
+                    BƯỚC {item.step}
+                  </span>
+                  <h3 className="text-lg font-semibold mt-0.5 mb-1.5">{item.title}</h3>
+                  <p className="text-sm text-[#77736D] dark:text-muted-foreground leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">Giao hàng & Kiểm tra</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Người bán tiến hành đóng gói và giao hàng. Bạn nhận hàng, kiểm tra kỹ lưỡng xem có đúng mô tả, hình ảnh và tình trạng đã cam kết hay không.
-                </p>
               </div>
-
-              {/* Step 3 */}
-              <div className="text-center">
-                <div className="w-24 h-24 glass bg-background/50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)] border-4 border-emerald-500/20 relative">
-                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center font-bold border-2 border-background">3</div>
-                  <CheckCircle className="w-10 h-10 text-emerald-500" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-3">Hoàn tất (Release)</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Nếu mọi thứ ổn thoả, bạn nhấn nút "Đã nhận hàng". Lúc này hệ thống mới <span className="font-semibold text-foreground">mở khóa tiền</span> và cộng thẳng vào ví người bán.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ/Benefits Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="glass bg-background/50 rounded-[2.5rem] p-8 md:p-12 border border-border shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-            <h2 className="text-2xl md:text-3xl font-black text-foreground mb-8 text-center">Tại sao bạn nên yên tâm?</h2>
+      <section className="py-16 lg:py-24 bg-[#F5F2EC] dark:bg-background">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl bg-white dark:bg-card border border-[#E5E0D7] dark:border-border p-7 sm:p-12 shadow-surface">
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold mb-8">
+              Câu Hỏi Thường Gặp Về Escrow
+            </h2>
 
-            <div className="space-y-6">
-              <div className="bg-muted p-6 rounded-2xl shadow-sm border border-border">
-                <h4 className="font-bold text-lg text-foreground mb-2 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  Chuyện gì xảy ra nếu hàng bị lỗi/không đúng mô tả?
-                </h4>
-                <p className="text-muted-foreground pl-4">
-                  Tiền vẫn đang nằm trong hệ thống Escrow của Thriftly! Bạn chỉ cần nhấn báo cáo lỗi trong vòng 3 ngày kể từ khi nhận hàng. Đội ngũ quản trị viên sẽ xem xét bằng chứng và <span className="font-semibold text-foreground">hoàn lại 100% tiền</span> về ví của bạn nếu người bán có gian lận.
+            <div className="space-y-4 mb-10">
+              <div className="rounded-2xl bg-[#F5F2EC] dark:bg-muted/40 border border-[#E5E0D7] dark:border-border p-5 sm:p-6">
+                <h3 className="font-semibold text-base mb-2">
+                  Chuyện gì xảy ra nếu hàng bị lỗi hoặc không đúng mô tả?
+                </h3>
+                <p className="text-sm text-[#77736D] dark:text-muted-foreground leading-relaxed">
+                  Khoản tiền vẫn đang được tạm giữ trong hệ thống Escrow. Bạn có thể gửi yêu cầu hoàn tiền hoặc khiếu nại kèm bằng chứng trong thời hạn quy định trước khi xác nhận nhận hàng để đội ngũ quản trị xem xét và hoàn tiền về ví.
                 </p>
               </div>
 
-              <div className="bg-muted p-6 rounded-2xl shadow-sm border border-border">
-                <h4 className="font-bold text-lg text-foreground mb-2 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  Người bán có sợ bị người mua "bùng" tiền không?
-                </h4>
-                <p className="text-muted-foreground pl-4">
-                  Hoàn toàn không! Một khi trạng thái đơn hàng là "Đã thanh toán (Escrow)", điều đó chứng tỏ tiền thật 100% của người mua đã được nạp và khóa lại trong hệ thống. Người bán có thể yên tâm giao hàng mà không sợ rủi ro "bùng hàng, bom hàng".
+              <div className="rounded-2xl bg-[#F5F2EC] dark:bg-muted/40 border border-[#E5E0D7] dark:border-border p-5 sm:p-6">
+                <h3 className="font-semibold text-base mb-2">
+                  Người bán có yên tâm giao hàng mà không sợ bị bùng tiền không?
+                </h3>
+                <p className="text-sm text-[#77736D] dark:text-muted-foreground leading-relaxed">
+                  Có. Khi đơn hàng chuyển sang trạng thái đã thanh toán Escrow, số tiền tương ứng đã được giữ chắc chắn trong hệ thống, giúp người bán yên tâm đóng gói và vận chuyển.
                 </p>
               </div>
             </div>
 
-            <div className="mt-12 text-center">
+            <div className="flex flex-col sm:flex-row gap-3.5">
               <Link href="/wallet">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 h-14 text-lg font-bold shadow-lg shadow-primary/20">
-                  Nạp tiền vào ví ngay
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto h-12 px-7 rounded-xl bg-[#244C3A] hover:bg-[#1D3E2F] text-white dark:bg-primary dark:text-primary-foreground font-medium group"
+                >
+                  Đi tới Ví Thriftly
+                  <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <Link href="/policies?tab=refund">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto h-12 px-7 rounded-xl border-[#E5E0D7] dark:border-border bg-white dark:bg-card text-[#191919] dark:text-foreground hover:bg-[#F5F2EC] dark:hover:bg-accent font-medium"
+                >
+                  Xem chính sách hoàn tiền
                 </Button>
               </Link>
             </div>

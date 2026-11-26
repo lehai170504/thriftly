@@ -13,13 +13,13 @@ type StatePanelProps = {
 
 function StatePanel({ title, description, icon, action, className }: StatePanelProps) {
   return (
-    <div className={cn("flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 p-8 sm:p-12 text-center shadow-xs", className)}>
+    <div className={cn("flex min-h-64 flex-col items-center justify-center rounded-2xl border border-border bg-card p-8 sm:p-12 text-center shadow-surface", className)}>
       {icon && (
-        <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-muted/80 border border-border/80 text-primary shadow-xs">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-xl bg-background border border-border text-primary shadow-2xs">
           {icon}
         </div>
       )}
-      <h3 className="font-heading text-lg font-bold text-foreground tracking-tight">{title}</h3>
+      <h3 className="font-serif text-xl font-semibold text-foreground tracking-tight">{title}</h3>
       {description && <p className="mt-1.5 max-w-md text-sm text-muted-foreground leading-relaxed">{description}</p>}
       {action && <div className="mt-6 flex flex-wrap items-center justify-center gap-3">{action}</div>}
     </div>

@@ -1,161 +1,340 @@
 'use client';
 
-import { useProducts } from '@/features/products/hooks/useProducts';
-import { AuctionProductCard } from '@/components/home/AuctionProductCard';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { FadeIn } from '@/components/ui/fade-in';
+import { ArrowRight, Clock, Gavel, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Money, NumberText } from '@/components/ui/typography';
 import { ProductGridSkeleton } from '@/components/ui/loading-skeletons';
-import { useRef } from 'react';
+import { useProducts } from '@/features/products/hooks/useProducts';
+import type { Product } from '@/features/products/types/product';
+import { formatDateTime } from '@/lib/formatters';
+
+interface DemoAuctionItem {
+  id: string;
+  title: string;
+  categoryName: string;
+  startingPrice: number;
+  currentBid: number;
+  bidCount: number;
+  imageUrl: string;
+  statusLabel: string;
+  endNote: string;
+}
+
+const DEMO_AUCTIONS: DemoAuctionItem[] = [
+  {
+    id: 'demo-jacket',
+    title: 'Áo khoác da dáng Vintage 1990s',
+    categoryName: 'Thời trang Vintage',
+    startingPrice: 1800000,
+    currentBid: 2450000,
+    bidCount: 14,
+    imageUrl: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=700&q=80',
+    statusLabel: 'Minh họa',
+    endNote: 'Mẫu giao diện phiên đấu giá',
+  },
+  {
+    id: 'demo-watch',
+    title: 'Đồng hồ cơ cổ điển mặt số kem',
+    categoryName: 'Phụ kiện',
+    startingPrice: 3500000,
+    currentBid: 4200000,
+    bidCount: 9,
+    imageUrl: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=700&q=80',
+    statusLabel: 'Minh họa',
+    endNote: 'Mẫu giao diện phiên đấu giá',
+  },
+  {
+    id: 'demo-camera',
+    title: 'Máy ảnh film Rangefinder ống kính 35mm',
+    categoryName: 'Thiết bị điện tử',
+    startingPrice: 4800000,
+    currentBid: 5600000,
+    bidCount: 18,
+    imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=700&q=80',
+    statusLabel: 'Minh họa',
+    endNote: 'Mẫu giao diện phiên đấu giá',
+  },
+  {
+    id: 'demo-sneakers',
+    title: 'Giày thể thao da lộn phối màu Retro',
+    categoryName: 'Giày & Streetwear',
+    startingPrice: 1500000,
+    currentBid: 2100000,
+    bidCount: 11,
+    imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80',
+    statusLabel: 'Minh họa',
+    endNote: 'Mẫu giao diện phiên đấu giá',
+  },
+];
+
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=700&q=80';
+
+const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const;
+
+function AuctionCountdownBadge({ endTime }: { endTime?: string }) {
+  const [text, setText] = useState<string>('Đang cập nhật');
+
+  useEffect(() => {
+    if (!endTime) return;
+    const update = () => {
+      const diff = new Date(endTime).getTime() - Date.now();
+      if (diff <= 0) {
+        setText('Đã kết thúc');
+        return;
+      }
+      const days = Math.floor(diff / 86_400_000);
+      const hours = Math.floor((diff % 86_400_000) / 3_600_000);
+      const minutes = Math.floor((diff % 3_600_000) / 60_000);
+      setText(days > 0 ? `Còn ${days} ngày ${hours} giờ` : `Còn ${hours} giờ ${minutes} phút`);
+    };
+    update();
+    const interval = window.setInterval(update, 60_000);
+    return () => window.clearInterval(interval);
+  }, [endTime]);
+
+  return <span>{text}</span>;
+}
 
 export function FeaturedProducts() {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { data, isLoading, isError } = useProducts(0, 12);
+  const [now, setNow] = useState<number | null>(null);
 
-  const { data, isLoading, isError } = useProducts(0, 8);
+  useEffect(() => {
+    setNow(Date.now());
+  }, []);
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const { scrollLeft, clientWidth } = scrollContainerRef.current;
-      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
-    }
-  };
+  const liveAuctions = useMemo<Product[]>(() => {
+    if (!data?.content || now === null) return [];
+    return data.content
+      .filter(
+        (item) =>
+          item.sellType === 'AUCTION' &&
+          item.auctionEndTime &&
+          new Date(item.auctionEndTime).getTime() > now
+      )
+      .slice(0, 4);
+  }, [data, now]);
+
+  const showDemo = !isLoading && (isError || liveAuctions.length === 0);
 
   if (isLoading) {
     return (
-      <div className="w-full py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col mb-8">
-            <div className="w-48 h-4 bg-slate-200 animate-pulse rounded-full mb-4"></div>
-            <div className="w-64 h-10 bg-slate-200 animate-pulse rounded"></div>
+      <section className="py-16 lg:py-24 bg-[#F5F2EC] dark:bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 space-y-3">
+            <div className="w-36 h-4 bg-[#E5E0D7] dark:bg-muted animate-pulse rounded-full" />
+            <div className="w-72 h-9 bg-[#E5E0D7] dark:bg-muted animate-pulse rounded-lg" />
           </div>
           <ProductGridSkeleton count={4} />
         </div>
-      </div>
+      </section>
     );
   }
 
-  if (isError || !data) return null;
-
-  const now = new Date().getTime();
-  let auctionProducts: any[] = (data.content || []).filter((p: any) => {
-    if (p.sellType !== 'AUCTION') return false;
-    if (!p.auctionEndTime) return false;
-    return new Date(p.auctionEndTime).getTime() > now;
-  });
-
-  if (auctionProducts.length === 0) {
-    auctionProducts = [
-      {
-        id: 'demo-1',
-        title: 'MacBook Pro M3 Max 2023 (Demo)',
-        price: 50000000,
-        currentHighestBid: 55000000,
-        auctionEndTime: new Date(new Date().getTime() + 12 * 60 * 60 * 1000).toISOString(),
-        imageUrl: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=500&q=80',
-        sellerName: 'Thriftly System'
-      },
-      {
-        id: 'demo-2',
-        title: 'Đồng hồ Rolex Submariner (Demo)',
-        price: 120000000,
-        currentHighestBid: 150000000,
-        auctionEndTime: new Date(new Date().getTime() + 5 * 60 * 60 * 1000).toISOString(),
-        imageUrl: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=500&q=80',
-        sellerName: 'Thriftly System'
-      },
-      {
-        id: 'demo-3',
-        title: 'Máy ảnh Sony A7IV (Demo)',
-        price: 45000000,
-        currentHighestBid: 48000000,
-        auctionEndTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString(),
-        imageUrl: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=500&q=80',
-        sellerName: 'Thriftly System'
-      },
-      {
-        id: 'demo-4',
-        title: 'Giày Nike Air Jordan 1 (Demo)',
-        price: 4000000,
-        currentHighestBid: 5500000,
-        auctionEndTime: new Date(new Date().getTime() + 2 * 60 * 60 * 1000).toISOString(),
-        imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80',
-        sellerName: 'Thriftly System'
-      }
-    ];
-  }
-
-  if (auctionProducts.length === 0) return null;
-
   return (
-    <div className="w-full relative overflow-hidden py-2">
-      <div className="w-full px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto">
-        <FadeIn direction="up">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-            <div className="max-w-2xl">
-              <p className="text-xs font-bold tracking-[0.2em] text-blue-600 uppercase mb-3 flex items-center gap-3">
-                <span className="w-8 h-px bg-blue-600/50"></span>
-                Phiên đấu giá
-              </p>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-2 font-sans">
-                Khám Phá Phiên Đấu Giá Nổi Bật
-              </h2>
-              <p className="text-base text-muted-foreground font-medium">
-                Cơ hội sở hữu những món đồ độc đáo với giá tốt nhất hôm nay.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-2 mr-2">
-                <Button variant="outline" size="icon" onClick={() => scroll('left')} className="rounded-full border-slate-200 hover:bg-slate-100 transition-transform hover:scale-105 active:scale-95">
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                <Button variant="outline" size="icon" onClick={() => scroll('right')} className="rounded-full border-slate-200 hover:bg-slate-100 transition-transform hover:scale-105 active:scale-95">
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
-              </div>
-              <Link href="/products">
-                <Button variant="ghost" className="rounded-full px-5 hover:bg-slate-100 font-semibold text-slate-700 transition-transform hover:translate-x-1">
-                  Xem tất cả <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </div>
+    <section className="py-16 lg:py-24 bg-[#F5F2EC] dark:bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.45, ease: EDITORIAL_EASE }}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10"
+        >
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold tracking-[0.16em] uppercase text-[#244C3A] dark:text-primary mb-3">
+              Đấu giá nổi bật
+            </p>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-[2.75rem] font-semibold tracking-tight text-[#191919] dark:text-foreground leading-tight mb-3">
+              Sức Hút Nằm Ở Từng Lượt Trả Giá.
+            </h2>
+            <p className="text-sm sm:text-base text-[#77736D] dark:text-muted-foreground leading-relaxed">
+              Theo dõi mức giá hiện tại, số lượt trả giá và thời gian kết thúc của các phiên đấu giá đang mở trên Thriftly.
+            </p>
           </div>
-        </FadeIn>
 
-        <div className="relative w-full">
-          <div
-            ref={scrollContainerRef}
-            className="flex overflow-x-auto gap-6 snap-x snap-mandatory pb-6 pt-2 scrollbar-hide"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {auctionProducts.map((product: any, index: number) => (
-              <FadeIn 
-                key={product.id} 
-                direction="left" 
-                delay={index * 0.1}
-                className="w-[280px] sm:w-[320px] lg:w-[340px] snap-start shrink-0 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl rounded-2xl"
-              >
-                <AuctionProductCard product={product} />
-              </FadeIn>
-            ))}
-
-            <FadeIn 
-              direction="left" 
-              delay={auctionProducts.length * 0.1} 
-              className="w-[280px] sm:w-[320px] lg:w-[340px] snap-start shrink-0 flex items-center justify-center p-4"
+          <Link href="/products?sellType=AUCTION" className="shrink-0">
+            <Button
+              variant="outline"
+              className="rounded-xl border-[#E5E0D7] dark:border-border bg-white dark:bg-card text-[#191919] dark:text-foreground hover:bg-[#E5E0D7]/40 dark:hover:bg-accent h-11 px-5 text-sm font-medium group transition-all duration-200 active:scale-[0.98]"
             >
-              <Link href="/products" className="group flex flex-col items-center justify-center gap-5 w-full h-full min-h-[360px] rounded-[2rem] bg-card border border-border hover:border-primary/50 transition-all duration-500 hover:shadow-xl hover:-translate-y-2 cursor-pointer">
-                <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500 group-hover:scale-110">
-                  <ArrowRight className="w-6 h-6 text-muted-foreground group-hover:text-primary-foreground transition-colors duration-500" />
-                </div>
-                <span className="font-bold text-base text-foreground group-hover:text-primary transition-colors duration-300">Xem toàn bộ</span>
-              </Link>
-            </FadeIn>
+              Xem tất cả phiên đấu giá
+              <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+            </Button>
+          </Link>
+        </motion.div>
+
+        {showDemo && (
+          <div className="mb-8 flex items-start sm:items-center gap-3 rounded-xl bg-white dark:bg-card border border-[#E5E0D7] dark:border-border px-4 py-3 text-xs sm:text-sm text-[#77736D] dark:text-muted-foreground">
+            <Info className="w-4 h-4 text-[#244C3A] dark:text-primary shrink-0 mt-0.5 sm:mt-0" />
+            <p>
+              Hiện chưa có phiên đấu giá trực tiếp nào từ hệ thống. Các thẻ bên dưới là{' '}
+              <span className="font-semibold text-[#191919] dark:text-foreground">nội dung minh họa</span>{' '}
+              giúp bạn hình dung bố cục phiên đấu giá trên Thriftly.
+            </p>
           </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {!showDemo
+            ? liveAuctions.map((product, index) => {
+                const currentBid =
+                  product.currentHighestBid && product.currentHighestBid > product.price
+                    ? product.currentHighestBid
+                    : product.price;
+                const hasHigherBid =
+                  Boolean(product.currentHighestBid) &&
+                  (product.currentHighestBid ?? 0) > product.price;
+
+                return (
+                  <motion.article
+                    key={product.id}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.4, delay: index * 0.06, ease: EDITORIAL_EASE }}
+                    className="group editorial-card flex flex-col rounded-2xl bg-white dark:bg-card border border-[#E5E0D7] dark:border-border overflow-hidden hover:border-[#244C3A]/40 dark:hover:border-primary/40 hover:shadow-elevated"
+                  >
+                    <Link href={`/auctions/${product.id}`} className="flex flex-col flex-1">
+                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#E5E0D7]/30 dark:bg-muted">
+                        <img
+                          src={product.imageUrl || product.images?.[0] || FALLBACK_IMAGE}
+                          alt={product.title}
+                          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                          onError={(event) => {
+                            event.currentTarget.src = FALLBACK_IMAGE;
+                          }}
+                        />
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 dark:bg-card/95 text-[#191919] dark:text-foreground text-[11px] font-semibold shadow-surface">
+                            <span className="size-1.5 rounded-full bg-[#244C3A] dark:bg-primary animate-pulse" />
+                            {product.isLive ? 'Trực tiếp' : 'Đang diễn ra'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col flex-1 p-5">
+                        <p className="text-xs text-[#77736D] dark:text-muted-foreground mb-1 truncate">
+                          {product.categoryName || 'Đồ tuyển chọn'}
+                        </p>
+                        <h3 className="text-base font-semibold text-[#191919] dark:text-foreground line-clamp-2 min-h-[3rem] mb-4 group-hover:text-[#244C3A] dark:group-hover:text-primary transition-colors">
+                          {product.title}
+                        </h3>
+
+                        <div className="mt-auto space-y-3 pt-3 border-t border-[#E5E0D7] dark:border-border">
+                          <div className="flex items-baseline justify-between gap-2">
+                            <div>
+                              <p className="text-[11px] text-[#77736D] dark:text-muted-foreground">
+                                {hasHigherBid ? 'Giá cao nhất hiện tại' : 'Giá khởi điểm'}
+                              </p>
+                              <Money
+                                value={currentBid}
+                                className="text-lg font-bold text-[#191919] dark:text-foreground"
+                              />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[11px] text-[#77736D] dark:text-muted-foreground">Lượt giá</p>
+                              <NumberText
+                                value={product.bidCount ?? 0}
+                                className="text-sm font-semibold text-[#191919] dark:text-foreground"
+                              />
+                            </div>
+                          </div>
+
+                          {hasHigherBid && (
+                            <p className="text-xs text-[#77736D] dark:text-muted-foreground">
+                              Khởi điểm: <Money value={product.price} className="text-xs font-medium text-[#77736D] dark:text-muted-foreground" />
+                            </p>
+                          )}
+
+                          <div className="flex items-center justify-between text-xs text-[#77736D] dark:text-muted-foreground">
+                            <span className="inline-flex items-center gap-1.5 font-numeric font-medium text-[#244C3A] dark:text-primary">
+                              <Clock className="w-3.5 h-3.5" />
+                              <AuctionCountdownBadge endTime={product.auctionEndTime} />
+                            </span>
+                            <span title={formatDateTime(product.auctionEndTime)}>
+                              <Gavel className="w-3.5 h-3.5 inline mr-1" />
+                              Xem phiên
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.article>
+                );
+              })
+            : DEMO_AUCTIONS.map((item, index) => (
+                <motion.article
+                  key={item.id}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.4, delay: index * 0.06, ease: EDITORIAL_EASE }}
+                  className="group editorial-card flex flex-col rounded-2xl bg-white dark:bg-card border border-[#E5E0D7] dark:border-border overflow-hidden hover:border-[#244C3A]/40 dark:hover:border-primary/40 hover:shadow-elevated"
+                >
+                  <Link href="/products?sellType=AUCTION" className="flex flex-col flex-1">
+                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#E5E0D7]/30 dark:bg-muted">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                      />
+                      <div className="absolute top-3 left-3">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/95 dark:bg-card/95 text-[#77736D] dark:text-muted-foreground text-[11px] font-semibold border border-[#E5E0D7] dark:border-border shadow-surface">
+                          {item.statusLabel}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col flex-1 p-5">
+                      <p className="text-xs text-[#77736D] dark:text-muted-foreground mb-1 truncate">
+                        {item.categoryName}
+                      </p>
+                      <h3 className="text-base font-semibold text-[#191919] dark:text-foreground line-clamp-2 min-h-[3rem] mb-4 group-hover:text-[#244C3A] dark:group-hover:text-primary transition-colors">
+                        {item.title}
+                      </h3>
+
+                      <div className="mt-auto space-y-2.5 pt-3 border-t border-[#E5E0D7] dark:border-border">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <div>
+                            <p className="text-[11px] text-[#77736D] dark:text-muted-foreground">
+                              Giá minh họa
+                            </p>
+                            <Money
+                              value={item.currentBid}
+                              className="text-lg font-bold text-[#191919] dark:text-foreground"
+                            />
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[11px] text-[#77736D] dark:text-muted-foreground">Lượt giá</p>
+                            <NumberText
+                              value={item.bidCount}
+                              className="text-sm font-semibold text-[#191919] dark:text-foreground"
+                            />
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-[#77736D] dark:text-muted-foreground">
+                          Khởi điểm: <Money value={item.startingPrice} className="text-xs font-medium text-[#77736D] dark:text-muted-foreground" />
+                        </p>
+
+                        <div className="flex items-center justify-between pt-1 text-xs font-medium text-[#244C3A] dark:text-primary">
+                          <span>{item.endNote}</span>
+                          <span className="inline-flex items-center gap-1 transition-transform duration-200 group-hover:translate-x-0.5">
+                            Xem sàn <ArrowRight className="w-3.5 h-3.5" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.article>
+              ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

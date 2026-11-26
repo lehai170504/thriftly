@@ -1,118 +1,308 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { FadeIn } from '@/components/ui/fade-in';
+import { ArrowRight, Clock, Gavel, Plus, ShieldCheck, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Money, NumberText } from '@/components/ui/typography';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProducts } from '@/features/products/hooks/useProducts';
+import { CreateProductModal } from '@/features/products/components/CreateProductModal';
+import type { Product } from '@/features/products/types/product';
 
-interface LiveAuctionHeroProps {
-  product?: {
-    id: string;
-    title: string;
-    currentHighestBid?: number;
-    price: number;
-    auctionEndTime?: string;
-    imageUrl?: string;
-    bidCount?: number;
-    sellerName?: string;
-  };
+const EDITORIAL_HERO_IMAGE =
+  'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=1000&q=85';
+
+const EDITORIAL_ACCENT_IMAGE =
+  'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=600&q=80';
+
+const EDITORIAL_EASE = [0.22, 1, 0.36, 1] as const;
+
+function useRealAuctionCountdown(endTime?: string) {
+  const [label, setLabel] = useState<string>('');
+
+  useEffect(() => {
+    if (!endTime) {
+      setLabel('');
+      return;
+    }
+
+    const update = () => {
+      const diff = new Date(endTime).getTime() - Date.now();
+      if (diff <= 0) {
+        setLabel('Đã kết thúc');
+        return;
+      }
+      const hours = Math.floor(diff / 3_600_000);
+      const minutes = Math.floor((diff % 3_600_000) / 60_000);
+      const seconds = Math.floor((diff % 60_000) / 1_000);
+      if (hours >= 24) {
+        const days = Math.floor(hours / 24);
+        setLabel(`${days} ngày ${hours % 24} giờ`);
+      } else {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        setLabel(`${pad(hours)}:${pad(minutes)}:${pad(seconds)}`);
+      }
+    };
+
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [endTime]);
+
+  return label;
 }
 
-export function LiveAuctionHero({ product }: LiveAuctionHeroProps) {
-  const avatars = [
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80",
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80"
-  ];
+export function LiveAuctionHero() {
+  const { isAuthenticated, openRegisterModal } = useAuth();
+  const { data } = useProducts(0, 12);
+  const [now, setNow] = useState<number | null>(null);
+
+  useEffect(() => {
+    setNow(Date.now());
+  }, []);
+
+  const featuredAuction = useMemo<Product | null>(() => {
+    if (now === null) return null;
+    const items = data?.content || [];
+    const active = items.filter(
+      (item) =>
+        item.sellType === 'AUCTION' &&
+        item.auctionEndTime &&
+        new Date(item.auctionEndTime).getTime() > now
+    );
+    return active[0] ?? null;
+  }, [data, now]);
+
+  const countdown = useRealAuctionCountdown(featuredAuction?.auctionEndTime);
 
   return (
-    <section className="relative w-full min-h-[calc(100vh-5rem)] flex items-center pt-28 pb-16 overflow-hidden">
-      {/* Background Image & Overlays */}
-      <motion.div
-        initial={{ scale: 1.05, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.2, ease: 'easeOut' }}
-        className="absolute inset-0 z-0"
-      >
-        <img
-          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=80"
-          alt="Vintage clothing background"
-          className="w-full h-full object-cover object-center opacity-100"
-        />
-        {/* Dark overlay to ensure text readability across the entire image */}
-        <div className="absolute inset-0 bg-black/60 dark:bg-black/70" />
-      </motion.div>
+    <section className="relative w-full bg-[#F5F2EC] dark:bg-background text-[#191919] dark:text-foreground overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-14 lg:pt-16 lg:pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <div className="lg:col-span-7 flex flex-col items-start">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: EDITORIAL_EASE }}
+              className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-card border border-[#E5E0D7] dark:border-border text-xs font-medium text-[#244C3A] dark:text-primary mb-6"
+            >
+              <span className="size-1.5 rounded-full bg-[#244C3A] dark:bg-primary animate-pulse" />
+              <span>Đấu giá trực tiếp &amp; Ký quỹ Escrow</span>
+            </motion.div>
 
-      <div className="max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 relative z-10 flex flex-col items-center justify-center text-center">
-        <div className="flex flex-col items-center max-w-4xl">
-          <FadeIn delay={0.2} direction="up">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/20 shadow-xl text-xs font-semibold mb-8 bg-black/30 backdrop-blur-md text-white hover:bg-black/40 transition-all duration-300">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Nền Tảng Đấu Giá AI & Escrow An Toàn Số 1</span>
-            </div>
-          </FadeIn>
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.06, ease: EDITORIAL_EASE }}
+              className="font-serif text-4xl sm:text-5xl lg:text-[3.75rem] font-semibold tracking-tight text-[#191919] dark:text-foreground leading-[1.12] mb-6"
+            >
+              Quá khứ của một người.{' '}
+              <span className="block italic font-normal text-[#244C3A] dark:text-primary mt-1">
+                Kho báu tiếp theo của bạn.
+              </span>
+            </motion.h1>
 
-          <FadeIn delay={0.3} direction="up">
-            <h1 className="text-7xl sm:text-8xl lg:text-[10rem] font-black tracking-tighter text-white leading-[1] mb-4 font-serif drop-shadow-2xl" style={{ fontFamily: 'var(--font-serif)' }}>
-              Thriftly<span className="text-primary">.</span>
-            </h1>
-          </FadeIn>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.12, ease: EDITORIAL_EASE }}
+              className="text-base sm:text-lg text-[#77736D] dark:text-muted-foreground leading-relaxed max-w-xl mb-8"
+            >
+              Khám phá những món đồ pre-loved độc bản, tham gia các phiên đấu giá trực tiếp kịch tính và giao dịch an tâm với quy trình bảo vệ thanh toán trung gian. Trao cho những món đồ giá trị một vòng đời mới.
+            </motion.p>
 
-          <FadeIn delay={0.4} direction="up">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white/90 leading-[1.3] mb-8 font-heading drop-shadow-lg">
-              Tái sinh phong cách, <br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400 drop-shadow-lg">Đấu giá dễ dàng</span>
-            </h2>
-          </FadeIn>
-
-          <FadeIn delay={0.5} direction="up">
-            <p className="text-base sm:text-lg text-white/80 leading-relaxed mb-12 max-w-2xl font-medium drop-shadow-md">
-              Dự đoán giá chuẩn xác bằng AI, đấu giá trực tiếp thời gian thực qua WebSocket và bảo vệ dòng tiền 100% bằng cơ chế thanh toán Escrow an toàn. Khám phá kho báu thời trang vintage cao cấp ngay hôm nay.
-            </p>
-          </FadeIn>
-
-          <FadeIn delay={0.6} direction="up" className="w-full sm:w-auto">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 w-full sm:w-auto">
-              <Link href="/products" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full sm:w-auto h-14 px-9 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl text-base font-semibold shadow-xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group">
-                  Khám phá ngay
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.18, ease: EDITORIAL_EASE }}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto mb-10"
+            >
+              <Link href="/products?sellType=AUCTION" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto h-12 px-7 rounded-xl bg-[#244C3A] hover:bg-[#1D3E2F] text-white dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 font-medium text-sm sm:text-base shadow-surface group transition-all duration-200 active:scale-[0.98]"
+                >
+                  Khám phá đấu giá
+                  <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <Link
-                href="/#how-it-works"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="w-full sm:w-auto"
-              >
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-9 bg-black/40 backdrop-blur-md border-white/20 text-white hover:bg-black/60 rounded-2xl text-base font-semibold shadow-xl transition-all duration-300">
-                  Xem cách hoạt động
-                </Button>
-              </Link>
-            </div>
-          </FadeIn>
 
-          <FadeIn delay={0.8} direction="up" className="w-full">
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8 border-t border-white/20 w-full max-w-md mx-auto">
-              <div className="flex -space-x-3 overflow-hidden p-1">
-                {avatars.map((url, index) => (
-                  <img
-                    key={index}
-                    src={url}
-                    alt={`User avatar ${index + 1}`}
-                    className="inline-block h-12 w-12 rounded-full ring-4 ring-background object-cover shadow-sm hover:-translate-y-1 transition-transform duration-300 relative z-10"
-                  />
-                ))}
+              {isAuthenticated ? (
+                <CreateProductModal>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto h-12 px-7 rounded-xl border-[#E5E0D7] dark:border-border bg-white dark:bg-card text-[#191919] dark:text-foreground hover:bg-[#E5E0D7]/40 dark:hover:bg-accent font-medium text-sm sm:text-base transition-all duration-200 active:scale-[0.98]"
+                  >
+                    <Plus className="mr-2 w-4 h-4" />
+                    Bắt đầu bán
+                  </Button>
+                </CreateProductModal>
+              ) : (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={openRegisterModal}
+                  className="w-full sm:w-auto h-12 px-7 rounded-xl border-[#E5E0D7] dark:border-border bg-white dark:bg-card text-[#191919] dark:text-foreground hover:bg-[#E5E0D7]/40 dark:hover:bg-accent font-medium text-sm sm:text-base transition-all duration-200 active:scale-[0.98]"
+                >
+                  Bắt đầu bán
+                </Button>
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.24, ease: EDITORIAL_EASE }}
+              className="grid grid-cols-3 gap-4 sm:gap-8 pt-6 border-t border-[#E5E0D7] dark:border-border w-full max-w-lg"
+            >
+              <div>
+                <p className="text-xs uppercase tracking-[0.12em] text-[#77736D] dark:text-muted-foreground font-medium mb-1">
+                  Hình thức
+                </p>
+                <p className="text-sm font-semibold text-[#191919] dark:text-foreground">
+                  Đấu giá &amp; Mua ngay
+                </p>
               </div>
-              <p className="text-sm sm:text-base font-medium text-white/80 text-center">
-                Tin dùng bởi <span className="font-bold text-white">10,000+</span> người dùng toàn quốc
-              </p>
+              <div>
+                <p className="text-xs uppercase tracking-[0.12em] text-[#77736D] dark:text-muted-foreground font-medium mb-1">
+                  Bảo vệ tiền
+                </p>
+                <p className="text-sm font-semibold text-[#191919] dark:text-foreground">
+                  Ký quỹ Escrow
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.12em] text-[#77736D] dark:text-muted-foreground font-medium mb-1">
+                  Cập nhật giá
+                </p>
+                <p className="text-sm font-semibold text-[#191919] dark:text-foreground">
+                  Thời gian thực
+                </p>
+              </div>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.14, ease: EDITORIAL_EASE }}
+            className="lg:col-span-5 relative"
+          >
+            <div className="relative rounded-2xl bg-white dark:bg-card border border-[#E5E0D7] dark:border-border p-3 sm:p-4 shadow-elevated group">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-[#E5E0D7]/40 dark:bg-muted">
+                <img
+                  src={
+                    featuredAuction
+                      ? featuredAuction.imageUrl || featuredAuction.images?.[0] || EDITORIAL_HERO_IMAGE
+                      : EDITORIAL_HERO_IMAGE
+                  }
+                  alt={featuredAuction ? featuredAuction.title : 'Áo khoác da vintage tuyển chọn'}
+                  className="h-full w-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+
+                <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2">
+                  {featuredAuction ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 dark:bg-card/95 text-[#191919] dark:text-foreground text-xs font-semibold shadow-surface">
+                      <span className="size-1.5 rounded-full bg-[#244C3A] dark:bg-primary animate-pulse" />
+                      {featuredAuction.isLive ? 'Đang phát trực tiếp' : 'Phiên đang mở'}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 dark:bg-card/95 text-[#191919] dark:text-foreground text-xs font-medium shadow-surface">
+                      <Tag className="w-3.5 h-3.5 text-[#244C3A] dark:text-primary" />
+                      Góc tuyển chọn · Minh họa
+                    </span>
+                  )}
+
+                  {featuredAuction && countdown && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#191919]/85 text-white text-xs font-numeric font-semibold backdrop-blur-sm">
+                      <Clock className="w-3.5 h-3.5" />
+                      {countdown}
+                    </span>
+                  )}
+                </div>
+
+                <div className="absolute bottom-3.5 left-3.5 right-3.5 rounded-xl bg-white/95 dark:bg-card/95 backdrop-blur-md border border-[#E5E0D7] dark:border-border p-4 shadow-surface transition-transform duration-300 group-hover:-translate-y-0.5">
+                  {featuredAuction ? (
+                    <div className="flex items-end justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-xs text-[#77736D] dark:text-muted-foreground truncate mb-1">
+                          {featuredAuction.categoryName || 'Đấu giá nổi bật'} · @{featuredAuction.sellerName}
+                        </p>
+                        <h2 className="text-sm sm:text-base font-semibold text-[#191919] dark:text-foreground truncate mb-1.5">
+                          {featuredAuction.title}
+                        </h2>
+                        <div className="flex items-baseline gap-3">
+                          <Money
+                            value={
+                              featuredAuction.currentHighestBid && featuredAuction.currentHighestBid > featuredAuction.price
+                                ? featuredAuction.currentHighestBid
+                                : featuredAuction.price
+                            }
+                            className="text-base sm:text-lg font-bold text-[#244C3A] dark:text-primary"
+                          />
+                          <span className="text-xs text-[#77736D] dark:text-muted-foreground">
+                            <NumberText value={featuredAuction.bidCount ?? 0} className="font-semibold text-[#191919] dark:text-foreground" /> lượt giá
+                          </span>
+                        </div>
+                      </div>
+                      <Link href={`/auctions/${featuredAuction.id}`} className="shrink-0">
+                        <Button
+                          size="sm"
+                          className="rounded-lg bg-[#244C3A] hover:bg-[#1D3E2F] text-white dark:bg-primary dark:text-primary-foreground h-9 px-3.5 text-xs font-medium"
+                        >
+                          <Gavel className="w-3.5 h-3.5 mr-1.5" />
+                          Trả giá
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-xs text-[#77736D] dark:text-muted-foreground mb-0.5">
+                          Thời trang Vintage · Phụ kiện
+                        </p>
+                        <p className="text-sm sm:text-base font-semibold text-[#191919] dark:text-foreground truncate">
+                          Săn tìm những món đồ có câu chuyện riêng
+                        </p>
+                      </div>
+                      <Link href="/products?sellType=AUCTION" className="shrink-0">
+                        <Button
+                          size="sm"
+                          className="rounded-lg bg-[#244C3A] hover:bg-[#1D3E2F] text-white dark:bg-primary dark:text-primary-foreground h-9 px-3.5 text-xs font-medium"
+                        >
+                          Xem phiên
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </FadeIn>
+
+            <div className="hidden sm:flex items-center gap-3 absolute -left-8 top-12 rounded-xl bg-white dark:bg-card border border-[#E5E0D7] dark:border-border px-3.5 py-2.5 shadow-elevated max-w-[230px] animate-float-slow">
+              <div className="size-9 rounded-lg bg-[#244C3A]/10 dark:bg-primary/15 text-[#244C3A] dark:text-primary flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-[#191919] dark:text-foreground">Bảo vệ Escrow</p>
+                <p className="text-[11px] text-[#77736D] dark:text-muted-foreground truncate">
+                  Giữ tiền đến khi nhận hàng
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden md:block absolute -right-5 top-1/3 w-20 h-20 rounded-xl overflow-hidden border-2 border-white dark:border-card shadow-elevated transition-transform duration-300 hover:scale-105">
+              <img
+                src={EDITORIAL_ACCENT_IMAGE}
+                alt="Đồng hồ cổ điển"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

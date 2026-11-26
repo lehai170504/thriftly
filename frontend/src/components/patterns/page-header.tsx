@@ -7,7 +7,7 @@ function PageHeader({ title, description, eyebrow, actions, className }: { title
     <header className={cn("flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between", className)}>
       <div className="min-w-0 space-y-1.5">
         {eyebrow && <p className="text-xs font-semibold uppercase tracking-wider text-primary">{eyebrow}</p>}
-        <Heading as="h1" size="h1">{title}</Heading>
+        <Heading as="h1" size="h1" className="font-serif font-semibold">{title}</Heading>
         {description && <p className="max-w-3xl text-sm text-muted-foreground md:text-base">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}

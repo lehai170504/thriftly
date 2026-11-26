@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, useState } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 export default function Providers({ children }: { children: ReactNode }) {
@@ -23,9 +24,11 @@ export default function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
+      <MotionConfig reducedMotion="user">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </MotionConfig>
     </QueryClientProvider>
   );
 }

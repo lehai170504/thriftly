@@ -40,7 +40,7 @@ export function ProductSortAndPrice({
             resetPage();
           }}
         >
-          <SelectTrigger className="h-10 px-4 w-[140px] sm:w-[170px] bg-background font-medium border-border/60 rounded-full hover:bg-muted/50 transition-all shadow-sm">
+          <SelectTrigger className="h-10 px-3.5 w-[140px] sm:w-[170px] bg-card font-medium border-border rounded-xl hover:bg-muted/40 transition-colors shadow-2xs">
             <span className="line-clamp-1 text-left">
               {(!minPrice && !maxPrice) ? 'Mọi mức giá' :
                 (!minPrice && maxPrice === '500000') ? 'Dưới 500.000đ' :
@@ -71,7 +71,7 @@ export function ProductSortAndPrice({
       <div className="flex items-center gap-2">
         <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest hidden sm:block">Sắp xếp:</span>
         <Select value={sort} onValueChange={(val) => { setSort(val || 'createdAt_desc'); resetPage(); }}>
-          <SelectTrigger className="h-10 px-4 w-[160px] sm:w-[190px] bg-background font-medium border-border/60 rounded-full hover:bg-muted/50 transition-all shadow-sm">
+          <SelectTrigger className="h-10 px-3.5 w-[160px] sm:w-[190px] bg-card font-medium border-border rounded-xl hover:bg-muted/40 transition-colors shadow-2xs">
             <span className="line-clamp-1 text-left">
               {sort === 'createdAt_desc' ? 'Mới nhất' : sort === 'price_asc' ? 'Giá: Thấp đến Cao' : 'Giá: Cao đến Thấp'}
             </span>
