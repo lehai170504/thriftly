@@ -634,3 +634,30 @@ Commands actually run and results:
 
 Rollback/forward-fix: Restore the previous frontend dependency versions and lockfile, and move the stylesheet import back only if reverting the dependency/build changes together.
 Open risks/manual checks: Trivy is unavailable locally, and this worktree has not been pushed, so the GitHub Actions repository scan has not verified the remediation. The remaining npm audit findings and the `braces` advisory need review against a new CI scan; do not mark the scanner gate green until that run succeeds.
+
+## Phase 10 CI Remediation — 2026-11-26
+
+Scope delivered:
+- Upgraded Next.js and eslint-config-next to `16.4.6`.
+- Refreshed the frontend lockfile and resolved vulnerable transitive packages, including Zod and body-parser.
+- Removed forgot-password and reset-password from the Spring Security CSRF ignore list so unsafe public auth mutations require a matching CSRF token.
+- Kept forgot-password and reset-password in the permit-all route list; authorization still permits public access, while CSRF provides browser protection.
+
+Commands actually run and results:
+- `backend\.\mvnw.cmd -q -Dtest=SessionCsrfSecurityTests test` — passed.
+- `frontend\npm run lint` — passed.
+- `frontend\npm run typecheck` — passed.
+- `frontend\npm run test:run` — passed, 3 files and 12 tests.
+- `frontend\npm run build` — passed, Next.js generated all 40 routes.
+- `frontend\npm audit --omit=dev --audit-level=high` — passed with 0 vulnerabilities.
+- `docker compose -f docker-compose.prod.yml config --quiet` with placeholder CI variables — passed.
+- `backend\.\mvnw.cmd clean test -B` — no assertion failures observed, but local execution stopped because Docker is unavailable and 25 Testcontainers contexts could not initialize PostgreSQL/Redis containers.
+
+Rollback/forward-fix:
+- Revert `frontend/package.json` and `frontend/package-lock.json` together to restore the previous frontend dependency set.
+- Revert the two authentication CSRF changes only if the password-reset flow contract is explicitly redesigned and covered by positive/negative CSRF tests.
+- Revert the PostgreSQL/JDBC upgrade in `backend/pom.xml` together if it conflicts with an approved runtime compatibility matrix.
+
+Open risks/manual checks:
+- Push the changes and confirm the GitHub-hosted runner completes the repository scan, backend Testcontainers suite, and container scan.
+- Local Docker was unavailable, so Docker-backed tests and container image scans remain unverified here.

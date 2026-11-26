@@ -63,8 +63,6 @@ public class SecurityConfig {
                                                                 "/api/v1/auth/google-login",
                                                                 "/api/v1/auth/facebook-login",
                                                                 "/api/v1/auth/verify-2fa",
-                                                                "/api/v1/auth/forgot-password",
-                                                                "/api/v1/auth/reset-password",
                                                                 "/api/v1/payment/payos/webhook",
                                                                 "/api/v1/webhooks/**"))
                                 .authorizeHttpRequests(auth -> auth

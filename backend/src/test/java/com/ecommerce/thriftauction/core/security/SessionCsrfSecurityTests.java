@@ -76,6 +76,11 @@ class SessionCsrfSecurityTests {
                                 .content("{\"email\":\"member@example.com\"}"))
                                 .andExpect(status().isForbidden());
 
+                mockMvc.perform(post("/api/v1/auth/reset-password")
+                                .contentType("application/json")
+                                .content("{}"))
+                                .andExpect(status().isForbidden());
+
                 mockMvc.perform(post("/api/v1/auth/forgot-password")
                                 .cookie(csrfCookie)
                                 .header("X-XSRF-TOKEN", csrfCookie.getValue())
